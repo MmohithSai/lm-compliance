@@ -41,6 +41,24 @@ Every Makefile target is one shell line. `scoop install make` if you want it. Ot
 ## Eval
 
 ```bash
-cd worker && uv run python ../eval/run_eval.py --label baseline-v1
+cd worker && uv run --extra ocr python ../eval/run_eval.py --label baseline-v1
 ```
 Prints per-field precision/recall and violation accuracy; writes `eval/results/<date>_<label>.json`.
+Every labelled run is kept in git — a measurement nobody can look up is not a measurement.
+
+OCR is memoised under `eval/.ocr_cache/` on (image, languages, hash of `preprocess.py` + `ocr.py`),
+so a rerun measures the change you made, not PaddleOCR reading 260 photos again. Edit either file
+and the cache misses by itself; there is no flag to remember.
+
+### Rebuilding the dataset
+
+```bash
+cd worker && uv run python ../eval/fetch_openfoodfacts.py --host food --count 60
+cd worker && uv run python ../eval/fetch_ecommerce.py       # needs Chrome or Edge
+```
+
+The first pulls Indian package photographs from Open Food / Beauty Facts (CC-BY-SA 3.0); the
+second screenshots public product listings with headless Chrome. Both only download images —
+`gold.json` is written by reading the photograph, never by running the pipeline. See
+`eval/dataset/README.md` for the conventions and for the shot list of the photos that still need
+a camera and a reference card.

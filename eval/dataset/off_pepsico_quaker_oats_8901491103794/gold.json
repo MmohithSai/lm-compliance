@@ -1,0 +1,11 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "net_quantity": "N.QTY: 400 g",
+    "mfg_date": "MFD: 06 SEP 23",
+    "best_before": "USE BY: 05 SEP 24",
+    "mrp": "MRP ₹: (INCL. OF ALL TAXES) 79/-",
+    "unit_sale_price": "USP ₹ 0.20/- per g"
+  },
+  "violations": ["D1", "D2", "D6"]
+}

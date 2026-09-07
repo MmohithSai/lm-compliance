@@ -1,0 +1,13 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "generic_name": "DARK SOY SAUCE (SOYABEAN SAUCE)",
+    "manufacturer": "BRAND OWNED & MARKETED BY: CAPITAL FOODS PVT.LTD., VILLA CAPITAL, SADHANA COMPOUND, NR. OSHIWARA BRIDGE, S.V. ROAD, JOGESHWARI (W), MUMBAI - 400 102.",
+    "mrp": "MRP ₹: (incl. of all taxes) 25 (Rs. 0.28/g)",
+    "unit_sale_price": "Rs. 0.28/g",
+    "mfg_date": "DATE OF MFG.: 10/12/2024 (15:16)",
+    "best_before": "USE BY: 10/12/2025",
+    "consumer_care": "FOR ANY COMPLAINT CONTACT CONSUMER MANAGER AT BRAND OWNED & MARKETED BY ADDRESS ABOVE. 022-67140100 AND CUSTOMERCARE@CAPITALFOODS.CO.IN"
+  },
+  "violations": ["D3"]
+}

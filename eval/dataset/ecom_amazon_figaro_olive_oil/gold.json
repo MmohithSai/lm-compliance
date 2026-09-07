@@ -1,0 +1,14 @@
+{
+  "context": { "source": "ecommerce", "is_imported": true },
+  "declarations": {
+    "generic_name": "Generic Name Olive Oil",
+    "manufacturer": "Manufacturer Deoleo SA, Deoleo SA, Ctra N-IV , km 388, 14610 Alcolea (Cordoba)- Spain. 18001030494",
+    "importer": "Importer Deoleo India Pvt. Ltd. Notan Heights, 1st Floor, 20, Gurunanak Marg, Bandra West Mumbai-400050 India. 18001030494",
+    "net_quantity": "Net Quantity 500.0 Milliliters",
+    "country_of_origin": "Country of Origin España",
+    "mrp": "M.R.P: ₹649",
+    "unit_sale_price": "₹119.80 /100 ml",
+    "best_before": "Use by: 01 DEC 2026"
+  },
+  "violations": ["E1"]
+}

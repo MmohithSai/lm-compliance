@@ -1,0 +1,8 @@
+{
+  "context": { "source": "package", "languages": ["hi", "en"] },
+  "declarations": {
+    "mfg_date": "MFG. DATE: 24.06.25",
+    "best_before": "USE BY: 23.11.25"
+  },
+  "violations": ["D1", "D2", "D3", "D5", "D6", "D8"]
+}
