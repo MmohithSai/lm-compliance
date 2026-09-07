@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { ImageKind, ScanSource } from "@/lib/database.types";
+import type { ImageKind, ScanSource } from "@/lib/db";
 import { resizeImage } from "@/lib/image";
 import { createClient } from "@/lib/supabase/client";
 

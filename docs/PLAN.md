@@ -14,12 +14,14 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 
 ## P1 — Supabase schema + auth + upload + worker loop
 - [x] `supabase/migrations/0001_init.sql` (tables, RLS, bucket, views, realtime, `claim_scan()`)
-- [ ] `supabase link` + `supabase db push` on the hosted project
-- [ ] `make seed` creates admin / inspector / viewer
+- [x] `supabase link` + `supabase db push` on the hosted project — project `jcjxukjgrbmkuydpsnuc`
+- [x] `make seed` creates admin / inspector / viewer
 - [x] login, upload form (camera, PDP mm, reference-card checkbox, source toggle), scans list
-- [ ] realtime status on the scan detail page
-- [ ] worker: `run_scan` downloads images, marks a fake scan `done`
+- [x] realtime status on the scan detail page
+- [x] worker: `run_scan` downloads images, marks a fake scan `done`
 - Done when: a scan goes queued → processing → done end to end from a phone.
+  **The loop is proven** (2026-09-07, scripted: queue → claim → done, score 100). The phone run
+  is still to do — it needs `make dev`, `make worker` and a device on the same network.
 
 ## P2 — OCR + regex/layout extractor (baseline)
 - [ ] `preprocess.py` deskew + denoise
@@ -78,6 +80,20 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - Total monthly cost: ₹0.
 
 ## Decisions log
+- 2026-09-07 — Hosted project linked: `jcjxukjgrbmkuydpsnuc` (name "SIH", Mumbai). `supabase link`
+  and `db push` needed no database password — CLI 2.51 provisions a login role from the personal
+  access token. `.env` and `frontend/.env.local` written from `supabase projects api-keys`.
+- 2026-09-07 — `.mcp.json` now carries `--project-ref`, so `account` dropped from `--features`
+  (project-scoped mode disables the account tools anyway).
+- 2026-09-07 — `database.types.ts` is generated from now on (`make db-types`). `gen types` only
+  sees `text` for the check-constrained columns, so the unions (`Role`, `ScanSource`, `ScanStatus`,
+  `ImageKind`, `Severity`) moved to a hand-written `frontend/lib/db.ts` that the generator cannot
+  overwrite. Keep it in step with `0001_init.sql`.
+- 2026-09-07 — `run_scan` catches `NotImplementedError` from `run_local` and stores an empty result
+  with score 100. The queue has to work before P2 exists; delete the `try/except` when it does.
+- 2026-09-07 — `ocr_words.id` is a Postgres identity column, so `store()` inserts the words first
+  and remaps `declarations.word_ids` and `violations.evidence.word_ids` onto the returned ids. The
+  pipeline's own word ids never reach the database.
 - 2026-09-06 — Repo root is `SIH/` itself, not a subfolder.
 - 2026-09-06 — Next.js pinned to 15.5 (latest is 16; spec says 15; 15 keeps `middleware.ts`).
 - 2026-09-06 — Worker on Python 3.12 via uv (paddlepaddle wheels); OCR and PDF deps are optional extras (`--extra ocr --extra pdf`) so `uv sync` stays fast on dev machines.
@@ -85,6 +101,7 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - 2026-09-06 — Unverifiable checks are stored as `info` violations with `evidence.status = unverifiable`; they never cost score points. One shape for the report, no second result type.
 - 2026-09-06 — Score = 100 − 25·critical − 10·major − 3·minor, floor 0.
 - 2026-09-06 — No docker on the dev machine: schema goes straight to the hosted project with `supabase db push`; `database.types.ts` is hand-written until `make db-types` can run against the linked project.
+- 2026-09-07 — Supabase MCP added read-only in `.mcp.json`, version pinned and `--features` narrowed. It holds an account-wide personal access token, so `@latest` + `-y` was a real supply-chain hole. Add `--project-ref` the moment the hosted project exists.
 - 2026-09-07 — `eval/results/*.json` un-ignored. The plan says "save the result file" and "nothing is done until measured"; a gitignored result is neither. Every labelled run is now in history.
 - 2026-09-07 — `make lint` also covers `eval/` (it never did, and `run_eval.py` had two lines over the limit).
 - 2026-09-07 — `docs/PROGRESS.md` is the per-item tracker; `PLAN.md` keeps the phase order and the "done when" lines. Two files, one commit.

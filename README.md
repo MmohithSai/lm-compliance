@@ -22,8 +22,17 @@ Demo users: `cd worker && uv run --env-file ../.env python ../supabase/seed_user
 `select`s and read logs, but cannot write or migrate. It needs a personal access token in your
 OS environment (see `.env.example`), not in `.env`.
 
-Scope it to one project once you have the ref — add `"--project-ref=<your-ref>"` to the args.
-To allow writes, drop `"--read-only"`. Do that only against a throwaway project.
+The server version is **pinned**. It runs with your Supabase personal access token, so a silent
+`@latest` bump would be a supply-chain hole. Bump it deliberately, as its own commit.
+
+It is scoped to one project with `--project-ref`, which caps the blast radius even though the
+token itself is account-wide. Tools are narrowed to `database,debugging,docs` (project scope
+disables the account tools anyway). Add `storage`, `functions`, `branching` or `development` to
+`--features` if you need them. To allow writes, drop `"--read-only"`, and only against a
+throwaway project.
+
+Claude Code reads `SUPABASE_ACCESS_TOKEN` from the OS environment at start-up. After `setx`,
+**restart Claude Code** or the MCP server comes up unauthorized.
 
 ## Without `make` (Windows)
 

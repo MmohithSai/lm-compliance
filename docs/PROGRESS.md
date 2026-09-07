@@ -17,7 +17,7 @@ Last updated: 2026-09-07.
 | Phase | State | Blocking item |
 |---|---|---|
 | P0 dataset + eval harness | partial | 40–60 real photos (needs a camera) |
-| P1 schema + auth + upload + worker loop | partial | `supabase db push` on the hosted project |
+| P1 schema + auth + upload + worker loop | partial | the phone run (code side is done) |
 | P2 OCR + extractor baseline | todo | starts after P0 has real photos |
 | P3 rule engine + detail page | todo | tests written, 130 `xfail` waiting |
 | P4 scale + font / contrast / grouping | todo | — |
@@ -89,11 +89,38 @@ beat. The table lists all 10 canonical fields, so nothing is silently missing fr
 | # | Item | Status | Where / evidence |
 |---|---|---|---|
 | 1 | `0001_init.sql`: tables, RLS, bucket, views, realtime, `claim_scan()` | done | `supabase/migrations/0001_init.sql` |
-| 2 | `supabase link` + `db push` on the hosted project | **blocked** | needs the project ref and the DB password |
-| 3 | `make seed` creates admin / inspector / viewer | todo | `supabase/seed_users.py` exists, unrun (needs item 2) |
+| 2 | `supabase link` + `db push` on the hosted project | done | project `jcjxukjgrbmkuydpsnuc`; `supabase migration list` shows 0001 local **and** remote |
+| 3 | `make seed` creates admin / inspector / viewer | done | 3 rows in `profiles` with the right roles |
 | 4 | Login, upload form, scans list | done | `frontend/app/{login,upload,scans}` |
-| 5 | Realtime status on the scan detail page | todo | — |
-| 6 | Worker marks a fake scan `done` | todo | `run_scan` raises `NotImplementedError("P1")` |
+| 5 | Realtime status on the scan detail page | done | [scan-realtime.tsx](frontend/components/scan-realtime.tsx), mounted only while the scan is queued/processing |
+| 6 | Worker marks a fake scan `done` | done | [pipeline/__init__.py](worker/pipeline/__init__.py), [test_run_scan.py](worker/tests/test_run_scan.py) |
+| 7 | One scan end to end from a phone | **blocked** | needs a person, a laptop running `make dev` + `make worker`, and a device |
+
+### How the loop was checked
+
+A throwaway script queued a scan with one 1×1 JPEG in the `scans` bucket and called
+`process_one` once:
+
+```
+queued d5e24bf4-…
+scan d5e24bf4-…: no pipeline yet (P2), storing an empty result
+after worker: {'status': 'done', 'compliance_score': 100, 'error': None}
+```
+
+`claim_scan()` is callable by the service role and refused to `anon`/`authenticated`; the `scans`
+bucket exists. `run_local` still raises `NotImplementedError("P2")` — `run_scan` catches it and
+stores an empty result so the queue works before the pipeline does. That `try/except` is deleted
+in P2.
+
+### Verified on the hosted project
+
+| Thing | Result |
+|---|---|
+| `supabase db push` | 0001 applied, no errors |
+| `profiles` after `make seed` | Demo Admin/admin, Demo Inspector/inspector, Demo Viewer/viewer |
+| `claim_scan()` as service role | returns `[]` on an empty queue |
+| storage buckets | `['scans']` |
+| `make db-types` | regenerated `frontend/lib/database.types.ts`; `tsc --noEmit` clean |
 
 ---
 
@@ -107,6 +134,15 @@ those phases get marked done.
 ---
 
 ## Log
+
+- **2026-09-07** — P1 code complete. Hosted project linked and `0001_init.sql` pushed; `make seed`
+  created the three demo users; `.env` and `frontend/.env.local` written from the project's API
+  keys (both gitignored). `run_scan` downloads the scan's images, runs the pipeline and writes
+  words/declarations/violations back, remapping word ids onto the ones Postgres assigns; until P2
+  lands it catches `NotImplementedError` and stores an empty result. Scan detail page refreshes on
+  realtime updates while the scan is queued or processing. `database.types.ts` is generated now,
+  with the check-constraint unions moved to `frontend/lib/db.ts`. `make test` green
+  (80 passed, 130 xfailed), `make lint` clean, `tsc --noEmit` clean. Remaining: the phone run.
 
 - **2026-09-07** — P0: synthetic set grown 3 → 16 cases (D1–D8, D7 imported, E1, X1/X2/X3);
   gold files now validated by `worker/tests/test_dataset.py`; shot list added to the dataset
