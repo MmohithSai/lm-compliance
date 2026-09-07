@@ -19,11 +19,17 @@ export default function LoginPage() {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const { error } = await createClient().auth.signInWithPassword({ email, password });
-    setBusy(false);
-    if (error) return setError(error.message);
-    router.push("/upload");
-    router.refresh();
+    try {
+      const { error } = await createClient().auth.signInWithPassword({ email, password });
+      if (error) return setError(error.message);
+      router.push("/upload");
+      router.refresh();
+    } catch (err) {
+      // a misconfigured env throws here; without this the button just sits on "Signing in…"
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
