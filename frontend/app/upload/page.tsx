@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -25,6 +25,14 @@ export default function UploadPage() {
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const camera = useRef<HTMLInputElement>(null);
+  const gallery = useRef<HTMLInputElement>(null);
+  const full = files.length >= 3;
+
+  function pick(e: React.ChangeEvent<HTMLInputElement>) {
+    setFiles((prev) => [...prev, ...Array.from(e.target.files ?? [])].slice(0, 3));
+    e.target.value = ""; // so re-picking the same file still fires onChange
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -94,21 +102,35 @@ export default function UploadPage() {
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="photos">Photos (front, back, and one with the reference card)</Label>
-            <Input
-              id="photos"
-              type="file"
-              accept="image/*"
-              multiple
-              disabled={files.length >= 3}
-              onChange={(e) => {
-                setFiles((prev) => [...prev, ...Array.from(e.target.files ?? [])].slice(0, 3));
-                e.target.value = ""; // so re-picking the same file still fires onChange
-              }}
-            />
+            <Label>Photos (front, back, and one with the reference card)</Label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                className="flex-1"
+                disabled={full}
+                onClick={() => camera.current?.click()}
+              >
+                Take photo
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                className="flex-1"
+                disabled={full}
+                onClick={() => gallery.current?.click()}
+              >
+                Choose files
+              </Button>
+            </div>
+            {/* capture opens the camera but caps the pick at one file, so the gallery input is
+                the only one that can take all three at once. Both append to the same list. */}
+            <input ref={camera} type="file" accept="image/*" capture="environment" hidden onChange={pick} />
+            <input ref={gallery} type="file" accept="image/*" multiple hidden onChange={pick} />
             <p className="text-xs text-muted-foreground">
-              {files.length}/3 chosen. Add them together or one at a time — the camera is in your
-              phone&rsquo;s file chooser. Resized to 1600 px before upload.
+              {files.length}/3 chosen. Resized to 1600 px before upload.
             </p>
             {files.length > 0 && (
               <ul className="space-y-1 pt-1">
