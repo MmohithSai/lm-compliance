@@ -18,7 +18,7 @@ Last updated: 2026-09-07.
 |---|---|---|
 | P0 dataset + eval harness | partial | 40–60 real photos (needs a camera) |
 | P1 schema + auth + upload + worker loop | **done** | — |
-| P2 OCR + extractor baseline | todo | starts after P0 has real photos |
+| P2 OCR + extractor baseline | **done on synthetics** | 94.5%; re-measure on real photos |
 | P3 rule engine + detail page | todo | tests written, 130 `xfail` waiting |
 | P4 scale + font / contrast / grouping | todo | — |
 | P5 reports | todo | — |
@@ -141,7 +141,60 @@ phase reaches for them.
 
 ---
 
-## P2–P9
+## P2 — OCR + regex/layout extractor (baseline)
+
+**Done when:** `make eval LABEL=baseline-v1` ≥ 70% field extraction on clean photos.
+**94.5% on the 16 synthetic labels.** Clean photos are still blocked on a camera, so this is a
+floor to re-measure, not the last word.
+
+| # | Item | Status | Where / evidence |
+|---|---|---|---|
+| 1 | `preprocess.py` | done | [preprocess.py](worker/pipeline/preprocess.py) — bilateral denoise; deskew deliberately dropped |
+| 2 | `ocr.py` PP-OCRv4 → boxes + confidence | done | [ocr.py](worker/pipeline/ocr.py); one `Word` = one line box |
+| 3 | `extractors/regex_layout.py` | done | [regex_layout.py](worker/pipeline/extractors/regex_layout.py), [test_extract.py](worker/tests/test_extract.py) |
+| 4 | `run_local` wired end to end | done | [pipeline/__init__.py](worker/pipeline/__init__.py); the P1 empty-result stand-in is gone |
+| 5 | Measured | done | `eval/results/2026-09-07_p2-baseline.json` |
+
+### Latest eval run
+
+`2026-09-07_p2-baseline` — 16 cases, pipeline ran on all 16, **field accuracy 94.5%** (up from
+0.0%). Violations are still 0: `CHECKS` is P3, and `run_local` logs and scores 100 until then.
+
+| field | prec | rec | misses |
+|---|---|---|---|
+| best_before, consumer_care, country_of_origin, mfg_date, mrp, unit_sale_price, manufacturer | 1.00 | 1.00 | — |
+| net_quantity | 1.00 | 0.93 | 1 — OCR read `Net Qty` as `Net Qtv`, so no anchor matched |
+| generic_name | 0.73 | 0.73 | 4 — `Glucose Bjscuits` |
+| importer | 0.50 | 0.50 | 1 — `Mumbai 400o59` |
+
+All six misses are character-level recognition errors. No amount of extractor work reaches them;
+the lever is a heavier recognition model, and only if the real photos show the same rate.
+
+### How the score moved, one variable at a time
+
+| Run | Change | Field accuracy |
+|---|---|---|
+| `p2-baseline-v1` | pipeline wired, nothing tuned | 57.3% |
+| `p2-strip-punct` | extractor trims the stray terminator OCR adds to a line | 69.1% |
+| `p2-currency` | eval folds the currency marker; extractor drops the `<` printed for `₹` | 91.8% |
+| `p2-baseline` | eval ignores a dot that is not between digits | 94.5% |
+
+Two of the three steps changed the measurement rather than the extraction, so both are argued in
+the `PLAN.md` Decisions log and both result files are kept. Short version: no PP-OCR dictionary
+contains `₹` (all 56 checked), so comparing on it measured the dictionary; and
+`eval/dataset/README.md` already said punctuation is ignored, which the kept `.` contradicted.
+
+### What P2 does not do
+
+- No deskew, no scale, no measurement. `mm_per_px` stays `None`, `scale_source` stays `none`.
+- No rules: `run_local` catches `NotImplementedError` from `run_rules` and scores 100. That
+  `try/except` is deleted in P3.
+- Anchors only. A pack that prints its generic name with no "generic name:" label is not found —
+  expected to show up as soon as real photos exist.
+
+---
+
+## P3–P9
 
 Not started. See `docs/PLAN.md` for the item list and the "done when" line of each phase.
 The tests for P3 and P4 are already written and carry a strict
@@ -151,6 +204,13 @@ those phases get marked done.
 ---
 
 ## Log
+
+- **2026-09-07** — **P2 baseline done on the synthetic set.** PaddleOCR PP-OCRv4 → line boxes →
+  anchor + layout extractor → declarations, wired into `run_local` and `run_scan`. Field
+  extraction 0.0% → 94.5% over four labelled runs. `paddlepaddle` had to be pinned to 3.0.0: on
+  3.3.1 every PP-OCRv4 model fails inside oneDNN regardless of `enable_mkldnn`. `make test` green
+  (84 passed, 130 xfailed), `make lint` clean. Real photos still blocked on a camera, so P2 will
+  be re-measured when P0 item 6 lands.
 
 - **2026-09-07** — **P1 done.** A scan shot on a phone over the LAN went queued → processing →
   done with the status updating on screen unprompted. The device run found three bugs localhost

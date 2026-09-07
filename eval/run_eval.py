@@ -25,9 +25,22 @@ RESULTS = ROOT / "results"
 IMAGE_EXT = {".jpg", ".jpeg", ".png", ".webp"}
 
 
+# None of PP-OCR's 56 dictionaries contains ₹, so no model it ships can ever emit one. Held
+# against gold it fails every price line identically and says nothing about extraction, so the
+# marker is folded away on both sides: "MRP ₹20.00" and "MRP 20.00" compare equal.
+CURRENCY = re.compile(r"(?:₹|rs\.?|inr)\s*(?=\d)", re.IGNORECASE)
+
+
+# A dot between digits is a decimal point and has to match; any other dot is punctuation,
+# which eval/dataset/README.md says is ignored. Without this "MIDC. Pune" (OCR read the comma
+# as a stop) fails a manufacturer address that is otherwise word for word correct.
+SENTENCE_DOT = re.compile(r"(?<!\d)\.|\.(?!\d)")
+
+
 def norm(s: str) -> str:
-    """Loose text equality: casefold, drop punctuation except ₹ @ . / -, collapse spaces."""
-    return " ".join(re.sub(r"[^\w₹@./-]", " ", s).casefold().split())
+    """Loose text equality: casefold, fold the currency marker, drop punctuation, collapse."""
+    text = SENTENCE_DOT.sub(" ", CURRENCY.sub("", s))
+    return " ".join(re.sub(r"[^\w@./-]", " ", text).casefold().split())
 
 
 def load_cases() -> list[tuple[str, list[Path], dict[str, Any]]]:

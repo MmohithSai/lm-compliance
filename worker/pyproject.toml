@@ -15,7 +15,10 @@ dependencies = [
 
 [project.optional-dependencies]
 # Heavy. `uv sync --extra ocr --extra pdf` in Docker / when Phase 2 and 5 land.
-ocr = ["paddleocr>=2.9,<3", "paddlepaddle>=3.0"]
+# paddlepaddle is pinned: 3.3 runs PP-OCRv4 through a oneDNN fused_conv2d that errors
+# ("OneDnnContext does not have the input Filter"), with or without enable_mkldnn.
+# setuptools: paddle 3.0 imports distutils, which python 3.12 dropped from the stdlib.
+ocr = ["paddleocr>=2.9,<3", "paddlepaddle==3.0.0", "setuptools>=75"]
 pdf = ["weasyprint>=62"]
 
 [dependency-groups]

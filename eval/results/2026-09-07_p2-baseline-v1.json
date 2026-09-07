@@ -1,0 +1,290 @@
+{
+  "label": "p2-baseline-v1",
+  "date": "2026-09-07",
+  "cases": 16,
+  "field_accuracy": 0.5727272727272728,
+  "fields": {
+    "best_before": {
+      "precision": 0.625,
+      "recall": 0.625,
+      "tp": 10,
+      "fp": 6,
+      "fn": 6
+    },
+    "consumer_care": {
+      "precision": 0.9333333333333333,
+      "recall": 0.9333333333333333,
+      "tp": 14,
+      "fp": 1,
+      "fn": 1
+    },
+    "country_of_origin": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 1,
+      "fn": 1
+    },
+    "generic_name": {
+      "precision": 0.4666666666666667,
+      "recall": 0.4666666666666667,
+      "tp": 7,
+      "fp": 8,
+      "fn": 8
+    },
+    "importer": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 2,
+      "fn": 2
+    },
+    "manufacturer": {
+      "precision": 0.6666666666666666,
+      "recall": 0.6666666666666666,
+      "tp": 6,
+      "fp": 3,
+      "fn": 3
+    },
+    "mfg_date": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 13,
+      "fp": 0,
+      "fn": 0
+    },
+    "mrp": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 13,
+      "fn": 13
+    },
+    "net_quantity": {
+      "precision": 1.0,
+      "recall": 0.9285714285714286,
+      "tp": 13,
+      "fp": 0,
+      "fn": 1
+    },
+    "unit_sale_price": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 12,
+      "fn": 12
+    }
+  },
+  "violations": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "exact_set_accuracy": 0.375
+  },
+  "per_case": [
+    {
+      "case": "synthetic_approx_no_email",
+      "pred": {
+        "generic_name": "Generic name: Glucose Biscuits",
+        "net_quantity": "Net Qty: approx 500 g",
+        "mrp": "MRP <20.00 (Inclusive of all taxes)",
+        "mfg_date": "Mfd: 03/2026",
+        "manufacturer": "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC, Pune 411019",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567.",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging."
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_compliant",
+      "pred": {
+        "generic_name": "Generic name: Glucose Bjscuits.",
+        "net_quantity": "Net Qty: 200 g",
+        "mrp": "MRP <20.00 (Inclusive of all taxes)",
+        "mfg_date": "Mfd: 03/2026",
+        "manufacturer": "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC, Pune 411019",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_dpco_drug",
+      "pred": {
+        "generic_name": "Generic name: Glucose Biscuits",
+        "net_quantity": "Net Qty: 200 g",
+        "mfg_date": "Mfd: 03/2026",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_ecom_complete",
+      "pred": {
+        "generic_name": "Generic name: Glucose Biscuits.",
+        "net_quantity": "Net Qty: 200 g",
+        "mrp": "MRP 20.00 (Inclusive of all taxes)",
+        "manufacturer": "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC. Pune 411019",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging."
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_ecom_missing_qty",
+      "pred": {
+        "generic_name": "Generic name: Glucose Bjscuits.",
+        "mrp": "MRP 20.00 (Inclusive of all taxes)",
+        "manufacturer": "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC, Pune 411019",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging."
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_future_date",
+      "pred": {
+        "generic_name": "Generic name: Glucose Bjscuits.",
+        "net_quantity": "Net Qty: 200 g",
+        "mrp": "MRP <20.00 (Inclusive of all taxes)",
+        "mfg_date": "Mfd: 12/2031",
+        "manufacturer": "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC, Pune 411019",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_imported_no_origin",
+      "pred": {
+        "generic_name": "Generic name: Olive Oil.",
+        "mrp": "MRP <20.00 (Inclusive of all taxes)",
+        "mfg_date": "Mfd: 03/2026",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: <90.00 per 100 ml",
+        "best_before": "Best before 6 months from packaging.",
+        "importer": "Imported by: Global Foods India Pvt Ltd, Andheri, Mumbai 400059."
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_imported_ok",
+      "pred": {
+        "generic_name": "Generic name: Olive Oil.",
+        "net_quantity": "Net Qty: 500 ml",
+        "mrp": "MRP 20.00 (Inclusive of all taxes)",
+        "mfg_date": "Mfd: 03/2026",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 90.00 per 100 ml",
+        "best_before": "Best before 6 months from packaging.",
+        "importer": "Imported by: Global Foods India Pvt Ltd, Andheri, Mumbai 400o59.",
+        "country_of_origin": "Country of origin: Spain."
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_missing_three",
+      "pred": {
+        "generic_name": "Generic name: Glucose Biscuits.",
+        "mfg_date": "Mfd: 03/2026",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging."
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_no_date",
+      "pred": {
+        "generic_name": "Generic name: Glucose Biscuits",
+        "net_quantity": "Net Qty: 200 g",
+        "mrp": "MRP <20.00 (Inclusive of all taxes)",
+        "manufacturer": "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC. Pune 411019",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_no_generic_name",
+      "pred": {
+        "net_quantity": "Net Qty: 200 g",
+        "mrp": "MRP <20.00 (Inclusive of all taxes)",
+        "mfg_date": "Mfd: 03/2026",
+        "manufacturer": "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC. Pune 411019",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_no_manufacturer",
+      "pred": {
+        "generic_name": "Generic name: Glucose Biscuits",
+        "net_quantity": "Net Qty: 200 g",
+        "mrp": "MRP 20.00 (Inclusive of all taxes)",
+        "mfg_date": "Mfd: 03/2026",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_no_tax_wording",
+      "pred": {
+        "generic_name": "Generic name: Glucose Bjscuits.",
+        "net_quantity": "Net Qty: 200 g",
+        "mrp": "MRP 20.00",
+        "mfg_date": "Mfd: 03/2026",
+        "manufacturer": "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC, Pune 411019",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_no_unit_price",
+      "pred": {
+        "generic_name": "Generic name: Glucose Biscuits",
+        "net_quantity": "Net Qty: 200 g",
+        "mrp": "MRP 20.00 (Inclusive of all taxes)",
+        "mfg_date": "Mfd: 03/2026",
+        "manufacturer": "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC, Pune 411019",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_restaurant_food",
+      "pred": {
+        "generic_name": "Generic name: Glucose Biscuits",
+        "net_quantity": "Net Qty: 200 g",
+        "mfg_date": "Mfd: 03/2026",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_small_sachet",
+      "pred": {
+        "generic_name": "Generic name: Glucose Biscuits",
+        "net_quantity": "Net Qty: 8 g",
+        "mrp": "MRP 2.00 (Inclusive of all taxes)",
+        "mfg_date": "Mfd: 03/2026",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    }
+  ]
+}

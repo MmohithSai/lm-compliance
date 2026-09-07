@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, cast
 
 import pytest
@@ -13,6 +14,7 @@ from pipeline.models import (
     Evidence,
     PipelineResult,
     ScaleSource,
+    ScanContext,
     ScanRow,
     Severity,
     Violation,
@@ -80,16 +82,47 @@ IMAGES = [
 ]
 
 
+WORDS = [Word(id=i, image_id="img-a", text="x", x=0, y=0, w=1, h=1, confidence=0.9) for i in (1, 2)]
+RESULT = PipelineResult(
+    words=WORDS,
+    declarations=[Declaration(field="mrp", value="MRP 20", word_ids=[2])],
+    violations=[
+        Violation(
+            rule_id="D1",
+            rule_ref="6(1)(a)",
+            severity=Severity.critical,
+            message="missing",
+            evidence=Evidence(word_ids=[1, 2]),
+        )
+    ],
+    mm_per_px=None,
+    scale_source=ScaleSource.none,
+    compliance_score=75,
+)
+
+
 def fake(**seed: list[dict[str, Any]]) -> FakeClient:
     return FakeClient({"scan_images": IMAGES, **seed})
 
 
-def test_run_scan_downloads_every_image_and_finishes_without_the_p2_pipeline() -> None:
+def test_run_scan_downloads_every_image_and_stores_what_the_pipeline_returned(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The pipeline itself is covered by the eval harness; this pins the wiring around it."""
+    seen: list[list[str]] = []
+
+    def fake_pipeline(images: list[Path], ctx: ScanContext) -> PipelineResult:
+        seen.append([p.stem for p in images])  # named by scan_images.id, for Word.image_id
+        assert ctx.pdp_area_cm2 == 24.0  # 60 x 40 mm
+        return RESULT
+
     db = fake()
+    monkeypatch.setattr("pipeline.run_local", fake_pipeline)
     result = run_scan(cast(Client, db), SCAN)
     assert db.downloaded == ["s1/0.jpg", "s1/1.jpg"]
-    assert result.compliance_score == 100
-    assert result.words == [] and result.declarations == [] and result.violations == []
+    assert seen == [["img-a", "img-b"]]
+    assert result.compliance_score == 75
+    assert db.written["declarations"][0]["value"] == "MRP 20"
 
 
 def test_run_scan_without_images_fails_loudly() -> None:
@@ -99,30 +132,8 @@ def test_run_scan_without_images_fails_loudly() -> None:
 
 
 def test_store_remaps_word_ids_to_the_ids_postgres_assigned() -> None:
-    words = [
-        Word(id=i, image_id="img-a", text="x", x=0, y=0, w=1, h=1, confidence=0.9) for i in (1, 2)
-    ]
     db = fake()
-    store(
-        cast(Client, db),
-        "s1",
-        PipelineResult(
-            words=words,
-            declarations=[Declaration(field="mrp", value="MRP 20", word_ids=[2])],
-            violations=[
-                Violation(
-                    rule_id="D1",
-                    rule_ref="6(1)(a)",
-                    severity=Severity.critical,
-                    message="missing",
-                    evidence=Evidence(word_ids=[1, 2]),
-                )
-            ],
-            mm_per_px=None,
-            scale_source=ScaleSource.none,
-            compliance_score=75,
-        ),
-    )
+    store(cast(Client, db), "s1", RESULT)
     assert [w["id"] for w in db.written["ocr_words"]] == [900, 901]
     assert db.written["ocr_words"][0]["scan_id"] == "s1"
     assert db.written["declarations"][0]["word_ids"] == [901]

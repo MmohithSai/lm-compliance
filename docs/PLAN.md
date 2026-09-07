@@ -24,11 +24,14 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
   1205×1600, claimed by the worker, `done` on screen without a reload. Score 100 is the P2 stub.
 
 ## P2 — OCR + regex/layout extractor (baseline)
-- [ ] `preprocess.py` deskew + denoise
-- [ ] `ocr.py` PaddleOCR PP-OCRv4 → words with boxes + confidence, stored in `ocr_words`
-- [ ] `extractors/regex_layout.py` anchors + nearest-box layout rule
-- [ ] `run_local` wired: preprocess → ocr → extract → (measure: none) → rules → score
+- [x] `preprocess.py` denoise (deskew dropped on purpose, see the Decisions log)
+- [x] `ocr.py` PaddleOCR PP-OCRv4 → line boxes with confidence, stored in `ocr_words`
+- [x] `extractors/regex_layout.py` anchors + nearest-box layout rule
+- [x] `run_local` wired: preprocess → ocr → extract → (measure: none) → rules → score
 - Done when: `make eval LABEL=baseline-v1` ≥ 70% field extraction on clean photos. Save the result file.
+  **94.5% on the 16 synthetic labels**, 2026-09-07 (`eval/results/2026-09-07_p2-baseline.json`).
+  Clean photos are still blocked on a camera (P0 item 6): a rendered PNG is not a phone photo, so
+  this number is a floor to re-measure, not the phase's final answer.
 
 ## P3 — rule engine + scan detail page
 - [ ] fill `CHECKS` in `rules_engine.py`; delete the `xfail` line in `tests/test_rules.py`
@@ -66,6 +69,8 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 
 ## P9 — deploy worker + docs
 - [ ] Dockerfile builds on amd64 + arm64; HF Space (add a stdlib HTTP health thread on port 7860) or Oracle ARM
+- [ ] bake the PP-OCR models into the image — PaddleOCR downloads them on first use,
+      which on a cold container is a download per start
 - [ ] `docs/DEPLOY.md`; README verified; dry run on a phone over mobile data
 - Done when: the demo works away from the laptop.
 
@@ -80,6 +85,32 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - Total monthly cost: ₹0.
 
 ## Decisions log
+- 2026-09-07 — P2. `paddlepaddle` pinned to `==3.0.0`. On 3.3.1 every PP-OCRv4 model dies in
+  `NotFoundError: OneDnnContext does not have the input Filter` at the first conv, with
+  `enable_mkldnn` off and with `FLAGS_use_mkldnn=0`. `setuptools` joins the `ocr` extra because
+  paddle 3.0 imports `distutils`, which Python 3.12 dropped.
+- 2026-09-07 — One `Word` = one PP-OCR line box. PP-OCR detects lines, not words, and splitting a
+  line into per-word boxes means inventing the split coordinates, which this project does not do.
+  A declaration is printed as one line anyway, so the extractor and the P4 font checks both want
+  the line. `ocr_words` keeps its name; the table is still `ocr_words`.
+- 2026-09-07 — No deskew in `preprocess`. PP-OCRv4 detects rotated quads by itself, and rotating
+  the page would put every box in a space the detail page cannot draw in — the axis-aligned box of
+  a line rotated 15° grows by its own length. `preprocess` is denoise only, and the bilateral
+  sigmas are the knob for the real photo set.
+- 2026-09-07 — Baseline eval, one variable per run: 57.3% → 69.1% (strip the stray terminator OCR
+  adds to a line) → 91.8% (currency) → 94.5% (dots). Two of those were measurement fixes, not
+  extraction work, and both are alignments with what `eval/dataset/README.md` already promised:
+  no PP-OCR dictionary contains `₹` (checked all 56), so holding gold to a glyph no model can emit
+  measured the dictionary and nothing else; and a dot that is not between digits is punctuation,
+  which the README says is ignored — keeping it failed "MIDC. Pune 411019", an address that is
+  otherwise word for word right. The extractor drops the `<` PP-OCR prints where `₹` should be:
+  a deletion, not a guess. Every run's result file is in `eval/results/`.
+- 2026-09-07 — The 6 remaining misses are recognition errors on rendered text, nothing the
+  extractor can reach: `Bjscuits` ×4, `400o59`, `Net Qtv`. The upgrade path if the real set shows
+  the same is a heavier rec model, not more regex.
+- 2026-09-07 — `run_scan` no longer catches `NotImplementedError`; `run_local` now catches it
+  around `run_rules` instead, so a scan still completes while P3's checks are stubs. Delete that
+  `try/except` when `CHECKS` is filled.
 - 2026-09-07 — `lib/env.ts` must reference `process.env.NEXT_PUBLIC_*` literally. With a computed
   key (`process.env[name]`) Next.js inlines nothing, so the browser bundle had no Supabase URL or
   key and every client call threw. Server code was fine, which made it look like an auth problem.

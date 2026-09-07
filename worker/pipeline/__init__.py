@@ -7,26 +7,47 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, cast
 
+import cv2
+import numpy as np
+from numpy.typing import NDArray
 from supabase import Client
 
-from .models import PipelineResult, ScaleSource, ScanContext, ScanRow
+from .extractors.regex_layout import RegexLayoutExtractor
+from .models import PipelineResult, ScaleSource, ScanContext, ScanRow, Word
+from .ocr import ocr_words
+from .preprocess import preprocess
+from .rules_engine import run_rules, score
 
 log = logging.getLogger("worker")
-
-# P1 stand-in for run_local. Delete the try/except in run_scan when P2 lands.
-_EMPTY = PipelineResult(
-    words=[],
-    declarations=[],
-    violations=[],
-    mm_per_px=None,
-    scale_source=ScaleSource.none,
-    compliance_score=100,
-)
 
 
 def run_local(images: list[Path], ctx: ScanContext) -> PipelineResult:
     """preprocess -> ocr -> extract -> measure -> rules -> score. No network."""
-    raise NotImplementedError("P2")
+    words: list[Word] = []
+    for path in images:
+        img = cv2.imread(str(path))
+        if img is None:
+            raise ValueError(f"unreadable image: {path.name}")
+        page = preprocess(cast("NDArray[np.uint8]", img))
+        for word in ocr_words(page, path.stem, ctx.languages):
+            words.append(word.model_copy(update={"id": len(words)}))
+
+    declarations = RegexLayoutExtractor().extract(words, ctx)
+    # measure is P4: without a scale mm_per_px stays None and the font checks say unverifiable.
+    try:
+        violations = run_rules(declarations, ctx)
+    except NotImplementedError:
+        log.warning("rule engine not built yet (P3), no violations and a score of 100")
+        violations = []
+
+    return PipelineResult(
+        words=words,
+        declarations=declarations,
+        violations=violations,
+        mm_per_px=None,
+        scale_source=ScaleSource.none,
+        compliance_score=score(violations),
+    )
 
 
 def context_for(scan: ScanRow) -> ScanContext:
@@ -53,11 +74,7 @@ def run_scan(sb: Client, scan: ScanRow) -> PipelineResult:
             path = Path(tmp) / f"{img['id']}.jpg"
             path.write_bytes(sb.storage.from_("scans").download(img["storage_path"]))
             paths.append(path)
-        try:
-            result = run_local(paths, context_for(scan))
-        except NotImplementedError:
-            log.warning("scan %s: no pipeline yet (P2), storing an empty result", scan.id)
-            result = _EMPTY
+        result = run_local(paths, context_for(scan))
 
     store(sb, scan.id, result)
     return result
