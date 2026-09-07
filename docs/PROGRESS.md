@@ -252,7 +252,24 @@ That split is why the work went into the extractor and not into the OCR settings
 | 3 | Violations stored with rule ref and evidence | done | `store()` was already writing them; scan `7f7eb986` has 3 fails + 4 `unverifiable` rows |
 | 4 | Detail page: image with boxes, declarations, violations, score | done | [scans/[id]/page.tsx](frontend/app/scans/[id]/page.tsx), [scan-evidence.tsx](frontend/components/scan-evidence.tsx). Click a violation, its boxes turn red |
 | 5 | Engine reproduces gold from gold declarations | done | 53/53, `test_engine_reproduces_gold_from_gold_declarations`. Found one wrong gold file on its first run |
-| 6 | One real scan end to end | done, not seen on screen | `7f7eb986` ran queued → processing → done against the hosted project, score 25. `pnpm build` and `tsc` clean. **The page itself needs a browser login** |
+| 6 | One real scan end to end | done | `7f7eb986` (synthetic label, score 25) and `5e0811b8` (a phone photo of a Reynolds pen box, 45 OCR lines, score 17). Both seen on screen |
+| 7 | An unreadable photo cannot score 100 | done | `run_scan` fails the scan instead; `test_run_scan_fails_when_the_ocr_read_nothing` |
+
+### Three things the first look at the page found
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Boxes drawn in the wrong places | the page divided by `scan_images.width`/`height`, and the throwaway script that made that scan had written the wrong pair | the page uses the size of the image the browser loaded, which cannot disagree with the file |
+| **100 / 100 on a pack the pipeline never read** | `score([])` is 100 by construction, and `5e0811b8` was a pre-P2 stub with zero OCR words | `run_scan` refuses to finish a scan with no words: `failed`, with a message telling the inspector how to re-shoot. Fixed in the pipeline, not on the page, so the P5 report and the P7 dashboard inherit it |
+| D4 quoting "Manufactured,Marketed and" as a month and year | the `manufactured` anchor claimed a line with no date in it | a date label with no figure in it is a label — `mfg_date` joins `NEEDS_A_NUMBER`. Precision 0.56 → 0.65 |
+
+The pen box also shows the P2 gap at full size. PP-OCR read the pack almost perfectly — `'MRP'`,
+`'25.00'`, `'02/2026'`, the whole address — and the extractor still reported no MRP, no generic
+name and no manufacturer, for two reasons that are not the rule engine's: one character wrong
+(`'Ceneric Name Ball Pen'`, so the anchor does not match) and a value in the next table cell two
+pixels outside the same-row tolerance. Two ways of widening that tolerance were measured and both
+cost 1.5 points of real accuracy, so both were reverted. **A printed declarations table is the
+shape the extractor cannot read, and it is a common one.**
 
 ### What the numbers say
 
@@ -294,6 +311,16 @@ that line is how the phase gets marked done. P8's first item is already done —
 ---
 
 ## Log
+
+- **2026-09-08** — **First look at the detail page, three fixes.** The worst was a scan showing
+  **100 / 100** for a pen box the pipeline had never read a word of — `score([])` is 100 by
+  construction and a pre-P2 stub had reached `done`. A scan with no OCR words is now `failed`
+  with a message about re-shooting, guarded in `run_scan` so the report and the dashboard cannot
+  inherit it later. Boxes now measure against the image the browser loaded rather than a stored
+  column that can be wrong. A date label with no figure in it is a label, which stopped D4
+  quoting "Manufactured,Marketed and" back at the inspector as a month and year. Two attempts to
+  widen the same-row tolerance so a table cell two pixels out of reach would be found were both
+  measured at real 28.9% → 27.4% and both reverted.
 
 - **2026-09-08** — **P3 done.** All 20 checks written against the tests that were waiting for
   them; the 130 `xfail`s are gone and `make test` is 407 passed / 26 xfailed (the 26 are P4).

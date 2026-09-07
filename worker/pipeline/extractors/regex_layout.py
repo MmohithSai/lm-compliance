@@ -62,11 +62,15 @@ ANCHORS: dict[str, list[str]] = {
 # is a deletion, not a guess: no price line carries these characters before a digit.
 NOT_A_RUPEE = re.compile(r"[<>?]\s*(?=\d)")
 
-# A quantity or a price is a number. Packs print the label on its own and the figure beside or
-# under it ("MRP (Inclusive of all taxes)" / "486.00"), and they also print labels that point
-# somewhere else entirely ("MRP (INCL OF ALL TAXES): SEE BOTTLE"). Requiring a digit tells the
-# two apart without reading the wording.
-NEEDS_A_NUMBER = {"mrp", "net_quantity", "unit_sale_price"}
+# A quantity, a price and a date are all numbers. Packs print the label on its own and the figure
+# beside or under it ("MRP (Inclusive of all taxes)" / "486.00", "Month & Year of Manufacture" /
+# "02/2026"), and they also print labels that point somewhere else entirely ("MRP (INCL OF ALL
+# TAXES): SEE BOTTLE"). Requiring a digit tells the two apart without reading the wording.
+#
+# mfg_date is here because "manufactured" anchors it: on a pack whose declarations are a table,
+# "Manufactured, Marketed and Brand Owned by" was claimed as the month and year, and the report
+# then quoted that line back at the inspector as an unreadable date.
+NEEDS_A_NUMBER = {"mrp", "net_quantity", "unit_sale_price", "mfg_date"}
 DIGIT = re.compile(r"\d")
 
 # Indian packs cross-refer rather than repeat: "MRP (INCL OF ALL TAXES): SEE BOTTLE",
@@ -160,7 +164,10 @@ def nearest(anchor: Word, words: list[Word], needs_number: bool = False) -> Word
 
     Three guards, each one a mistake seen on the real packs:
     * same *row*, not "within a line height" — PP-OCR boxes are tall enough on a 1600 px photo
-      that "MRP" claimed the net weight printed on the line above it;
+      that "MRP" claimed the net weight printed on the line above it. Centre to centre, and
+      tight: a table cell whose value is set larger than its label can miss by a pixel or two
+      (a real pen box prints "MRP" 31 px tall beside "25.00" at 42), but both looser tests were
+      measured and both cost 1.5 points of real accuracy — see the Decisions log;
     * nothing further away than a few lines — a bare "MRP" took a storage instruction from the
       far side of the panel;
     * never a box that is a declaration itself — the line under a bare "MRP" is often the next

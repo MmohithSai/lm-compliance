@@ -20,7 +20,7 @@ export default async function ScanPage({ params }: { params: Promise<{ id: strin
   if (!scan) notFound();
 
   const [{ data: images }, { data: words }, { data: declarations }, { data: violations }] = await Promise.all([
-    supabase.from("scan_images").select("id, kind, storage_path, width, height").eq("scan_id", id).order("kind"),
+    supabase.from("scan_images").select("id, kind, storage_path").eq("scan_id", id).order("kind"),
     supabase.from("ocr_words").select("id, image_id, x, y, w, h").eq("scan_id", id),
     supabase.from("declarations").select("id, field, value, confidence, word_ids, image_id").eq("scan_id", id),
     supabase.from("violations").select("id, rule_id, rule_ref, severity, message, evidence").eq("scan_id", id),
@@ -34,7 +34,7 @@ export default async function ScanPage({ params }: { params: Promise<{ id: strin
   const url = new Map((signed ?? []).map((s) => [s.path, s.signedUrl]));
   const panels: Panel[] = (images ?? []).flatMap((i) =>
     url.get(i.storage_path)
-      ? [{ id: i.id, kind: i.kind, url: url.get(i.storage_path)!, width: i.width, height: i.height }]
+      ? [{ id: i.id, kind: i.kind, url: url.get(i.storage_path)! }]
       : [],
   );
 

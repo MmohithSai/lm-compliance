@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import type { Severity } from "@/lib/db";
 
 export type Word = { id: number; image_id: string | null; x: number; y: number; w: number; h: number };
-export type Panel = { id: string; kind: string; url: string; width: number | null; height: number | null };
+export type Panel = { id: string; kind: string; url: string };
 export type Declaration = { id: string; field: string; word_ids: number[] };
 export type Violation = {
   id: string;
@@ -31,8 +31,10 @@ const TONE: Record<Severity, "destructive" | "secondary" | "outline"> = {
  * has to be able to see on the pack what the report is talking about.
  *
  * Box coordinates are pixels in the uploaded image. preprocess.py deliberately does not resize
- * or rotate, so they still line up; they are turned into percentages here so the image can be
- * shown at any width.
+ * or rotate, so they still line up; they are turned into percentages of the image the browser
+ * actually loaded, so they cannot drift out of step with it. scan_images.width / height are not
+ * used for this: they are written by the uploader and a wrong pair there put every box in the
+ * wrong place with nothing on the page to say so.
  */
 export function ScanEvidence({
   panels,
@@ -46,6 +48,7 @@ export function ScanEvidence({
   violations: Violation[];
 }) {
   const [selected, setSelected] = useState<string | null>(null);
+  const [size, setSize] = useState<Record<string, { w: number; h: number }>>({});
   const active = violations.find((v) => v.id === selected) ?? null;
   const highlighted = new Set(active?.word_ids ?? []);
 
@@ -57,15 +60,27 @@ export function ScanEvidence({
     <div className="grid gap-6 md:grid-cols-2">
       <div className="space-y-4">
         {panels.map((panel) => {
-          const boxes = words.filter(
-            (w) => w.image_id === panel.id && label.has(w.id) && panel.width && panel.height,
-          );
+          const natural = size[panel.id];
+          const boxes = natural ? words.filter((w) => w.image_id === panel.id && label.has(w.id)) : [];
           return (
             <figure key={panel.id} className="space-y-1">
               <div className="relative overflow-hidden rounded border">
                 {/* eslint-disable-next-line @next/next/no-img-element -- a signed Storage URL,
                     shown at its own aspect ratio so the boxes below land on the right words. */}
-                <img src={panel.url} alt={`${panel.kind} panel`} className="block w-full" />
+                <img
+                  src={panel.url}
+                  alt={`${panel.kind} panel`}
+                  className="block w-full"
+                  onLoad={(e) =>
+                    setSize((prev) => ({
+                      ...prev,
+                      [panel.id]: {
+                        w: e.currentTarget.naturalWidth,
+                        h: e.currentTarget.naturalHeight,
+                      },
+                    }))
+                  }
+                />
                 {boxes.map((w) => {
                   const on = highlighted.has(w.id);
                   return (
@@ -74,10 +89,10 @@ export function ScanEvidence({
                       title={label.get(w.id)}
                       className={`absolute border-2 ${on ? "border-red-500 bg-red-500/20" : "border-sky-500/70"}`}
                       style={{
-                        left: `${(w.x / panel.width!) * 100}%`,
-                        top: `${(w.y / panel.height!) * 100}%`,
-                        width: `${(w.w / panel.width!) * 100}%`,
-                        height: `${(w.h / panel.height!) * 100}%`,
+                        left: `${(w.x / natural.w) * 100}%`,
+                        top: `${(w.y / natural.h) * 100}%`,
+                        width: `${(w.w / natural.w) * 100}%`,
+                        height: `${(w.h / natural.h) * 100}%`,
                       }}
                     />
                   );

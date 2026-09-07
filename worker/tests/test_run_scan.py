@@ -155,3 +155,15 @@ def test_store_writes_nothing_when_the_result_is_empty() -> None:
         ),
     )
     assert db.written == {}
+
+
+def test_run_scan_fails_when_the_ocr_read_nothing(monkeypatch: pytest.MonkeyPatch) -> None:
+    """score([]) is 100 by construction, so an unreadable photo would otherwise finish `done`
+    with a perfect score. Scan 5e0811b8 did exactly that and showed "100 / 100" for a pack the
+    pipeline never read."""
+    empty = RESULT.model_copy(update={"words": [], "declarations": [], "violations": []})
+    db = fake()
+    monkeypatch.setattr("pipeline.run_local", lambda images, ctx: empty)
+    with pytest.raises(ValueError, match="no text was read"):
+        run_scan(cast(Client, db), SCAN)
+    assert db.written == {}

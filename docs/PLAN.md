@@ -124,6 +124,28 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - Total monthly cost: ₹0.
 
 ## Decisions log
+- 2026-09-08 — A scan the OCR read nothing from is `failed`, not `done`. `score([])` is 100 by
+  construction, so an unreadable photograph finished with a perfect score: scan `5e0811b8` sat at
+  **100 / 100** for a pen box the pipeline had never read a word of, which is the one wrong
+  answer this project must never give. The guard is in `run_scan`, not on the page, because the
+  PDF (P5) and the dashboard views (P7) read the same score and would each have inherited it.
+  `run_local` is left alone: the eval needs "predicted nothing" to stay scoreable.
+- 2026-09-08 — The scan page draws its boxes against the size of the image the browser loaded,
+  not `scan_images.width` / `height`. Those columns are written by whatever uploaded the scan,
+  and a wrong pair put every box in the wrong place with nothing on the page to say so.
+- 2026-09-08 — A date label with no figure in it is a label, same rule as a price or a quantity.
+  `mfg_date` joins `NEEDS_A_NUMBER`: on a pack whose declarations are a printed table the
+  "manufactured" anchor claimed "Manufactured, Marketed and Brand Owned by", and the report then
+  quoted that line back as an unreadable month and year. mfg_date precision 0.56 -> 0.65, four
+  fewer false claims, recall and field accuracy unchanged.
+- 2026-09-08 — Two ways of loosening "same row" in `nearest`, both measured, both reverted, both
+  result files kept. A real pen box prints "MRP" 31 px tall beside "25.00" at 42 px, and their
+  centres are 17.5 px apart against a 15.5 px tolerance - the value is two pixels out of reach
+  and the pack reads as having no MRP. Requiring the boxes to overlap vertically by half a line
+  (`p3-same-row-is-vertical-overlap`) and requiring the anchor's middle to fall inside the value
+  (`p3-same-row-anchor-middle`) both scored real 28.9% -> 27.4%, losing more on net quantity than
+  they won on price. The tight test is doing real work; the table-cell case needs the column
+  found, not the tolerance widened.
 - 2026-09-08 — P3. D5's rupee marker is reported `unverifiable`, not failed. Rule 2(m) wants the
   amount marked ₹ or Rs, and that is the one part of the rule a photograph cannot settle: no
   PP-OCR dictionary contains ₹ (all 56 checked in an earlier entry), so the extractor never

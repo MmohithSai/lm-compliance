@@ -75,6 +75,16 @@ def run_scan(sb: Client, scan: ScanRow) -> PipelineResult:
             paths.append(path)
         result = run_local(paths, context_for(scan))
 
+    # A scan the OCR read nothing from is a failed read, not a compliant pack. score([]) is 100
+    # by construction, and letting that reach `done` puts "100 / 100" on the report for a
+    # photograph nobody could read — the one wrong answer this project must never give. The
+    # loop turns the exception into `failed` plus this message on the scan.
+    if not result.words:
+        raise ValueError(
+            "no text was read from these photos. Fill the frame with the declaration panel, "
+            "hold steady, and avoid glare."
+        )
+
     store(sb, scan.id, result)
     return result
 
