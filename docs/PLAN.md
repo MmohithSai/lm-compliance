@@ -105,6 +105,9 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - Total monthly cost: ₹0.
 
 ## Decisions log
+- 2026-09-07 — `make worker` and `make eval` pass `--extra ocr`. PaddleOCR was an optional extra
+  while the pipeline was a stub; since P2 it is the pipeline, and plain `uv run` syncs the venv
+  back down to the default dependencies and uninstalls it. Both targets failed on a clean machine.
 - 2026-09-07 — P0's "needs a camera" was wrong. Open Food Facts and Open Beauty Facts are public
   databases of phone photographs of packaging, Indian products included, and their
   ingredients / nutrition / packaging shots are the back panel — which is where the Legal Metrology

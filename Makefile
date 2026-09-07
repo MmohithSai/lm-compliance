@@ -5,13 +5,13 @@ dev:
 	cd frontend && pnpm dev
 
 worker:
-	cd worker && uv run --env-file ../.env python main.py
+	cd worker && uv run --extra ocr --env-file ../.env python main.py
 
 test:
 	cd worker && uv run pytest -q
 
 eval:
-	cd worker && uv run python ../eval/run_eval.py --label $(LABEL)
+	cd worker && uv run --extra ocr python ../eval/run_eval.py --label $(LABEL)
 
 lint:
 	cd worker && uv run ruff check . ../eval && uv run ruff format --check . ../eval && uv run mypy .
