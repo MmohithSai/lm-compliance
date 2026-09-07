@@ -20,8 +20,8 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - [x] realtime status on the scan detail page
 - [x] worker: `run_scan` downloads images, marks a fake scan `done`
 - Done when: a scan goes queued → processing → done end to end from a phone.
-  **The loop is proven** (2026-09-07, scripted: queue → claim → done, score 100). The phone run
-  is still to do — it needs `make dev`, `make worker` and a device on the same network.
+  **True since 2026-09-07** — scan `5e0811b8`, shot on a phone at `192.168.1.10:3000`, resized to
+  1205×1600, claimed by the worker, `done` on screen without a reload. Score 100 is the P2 stub.
 
 ## P2 — OCR + regex/layout extractor (baseline)
 - [ ] `preprocess.py` deskew + denoise
@@ -80,6 +80,15 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - Total monthly cost: ₹0.
 
 ## Decisions log
+- 2026-09-07 — `lib/env.ts` must reference `process.env.NEXT_PUBLIC_*` literally. With a computed
+  key (`process.env[name]`) Next.js inlines nothing, so the browser bundle had no Supabase URL or
+  key and every client call threw. Server code was fine, which made it look like an auth problem.
+- 2026-09-07 — `crypto.randomUUID()` is secure-context only and the demo runs over
+  `http://<lan-ip>:3000`. `lib/uuid.ts` builds the v4 id from `getRandomValues`, which is not
+  gated. Anything else needing a secure context (`getUserMedia`, `crypto.subtle`) will need HTTPS.
+- 2026-09-07 — Photo input split in two: `capture="environment"` and `multiple` cannot share an
+  element (capture wins and caps the pick at one file). A camera button and a gallery button feed
+  one list that appends instead of replacing.
 - 2026-09-07 — Hosted project linked: `jcjxukjgrbmkuydpsnuc` (name "SIH", Mumbai). `supabase link`
   and `db push` needed no database password — CLI 2.51 provisions a login role from the personal
   access token. `.env` and `frontend/.env.local` written from `supabase projects api-keys`.

@@ -17,7 +17,7 @@ Last updated: 2026-09-07.
 | Phase | State | Blocking item |
 |---|---|---|
 | P0 dataset + eval harness | partial | 40–60 real photos (needs a camera) |
-| P1 schema + auth + upload + worker loop | partial | the phone run (code side is done) |
+| P1 schema + auth + upload + worker loop | **done** | — |
 | P2 OCR + extractor baseline | todo | starts after P0 has real photos |
 | P3 rule engine + detail page | todo | tests written, 130 `xfail` waiting |
 | P4 scale + font / contrast / grouping | todo | — |
@@ -86,6 +86,8 @@ beat. The table lists all 10 canonical fields, so nothing is silently missing fr
 
 ## P1 — Supabase schema + auth + upload + worker loop
 
+**Done when:** a scan goes queued → processing → done end to end from a phone. **This is true.**
+
 | # | Item | Status | Where / evidence |
 |---|---|---|---|
 | 1 | `0001_init.sql`: tables, RLS, bucket, views, realtime, `claim_scan()` | done | `supabase/migrations/0001_init.sql` |
@@ -94,7 +96,7 @@ beat. The table lists all 10 canonical fields, so nothing is silently missing fr
 | 4 | Login, upload form, scans list | done | `frontend/app/{login,upload,scans}` |
 | 5 | Realtime status on the scan detail page | done | [scan-realtime.tsx](frontend/components/scan-realtime.tsx), mounted only while the scan is queued/processing |
 | 6 | Worker marks a fake scan `done` | done | [pipeline/__init__.py](worker/pipeline/__init__.py), [test_run_scan.py](worker/tests/test_run_scan.py) |
-| 7 | One scan end to end from a phone | **blocked** | needs a person, a laptop running `make dev` + `make worker`, and a device |
+| 7 | One scan end to end from a phone | done | scan `5e0811b8`, 2026-09-07, `192.168.1.10:3000` |
 
 ### How the loop was checked
 
@@ -112,6 +114,20 @@ bucket exists. `run_local` still raises `NotImplementedError("P2")` — `run_sca
 stores an empty result so the queue works before the pipeline does. That `try/except` is deleted
 in P2.
 
+### Three bugs the phone run found
+
+None of them showed up on localhost, which is the point of testing on the device.
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Sign-in button stuck on "Signing in…", no message | `lib/env.ts` read `process.env[name]` with a computed key. Next.js only inlines `NEXT_PUBLIC_*` where the name is literal, so the client bundle had no URL or key and `createClient()` threw. Server code read a real `process.env`, so auth tested fine against the API. | literal references; `submit()` got a try/catch so a throw prints instead of hanging |
+| `crypto.randomUUID is not a function` | secure-context-only API, and the phone loads `http://192.168.1.10:3000` | [lib/uuid.ts](frontend/lib/uuid.ts) builds v4 from `getRandomValues`, which is not gated |
+| Only one photo could ever be added | `capture="environment"` and `multiple` on one input — capture wins and caps the pick at one file. `onChange` also replaced the list rather than appending. | separate camera and gallery inputs, both appending to one list of 3 |
+
+`createImageBitmap`, canvas and `toBlob` are **not** secure-context gated, so the resize path was
+fine over plain HTTP. `getUserMedia` and `crypto.subtle` would not be — they need HTTPS if a later
+phase reaches for them.
+
 ### Verified on the hosted project
 
 | Thing | Result |
@@ -121,6 +137,7 @@ in P2.
 | `claim_scan()` as service role | returns `[]` on an empty queue |
 | storage buckets | `['scans']` |
 | `make db-types` | regenerated `frontend/lib/database.types.ts`; `tsc --noEmit` clean |
+| scan from a phone | `5e0811b8` — 1 image, resized 1205×1600, `done`, no error |
 
 ---
 
@@ -135,6 +152,11 @@ those phases get marked done.
 
 ## Log
 
+- **2026-09-07** — **P1 done.** A scan shot on a phone over the LAN went queued → processing →
+  done with the status updating on screen unprompted. The device run found three bugs localhost
+  could not (see the table above): non-inlined `NEXT_PUBLIC_*`, `crypto.randomUUID` outside a
+  secure context, and `capture` silently defeating `multiple` on the photo input. Score is 100 on
+  every scan because `run_local` is still P2.
 - **2026-09-07** — P1 code complete. Hosted project linked and `0001_init.sql` pushed; `make seed`
   created the three demo users; `.env` and `frontend/.env.local` written from the project's API
   keys (both gitignored). `run_scan` downloads the scan's images, runs the pipeline and writes
