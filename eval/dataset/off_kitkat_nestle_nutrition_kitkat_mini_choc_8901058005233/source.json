@@ -1,0 +1,28 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901058005233",
+  "barcode": "8901058005233",
+  "product_name": "Kitkat mini chocolate coated wafer",
+  "brands": "KitKat, Nestle nutrition",
+  "quantity_on_db": "11.9g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/105/800/5233/front_en.26.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/105/800/5233/ingredients_en.17.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/105/800/5233/nutrition_en.8.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      850,
+      1600
+    ],
+    "ingredients": [
+      1600,
+      918
+    ],
+    "nutrition": [
+      1039,
+      877
+    ]
+  }
+}

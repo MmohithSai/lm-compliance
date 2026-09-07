@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8996001312506",
+  "barcode": "8996001312506",
+  "product_name": "Malkist Cheese Flavoured Crunchy Layered Cracker Biscuits",
+  "brands": "Mayora",
+  "quantity_on_db": "144g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/899/600/131/2506/front_en.3.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/899/600/131/2506/ingredients_en.7.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/899/600/131/2506/nutrition_en.5.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/899/600/131/2506/packaging_en.15.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1600,
+      686
+    ],
+    "ingredients": [
+      1600,
+      289
+    ],
+    "nutrition": [
+      1600,
+      470
+    ],
+    "packaging": [
+      1600,
+      449
+    ]
+  }
+}

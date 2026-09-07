@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901063162914",
+  "barcode": "8901063162914",
+  "product_name": "Marie Gold Biscuit",
+  "brands": "Britannia",
+  "quantity_on_db": "64 g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/106/316/2914/front_en.3.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/106/316/2914/ingredients_en.13.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/106/316/2914/nutrition_en.15.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/106/316/2914/packaging_en.17.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1600,
+      1045
+    ],
+    "ingredients": [
+      1600,
+      581
+    ],
+    "nutrition": [
+      1030,
+      1600
+    ],
+    "packaging": [
+      421,
+      421
+    ]
+  }
+}

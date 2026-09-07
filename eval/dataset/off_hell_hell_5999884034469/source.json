@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/5999884034469",
+  "barcode": "5999884034469",
+  "product_name": "HELL",
+  "brands": "Hell",
+  "quantity_on_db": "250 ml",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/599/988/403/4469/front_bg.57.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/599/988/403/4469/ingredients_en.125.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/599/988/403/4469/nutrition_en.63.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/599/988/403/4469/packaging_es.122.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      640,
+      1600
+    ],
+    "ingredients": [
+      979,
+      512
+    ],
+    "nutrition": [
+      845,
+      1200
+    ],
+    "packaging": [
+      286,
+      248
+    ]
+  }
+}

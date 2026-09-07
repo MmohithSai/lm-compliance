@@ -1,0 +1,8 @@
+{
+  "context": { "source": "ecommerce" },
+  "declarations": {
+    "manufacturer": "Marketed by: TATA CONSUMER PRODUCTS LIMITED, 1, Bishop Lefroy Road, Kolkata, West Bengal - 700 020.",
+    "net_quantity": "Quantity 1000 g"
+  },
+  "violations": ["E1"]
+}

@@ -1,0 +1,28 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8906010502294",
+  "barcode": "8906010502294",
+  "product_name": "Flaming hot nachos",
+  "brands": null,
+  "quantity_on_db": null,
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/601/050/2294/front_en.8.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/601/050/2294/ingredients_en.10.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/601/050/2294/nutrition_en.5.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      440,
+      512
+    ],
+    "ingredients": [
+      1600,
+      561
+    ],
+    "nutrition": [
+      874,
+      560
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "country_of_origin": "MADE IN INDIA",
+    "consumer_care": "CONTACT CONSUMER RESPONSE COORDINATOR AT: 1800-208-2653 indiahelpline@coca-cola.com ADDRESS: SAME AS MFG/MKT BY ADDRESS"
+  },
+  "violations": ["D1", "D2", "D3", "D4", "D5", "D8"]
+}

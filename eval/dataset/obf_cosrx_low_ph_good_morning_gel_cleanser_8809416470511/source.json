@@ -1,0 +1,23 @@
+{
+  "source": "world.openbeautyfacts.org",
+  "product_url": "https://world.openbeautyfacts.org/product/8809416470511",
+  "barcode": "8809416470511",
+  "product_name": "Low PH good morning gel cleanser",
+  "brands": "COSRX",
+  "quantity_on_db": "150ml",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openbeautyfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openbeautyfacts.org/images/products/880/941/647/0511/front_en.15.full.jpg",
+    "ingredients": "https://images.openbeautyfacts.org/images/products/880/941/647/0511/ingredients_en.16.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      781,
+      1600
+    ],
+    "ingredients": [
+      1600,
+      643
+    ]
+  }
+}

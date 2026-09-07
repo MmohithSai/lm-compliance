@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8904004402261",
+  "barcode": "8904004402261",
+  "product_name": "PHALHARI CHIWDA",
+  "brands": "Haldiram",
+  "quantity_on_db": "45g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/400/440/2261/front_en.3.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/400/440/2261/ingredients_en.6.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/400/440/2261/nutrition_en.9.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/400/440/2261/packaging_en.13.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1501,
+      1600
+    ],
+    "ingredients": [
+      1600,
+      722
+    ],
+    "nutrition": [
+      1368,
+      1311
+    ],
+    "packaging": [
+      1299,
+      1600
+    ]
+  }
+}

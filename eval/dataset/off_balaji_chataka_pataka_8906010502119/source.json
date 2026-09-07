@@ -1,0 +1,28 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8906010502119",
+  "barcode": "8906010502119",
+  "product_name": "Chataka pataka",
+  "brands": "Balaji",
+  "quantity_on_db": "25",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/601/050/2119/front_en.7.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/601/050/2119/ingredients_en.15.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/601/050/2119/nutrition_en.12.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1308,
+      1600
+    ],
+    "ingredients": [
+      1200,
+      1600
+    ],
+    "nutrition": [
+      709,
+      1600
+    ]
+  }
+}

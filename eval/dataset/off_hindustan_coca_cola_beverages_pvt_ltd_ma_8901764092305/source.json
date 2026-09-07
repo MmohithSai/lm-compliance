@@ -1,0 +1,28 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901764092305",
+  "barcode": "8901764092305",
+  "product_name": "Maaza Origina",
+  "brands": "HINDUSTAN COCA-COLA BEVERAGES PVT LTD.",
+  "quantity_on_db": "1.2L",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/176/409/2305/front_en.4.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/176/409/2305/ingredients_en.13.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/176/409/2305/packaging_en.40.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1200,
+      1600
+    ],
+    "ingredients": [
+      350,
+      105
+    ],
+    "packaging": [
+      1205,
+      1600
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "generic_name": "Moisturising Lotion",
+    "manufacturer": "Marketed by: Galderma India Pvt. Ltd.",
+    "net_quantity": "Net Qty.: 100mL",
+    "mrp": "MRP (Inclusive of all taxes) ₹: 486.00 (Rs. 4.86/ml)",
+    "unit_sale_price": "Rs. 4.86/ml",
+    "mfg_date": "Mfg. Date: 04/23",
+    "best_before": "Use Before: 04/26"
+  },
+  "violations": ["D1", "D6"]
+}

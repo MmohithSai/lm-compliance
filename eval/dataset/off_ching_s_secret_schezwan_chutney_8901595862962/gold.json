@@ -1,0 +1,8 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "manufacturer": "MKT BY: CAPITAL FOODS PVT. LTD., VILLA CAPITAL, SADHANA COMPOUND, NR. OSHIWARA BRIDGE, S. V. ROAD, JOGESHWARI (W), MUMBAI - 400 102.",
+    "consumer_care": "FOR ANY COMPLAINT CONTACT CUSTOMER CARE EXECUTIVE AT MKT BY ADDRESS ABOVE. 18001084488 AND care@tataconsumer.com"
+  },
+  "violations": ["D2", "D3", "D4", "D5", "D8"]
+}

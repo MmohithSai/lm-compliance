@@ -1,0 +1,13 @@
+{
+  "context": { "source": "package", "net_qty_g_or_ml": 1.2 },
+  "declarations": {
+    "generic_name": "INSTANT COFFEE-CHICORY MIXTURE COFFEE 70% CHICORY 30%",
+    "manufacturer": "MKTD. BY: HINDUSTAN UNILEVER LTD. (HUL), UNILEVER HOUSE, CHAKALA, ANDHERI (E), MUMBAI-99.",
+    "net_quantity": "NET WT.: 1.2 g",
+    "mrp": "MRP ₹ 2.00 (INCL. OF ALL TAXES)",
+    "mfg_date": "PKD. 24/01/25",
+    "best_before": "USE BY 23/01/26",
+    "consumer_care": "LEVERCARE-QUERY / FEEDBACK, TOLL FREE: 1800-10-22-221, PO BOX 14760, MUMBAI 400 099, LEVER.CARE@UNILEVER.COM"
+  },
+  "violations": []
+}

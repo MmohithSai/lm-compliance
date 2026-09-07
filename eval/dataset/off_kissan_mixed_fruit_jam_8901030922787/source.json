@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901030922787",
+  "barcode": "8901030922787",
+  "product_name": "Mixed Fruit Jam",
+  "brands": "Kissan",
+  "quantity_on_db": "90g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/103/092/2787/front_en.3.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/103/092/2787/ingredients_en.10.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/103/092/2787/nutrition_en.11.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/103/092/2787/packaging_en.16.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1419,
+      1600
+    ],
+    "ingredients": [
+      1544,
+      1600
+    ],
+    "nutrition": [
+      1569,
+      1600
+    ],
+    "packaging": [
+      1273,
+      1600
+    ]
+  }
+}

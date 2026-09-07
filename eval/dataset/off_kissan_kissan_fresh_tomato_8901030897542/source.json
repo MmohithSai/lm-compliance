@@ -1,0 +1,28 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901030897542",
+  "barcode": "8901030897542",
+  "product_name": "kissan fresh tomato",
+  "brands": "Kissan",
+  "quantity_on_db": "90g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/103/089/7542/front_en.22.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/103/089/7542/ingredients_en.32.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/103/089/7542/nutrition_en.13.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      730,
+      1337
+    ],
+    "ingredients": [
+      1022,
+      1052
+    ],
+    "nutrition": [
+      1600,
+      1094
+    ]
+  }
+}

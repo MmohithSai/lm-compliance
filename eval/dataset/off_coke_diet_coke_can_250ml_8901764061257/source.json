@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901764061257",
+  "barcode": "8901764061257",
+  "product_name": "Diet Coke Can 250ml",
+  "brands": "Coke",
+  "quantity_on_db": "4",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/176/406/1257/front_en.15.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/176/406/1257/ingredients_en.22.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/176/406/1257/nutrition_en.17.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/176/406/1257/packaging_en.7.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      165,
+      396
+    ],
+    "ingredients": [
+      1085,
+      371
+    ],
+    "nutrition": [
+      723,
+      405
+    ],
+    "packaging": [
+      1200,
+      1600
+    ]
+  }
+}

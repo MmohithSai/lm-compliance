@@ -1,0 +1,11 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "manufacturer": "MFG BY SOUTH INDIA BOTTLING Co.PVT.LTD., B163-170, SIPCOT INDL. GROWTH CENTRE, NH7, GANGAIKONDAN VILLAGE, TIRUNELVELI DIST., TAMILNADU-627352.",
+    "country_of_origin": "MADE IN INDIA",
+    "net_quantity": "NET QUANTITY: 1 L",
+    "best_before": "BEST BEFORE TWELVE MONTHS FROM MANUFACTURE",
+    "consumer_care": "CONTACT CONSUMER RESPONSE COORDINATOR AT: 1800-208-2653 indiahelpline@coca-cola.com ADDRESS : SAME AS MFG BY ADDRESS"
+  },
+  "violations": ["D2", "D4", "D5", "D8"]
+}

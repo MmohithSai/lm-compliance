@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901764082405",
+  "barcode": "8901764082405",
+  "product_name": "Kinley Mineral Water 1ltr",
+  "brands": "Kinley",
+  "quantity_on_db": "6",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/176/408/2405/front_en.40.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/176/408/2405/ingredients_en.48.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/176/408/2405/nutrition_en.33.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/176/408/2405/packaging_en.38.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      489,
+      1600
+    ],
+    "ingredients": [
+      1600,
+      332
+    ],
+    "nutrition": [
+      1600,
+      1554
+    ],
+    "packaging": [
+      1491,
+      1600
+    ]
+  }
+}

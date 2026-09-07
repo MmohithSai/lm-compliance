@@ -1,0 +1,8 @@
+{
+  "context": { "source": "package", "languages": ["hi", "en"] },
+  "declarations": {
+    "generic_name": "AYURVEDIC PROPRIETARY MEDICINE",
+    "net_quantity": "Net Volume: 150 ml"
+  },
+  "violations": ["D1", "D4", "D5", "D6", "D8"]
+}

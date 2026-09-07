@@ -1,0 +1,8 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "net_quantity": "NET QUANTITY: 1.2 L",
+    "country_of_origin": "MADE IN INDIA"
+  },
+  "violations": ["D1", "D2", "D4", "D5", "D6", "D8"]
+}

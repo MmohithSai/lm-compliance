@@ -1,0 +1,28 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901719135118",
+  "barcode": "8901719135118",
+  "product_name": "MONACO",
+  "brands": "Parle",
+  "quantity_on_db": null,
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/171/913/5118/front_en.24.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/171/913/5118/ingredients_en.20.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/171/913/5118/nutrition_en.13.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      859,
+      1600
+    ],
+    "ingredients": [
+      1600,
+      1200
+    ],
+    "nutrition": [
+      1200,
+      1600
+    ]
+  }
+}

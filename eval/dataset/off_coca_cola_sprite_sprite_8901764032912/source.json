@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901764032912",
+  "barcode": "8901764032912",
+  "product_name": "Sprite",
+  "brands": "Coca-Cola, sprite",
+  "quantity_on_db": "250 ml",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/176/403/2912/front_en.26.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/176/403/2912/ingredients_en.28.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/176/403/2912/nutrition_en.30.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/176/403/2912/packaging_en.33.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      933,
+      1600
+    ],
+    "ingredients": [
+      1600,
+      1600
+    ],
+    "nutrition": [
+      1600,
+      916
+    ],
+    "packaging": [
+      1600,
+      1600
+    ]
+  }
+}

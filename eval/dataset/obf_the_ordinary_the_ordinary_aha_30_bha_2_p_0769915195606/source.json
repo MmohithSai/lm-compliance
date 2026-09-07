@@ -1,0 +1,23 @@
+{
+  "source": "world.openbeautyfacts.org",
+  "product_url": "https://world.openbeautyfacts.org/product/0769915195606",
+  "barcode": "0769915195606",
+  "product_name": "The Ordinary AHA 30% + BHA 2% Peeling Solution",
+  "brands": "The Ordinary",
+  "quantity_on_db": "30 ml",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openbeautyfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openbeautyfacts.org/images/products/076/991/519/5606/front_en.6.full.jpg",
+    "ingredients": "https://images.openbeautyfacts.org/images/products/076/991/519/5606/ingredients_en.8.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      572,
+      1600
+    ],
+    "ingredients": [
+      1198,
+      1166
+    ]
+  }
+}

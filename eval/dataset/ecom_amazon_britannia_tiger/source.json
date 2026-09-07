@@ -1,0 +1,7 @@
+{
+  "source": "e-commerce listing screenshot",
+  "product_url": "https://www.amazon.in/Britannia-Tiger-Glucose-Biscuit-124/dp/B0CRF29ZJR",
+  "captured": "2026-09-07",
+  "note": "public listing page, rendered by headless Chrome at 1000px wide and sliced into 1600px tiles",
+  "tiles": 4
+}

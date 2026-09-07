@@ -1,0 +1,9 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "generic_name": "SPICED BUTTERMILK",
+    "net_quantity": "Net Content: 200 mL",
+    "manufacturer": "Marketed by: Gujarat Co-operative Milk Marketing Federation Ltd., Amul Dairy Road, Anand, Gujarat - 388001, India."
+  },
+  "violations": ["D4", "D5", "D6", "D8"]
+}

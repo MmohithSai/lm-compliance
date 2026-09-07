@@ -1,0 +1,8 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "generic_name": "PASTEURISED HOMOGENISED TONED MILK",
+    "net_quantity": "Net Content : 500 mL"
+  },
+  "violations": ["D1", "D4", "D5", "D6", "D8"]
+}

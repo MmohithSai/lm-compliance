@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901030831690",
+  "barcode": "8901030831690",
+  "product_name": "kissan mixed fruit jam",
+  "brands": "kissan",
+  "quantity_on_db": "200g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/103/083/1690/front_en.32.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/103/083/1690/ingredients_en.35.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/103/083/1690/nutrition_en.37.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/103/083/1690/packaging_en.39.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      839,
+      1600
+    ],
+    "ingredients": [
+      1600,
+      496
+    ],
+    "nutrition": [
+      1600,
+      1400
+    ],
+    "packaging": [
+      1600,
+      1200
+    ]
+  }
+}

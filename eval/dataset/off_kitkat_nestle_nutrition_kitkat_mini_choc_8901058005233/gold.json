@@ -1,0 +1,10 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "generic_name": "Coated Wafer",
+    "mrp": "₹ 10/-",
+    "mfg_date": "JUL/25 - FEB/26 - 5159045481",
+    "consumer_care": "NESTLÉ CONSUMER CARE, P.O. BAG 2, NEW DELHI-110001 WECARE@IN.NESTLE.COM 1800 103 1947"
+  },
+  "violations": ["D1", "D3", "D5", "D8"]
+}

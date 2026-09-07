@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/90162602",
+  "barcode": "90162602",
+  "product_name": "Red Bull Energy Drink",
+  "brands": "Red Bull",
+  "quantity_on_db": "250 ml",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/90162602/front_en.151.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/90162602/ingredients_en.152.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/90162602/nutrition_fr.27.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/90162602/packaging_fr.46.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1600,
+      1600
+    ],
+    "ingredients": [
+      924,
+      535
+    ],
+    "nutrition": [
+      1200,
+      1600
+    ],
+    "packaging": [
+      1406,
+      608
+    ]
+  }
+}

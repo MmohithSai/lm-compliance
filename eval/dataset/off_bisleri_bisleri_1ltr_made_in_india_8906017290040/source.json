@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8906017290040",
+  "barcode": "8906017290040",
+  "product_name": "Bisleri 1ltr MADE IN INDIA",
+  "brands": "Bisleri",
+  "quantity_on_db": "1",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/601/729/0040/front_en.8.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/601/729/0040/ingredients_en.21.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/601/729/0040/nutrition_en.32.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/601/729/0040/packaging_en.15.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      526,
+      1600
+    ],
+    "ingredients": [
+      691,
+      190
+    ],
+    "nutrition": [
+      1364,
+      1600
+    ],
+    "packaging": [
+      503,
+      302
+    ]
+  }
+}

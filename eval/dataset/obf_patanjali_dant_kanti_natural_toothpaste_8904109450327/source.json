@@ -1,0 +1,23 @@
+{
+  "source": "world.openbeautyfacts.org",
+  "product_url": "https://world.openbeautyfacts.org/product/8904109450327",
+  "barcode": "8904109450327",
+  "product_name": "Dant Kanti Natural Toothpaste",
+  "brands": "Patanjali",
+  "quantity_on_db": "200g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openbeautyfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openbeautyfacts.org/images/products/890/410/945/0327/front_en.10.full.jpg",
+    "ingredients": "https://images.openbeautyfacts.org/images/products/890/410/945/0327/ingredients_en.3.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1600,
+      470
+    ],
+    "ingredients": [
+      1558,
+      1246
+    ]
+  }
+}

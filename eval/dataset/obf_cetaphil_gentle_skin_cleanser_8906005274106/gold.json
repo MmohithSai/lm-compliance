@@ -1,0 +1,8 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "generic_name": "Gentle Skin Cleanser",
+    "net_quantity": "Net Qty.: 125 mL"
+  },
+  "violations": ["D1", "D4", "D5", "D6", "D8"]
+}

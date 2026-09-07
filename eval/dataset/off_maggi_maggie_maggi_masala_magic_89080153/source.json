@@ -1,0 +1,28 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/89080153",
+  "barcode": "89080153",
+  "product_name": "Maggi masala magic",
+  "brands": "Maggi, Maggie",
+  "quantity_on_db": "6g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/89080153/front_en.8.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/89080153/ingredients_en.5.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/89080153/nutrition_en.16.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1600,
+      1369
+    ],
+    "ingredients": [
+      1600,
+      884
+    ],
+    "nutrition": [
+      1317,
+      956
+    ]
+  }
+}

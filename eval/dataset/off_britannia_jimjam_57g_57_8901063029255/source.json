@@ -1,0 +1,28 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901063029255",
+  "barcode": "8901063029255",
+  "product_name": "Jimjam 57g (57)",
+  "brands": "Britannia",
+  "quantity_on_db": "57 g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/106/302/9255/front_en.9.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/106/302/9255/ingredients_en.14.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/106/302/9255/nutrition_en.3.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1600,
+      836
+    ],
+    "ingredients": [
+      1600,
+      843
+    ],
+    "nutrition": [
+      720,
+      1600
+    ]
+  }
+}

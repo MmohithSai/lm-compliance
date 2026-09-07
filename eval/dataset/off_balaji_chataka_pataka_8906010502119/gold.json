@@ -1,0 +1,10 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "generic_name": "PROPRIETARY FOOD NAMKEEN INDIAN SNACKS & SAVOURIES",
+    "net_quantity": "NET WEIGHT : 25g",
+    "mrp": "MRP ₹ (*INCL. OF ALL TAXES) : 5.00",
+    "unit_sale_price": "UNIT SALE PRICE : ₹ 0.20 PER g"
+  },
+  "violations": ["D1", "D4", "D6"]
+}

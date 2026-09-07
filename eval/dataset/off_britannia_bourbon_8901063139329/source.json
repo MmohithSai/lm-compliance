@@ -1,0 +1,28 @@
+{
+  "source": "Open Food Facts",
+  "product_url": "https://world.openfoodfacts.org/product/8901063139329",
+  "barcode": "8901063139329",
+  "product_name": "bourbon",
+  "brands": "britannia",
+  "quantity_on_off": "50g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/106/313/9329/front_en.14.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/106/313/9329/ingredients_en.4.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/106/313/9329/nutrition_en.9.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1600,
+      1268
+    ],
+    "ingredients": [
+      1600,
+      1247
+    ],
+    "nutrition": [
+      1600,
+      1060
+    ]
+  }
+}

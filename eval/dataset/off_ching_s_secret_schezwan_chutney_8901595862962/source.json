@@ -1,0 +1,28 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901595862962",
+  "barcode": "8901595862962",
+  "product_name": "Schezwan Chutney",
+  "brands": "Ching's Secret",
+  "quantity_on_db": "250 g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/159/586/2962/front_en.51.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/159/586/2962/ingredients_en.35.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/159/586/2962/nutrition_en.26.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      821,
+      1600
+    ],
+    "ingredients": [
+      1600,
+      1600
+    ],
+    "nutrition": [
+      882,
+      1180
+    ]
+  }
+}

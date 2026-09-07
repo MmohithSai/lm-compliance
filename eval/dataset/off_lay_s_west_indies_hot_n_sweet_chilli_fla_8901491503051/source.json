@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901491503051",
+  "barcode": "8901491503051",
+  "product_name": "West Indies' Hot 'n' Sweet Chilli flavor",
+  "brands": "Lay's",
+  "quantity_on_db": "25g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/149/150/3051/front_en.27.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/149/150/3051/ingredients_en.34.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/149/150/3051/nutrition_en.38.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/149/150/3051/packaging_en.31.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1239,
+      1600
+    ],
+    "ingredients": [
+      1352,
+      650
+    ],
+    "nutrition": [
+      1309,
+      1383
+    ],
+    "packaging": [
+      418,
+      485
+    ]
+  }
+}

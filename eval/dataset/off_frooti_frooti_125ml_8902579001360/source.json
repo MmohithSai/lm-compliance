@@ -1,0 +1,28 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8902579001360",
+  "barcode": "8902579001360",
+  "product_name": "Frooti 125ml",
+  "brands": "Frooti",
+  "quantity_on_db": "125 ml",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/257/900/1360/front_en.64.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/257/900/1360/ingredients_as.15.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/257/900/1360/nutrition_en.58.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      872,
+      1600
+    ],
+    "ingredients": [
+      720,
+      405
+    ],
+    "nutrition": [
+      1420,
+      1442
+    ]
+  }
+}

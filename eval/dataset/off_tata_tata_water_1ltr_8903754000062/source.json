@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8903754000062",
+  "barcode": "8903754000062",
+  "product_name": "Tata water 1ltr",
+  "brands": "Tata",
+  "quantity_on_db": "1000ml",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/375/400/0062/front_en.3.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/375/400/0062/ingredients_en.5.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/375/400/0062/nutrition_en.7.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/375/400/0062/packaging_en.9.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      489,
+      1600
+    ],
+    "ingredients": [
+      1600,
+      447
+    ],
+    "nutrition": [
+      1041,
+      1600
+    ],
+    "packaging": [
+      569,
+      273
+    ]
+  }
+}

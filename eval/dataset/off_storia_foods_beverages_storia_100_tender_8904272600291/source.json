@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8904272600291",
+  "barcode": "8904272600291",
+  "product_name": "Storia 100% Tender Coconut Water 1L",
+  "brands": "Storia Foods & Beverages",
+  "quantity_on_db": "10",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/427/260/0291/front_en.32.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/427/260/0291/ingredients_en.12.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/427/260/0291/nutrition_en.14.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/427/260/0291/packaging_en.16.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      816,
+      1600
+    ],
+    "ingredients": [
+      1600,
+      701
+    ],
+    "nutrition": [
+      1443,
+      1600
+    ],
+    "packaging": [
+      1600,
+      809
+    ]
+  }
+}

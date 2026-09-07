@@ -1,0 +1,10 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "manufacturer": "MANUFACTURED BY BENGAL BEVERAGES PVT. LTD., (UNIT-II), DURGAPUR EXPRESSWAY, P.O. DANKUNI COAL COMPLEX, DIST: HOOGHLY - 712 310, WEST BENGAL",
+    "country_of_origin": "MADE IN INDIA",
+    "net_quantity": "NET QUANTITY: 250 ml",
+    "consumer_care": "CONTACT CONSUMER RESPONSE COORDINATOR AT: 1800-208-2653 indiahelpline@coca-cola.com ADDRESS : SAME AS MANUFACTURED BY ADDRESS"
+  },
+  "violations": ["D2", "D4", "D5", "D8"]
+}

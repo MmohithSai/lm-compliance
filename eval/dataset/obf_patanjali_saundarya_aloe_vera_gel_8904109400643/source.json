@@ -1,0 +1,23 @@
+{
+  "source": "world.openbeautyfacts.org",
+  "product_url": "https://world.openbeautyfacts.org/product/8904109400643",
+  "barcode": "8904109400643",
+  "product_name": "Saundarya aloe vera gel",
+  "brands": "Patanjali",
+  "quantity_on_db": "150ml",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openbeautyfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openbeautyfacts.org/images/products/890/410/940/0643/front_en.4.full.jpg",
+    "ingredients": "https://images.openbeautyfacts.org/images/products/890/410/940/0643/ingredients_en.10.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      768,
+      1600
+    ],
+    "ingredients": [
+      1202,
+      1600
+    ]
+  }
+}

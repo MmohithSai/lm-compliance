@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901058000290",
+  "barcode": "8901058000290",
+  "product_name": "maggi",
+  "brands": "Nestlé",
+  "quantity_on_db": "70",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/105/800/0290/front_en.36.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/105/800/0290/ingredients_en.7.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/105/800/0290/nutrition_en.9.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/105/800/0290/packaging_en.3.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      786,
+      1042
+    ],
+    "ingredients": [
+      500,
+      316
+    ],
+    "nutrition": [
+      500,
+      326
+    ],
+    "packaging": [
+      630,
+      634
+    ]
+  }
+}

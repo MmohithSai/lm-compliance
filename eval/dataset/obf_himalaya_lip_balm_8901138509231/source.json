@@ -1,0 +1,28 @@
+{
+  "source": "world.openbeautyfacts.org",
+  "product_url": "https://world.openbeautyfacts.org/product/8901138509231",
+  "barcode": "8901138509231",
+  "product_name": "Lip Balm",
+  "brands": "himalaya",
+  "quantity_on_db": "10g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openbeautyfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openbeautyfacts.org/images/products/890/113/850/9231/front_en.18.full.jpg",
+    "ingredients": "https://images.openbeautyfacts.org/images/products/890/113/850/9231/ingredients_en.20.full.jpg",
+    "packaging": "https://images.openbeautyfacts.org/images/products/890/113/850/9231/packaging_en.22.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      806,
+      1600
+    ],
+    "ingredients": [
+      1145,
+      355
+    ],
+    "packaging": [
+      547,
+      367
+    ]
+  }
+}

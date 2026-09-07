@@ -1,0 +1,28 @@
+{
+  "source": "world.openbeautyfacts.org",
+  "product_url": "https://world.openbeautyfacts.org/product/8906005274137",
+  "barcode": "8906005274137",
+  "product_name": "Moisturising Lotion",
+  "brands": "Cetaphil",
+  "quantity_on_db": "100 ml",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openbeautyfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openbeautyfacts.org/images/products/890/600/527/4137/front_en.3.full.jpg",
+    "ingredients": "https://images.openbeautyfacts.org/images/products/890/600/527/4137/ingredients_en.5.full.jpg",
+    "nutrition": "https://images.openbeautyfacts.org/images/products/890/600/527/4137/nutrition_en.7.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1600,
+      1600
+    ],
+    "ingredients": [
+      1600,
+      1600
+    ],
+    "nutrition": [
+      1600,
+      1600
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901719117183",
+  "barcode": "8901719117183",
+  "product_name": "Hide & Seek",
+  "brands": "Parle, Parle platina",
+  "quantity_on_db": "100g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/171/911/7183/front_en.26.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/171/911/7183/ingredients_en.28.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/171/911/7183/nutrition_en.30.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/171/911/7183/packaging_en.32.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1600,
+      1019
+    ],
+    "ingredients": [
+      1600,
+      612
+    ],
+    "nutrition": [
+      848,
+      944
+    ],
+    "packaging": [
+      524,
+      376
+    ]
+  }
+}

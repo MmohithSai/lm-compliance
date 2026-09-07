@@ -1,0 +1,28 @@
+{
+  "source": "world.openbeautyfacts.org",
+  "product_url": "https://world.openbeautyfacts.org/product/8901030869112",
+  "barcode": "8901030869112",
+  "product_name": "Ponds Body powders",
+  "brands": "Ponds",
+  "quantity_on_db": "100g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openbeautyfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openbeautyfacts.org/images/products/890/103/086/9112/front_en.3.full.jpg",
+    "ingredients": "https://images.openbeautyfacts.org/images/products/890/103/086/9112/ingredients_en.5.full.jpg",
+    "packaging": "https://images.openbeautyfacts.org/images/products/890/103/086/9112/packaging_en.7.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      583,
+      1600
+    ],
+    "ingredients": [
+      909,
+      1600
+    ],
+    "packaging": [
+      863,
+      501
+    ]
+  }
+}

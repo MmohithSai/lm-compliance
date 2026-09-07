@@ -1,0 +1,23 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/3948764042911",
+  "barcode": "3948764042911",
+  "product_name": "thums up",
+  "brands": "thumsup",
+  "quantity_on_db": "250ml",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/394/876/404/2911/front_en.20.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/394/876/404/2911/ingredients_en.9.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      817,
+      1600
+    ],
+    "ingredients": [
+      991,
+      1600
+    ]
+  }
+}

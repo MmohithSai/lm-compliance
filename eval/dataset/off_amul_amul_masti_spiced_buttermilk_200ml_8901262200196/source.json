@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901262200196",
+  "barcode": "8901262200196",
+  "product_name": "Amul Masti Spiced Buttermilk 200ml",
+  "brands": "Amul",
+  "quantity_on_db": "200mL",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/126/220/0196/front_en.54.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/126/220/0196/ingredients_en.58.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/126/220/0196/nutrition_en.24.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/126/220/0196/packaging_en.47.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1600,
+      1435
+    ],
+    "ingredients": [
+      1200,
+      1600
+    ],
+    "nutrition": [
+      306,
+      320
+    ],
+    "packaging": [
+      1200,
+      1600
+    ]
+  }
+}

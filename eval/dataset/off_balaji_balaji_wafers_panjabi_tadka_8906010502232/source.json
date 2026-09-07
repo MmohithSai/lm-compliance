@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8906010502232",
+  "barcode": "8906010502232",
+  "product_name": "Balaji wafers panjabi tadka",
+  "brands": "Balaji",
+  "quantity_on_db": "22g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/601/050/2232/front_en.6.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/601/050/2232/ingredients_en.8.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/601/050/2232/nutrition_en.10.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/601/050/2232/packaging_en.17.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1200,
+      1600
+    ],
+    "ingredients": [
+      1600,
+      759
+    ],
+    "nutrition": [
+      1600,
+      1539
+    ],
+    "packaging": [
+      1200,
+      1600
+    ]
+  }
+}

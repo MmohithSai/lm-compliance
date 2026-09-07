@@ -1,0 +1,28 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901262260121",
+  "barcode": "8901262260121",
+  "product_name": "Amul Taaza Milky Milk",
+  "brands": "Amul, Amul taaza",
+  "quantity_on_db": "500 ml",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/126/226/0121/front_en.52.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/126/226/0121/ingredients_en.54.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/126/226/0121/nutrition_en.56.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1600,
+      1590
+    ],
+    "ingredients": [
+      1200,
+      1600
+    ],
+    "nutrition": [
+      1200,
+      1600
+    ]
+  }
+}

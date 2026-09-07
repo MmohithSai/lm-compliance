@@ -1,0 +1,23 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/7622202334009",
+  "barcode": "7622202334009",
+  "product_name": "dairy milk",
+  "brands": "Cadbury, Dairy Milk",
+  "quantity_on_db": "11 g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/762/220/233/4009/front_en.9.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/762/220/233/4009/ingredients_en.13.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      496,
+      1016
+    ],
+    "ingredients": [
+      459,
+      343
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "context": { "source": "package", "net_qty_g_or_ml": 10 },
+  "declarations": {
+    "generic_name": "Lip Balm",
+    "net_quantity": "Net Wt. 10 g"
+  },
+  "violations": ["D5"]
+}

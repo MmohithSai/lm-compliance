@@ -1,0 +1,9 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "generic_name": "CARBONATED WATER",
+    "net_quantity": "NET QUANTITY: 300 ml",
+    "best_before": "BEST BEFORE THREE MONTHS FROM MANUFACTURE WHEN STORED IN A COOL AND DRY PLACE"
+  },
+  "violations": ["D1", "D4", "D5", "D6", "D8"]
+}

@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8904043901015",
+  "barcode": "8904043901015",
+  "product_name": "Tata Salt",
+  "brands": "Tata",
+  "quantity_on_db": "1 kg",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/404/390/1015/front_en.34.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/404/390/1015/ingredients_en.36.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/404/390/1015/nutrition_en.38.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/404/390/1015/packaging_en.40.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1319,
+      1600
+    ],
+    "ingredients": [
+      831,
+      144
+    ],
+    "nutrition": [
+      1600,
+      800
+    ],
+    "packaging": [
+      1600,
+      323
+    ]
+  }
+}

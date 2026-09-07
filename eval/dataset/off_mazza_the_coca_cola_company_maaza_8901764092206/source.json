@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901764092206",
+  "barcode": "8901764092206",
+  "product_name": "Maaza",
+  "brands": "Mazza, The Coca-Cola Company",
+  "quantity_on_db": "600 ml",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/176/409/2206/front_en.86.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/176/409/2206/ingredients_en.71.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/176/409/2206/nutrition_en.79.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/176/409/2206/packaging_en.20.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      148,
+      398
+    ],
+    "ingredients": [
+      199,
+      157
+    ],
+    "nutrition": [
+      249,
+      376
+    ],
+    "packaging": [
+      1012,
+      1600
+    ]
+  }
+}

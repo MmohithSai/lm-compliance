@@ -1,0 +1,13 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "generic_name": "PROPRIETARY FOOD - NAMKEEN (15.1)",
+    "manufacturer": "MARKETED BY: PepsiCo India Holdings Pvt. Ltd.",
+    "net_quantity": "N. QTY: 44 g (29.3 g + 14.7 g Extra)",
+    "mrp": "MRP Rs. 10.00 (INCL. OF ALL TAXES)",
+    "mfg_date": "MFD: 26/02/22",
+    "best_before": "USE BY: 26/06/22",
+    "consumer_care": "THE CONSUMER SERVICES MANAGER, PEPSICO INDIA HOLDINGS PVT. LTD., P.O. BOX-27, DLF QUTAB ENCLAVE, PHASE-1, GURUGRAM - 122002, HARYANA, INDIA. OR CALL US AT 1800 22 4020 OR EMAIL US AT CONSUMER.FEEDBACK@PEPSICO.COM"
+  },
+  "violations": ["D1", "D8"]
+}

@@ -1,0 +1,8 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "manufacturer": "MFG BY: HINDUSTAN COCA-COLA BEVERAGES PVT LTD, 303&304, BAANI ADDRESS 1, GOLF CRSE, SEC 53, GURUGRAM-122011, HARYANA",
+    "country_of_origin": "MADE IN INDIA"
+  },
+  "violations": ["D2", "D3", "D4", "D5", "D6", "D8"]
+}

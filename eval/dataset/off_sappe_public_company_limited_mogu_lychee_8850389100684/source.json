@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8850389100684",
+  "barcode": "8850389100684",
+  "product_name": "Mogu lychee",
+  "brands": "Sappe Public Company Limited",
+  "quantity_on_db": "320 ml",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/885/038/910/0684/front_en.123.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/885/038/910/0684/ingredients_en.83.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/885/038/910/0684/nutrition_en.125.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/885/038/910/0684/packaging_en.50.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      837,
+      1600
+    ],
+    "ingredients": [
+      1409,
+      1600
+    ],
+    "nutrition": [
+      631,
+      1051
+    ],
+    "packaging": [
+      724,
+      523
+    ]
+  }
+}

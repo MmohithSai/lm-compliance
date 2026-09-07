@@ -1,0 +1,8 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "generic_name": "Flavoured Sandwich Biscuits",
+    "net_quantity": "BISCUITS NET WEIGHT 57 g"
+  },
+  "violations": ["D1", "D4", "D5", "D6", "D8"]
+}

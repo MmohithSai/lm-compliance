@@ -1,0 +1,11 @@
+{
+  "context": { "source": "ecommerce" },
+  "declarations": {
+    "manufacturer": "Manufacturer : Parle Biscuits Pvt Ltd",
+    "country_of_origin": "Country of Origin : India",
+    "net_quantity": "Net Quantity : 800.0 Grams",
+    "mrp": "₹90",
+    "unit_sale_price": "₹11.25 /100 g"
+  },
+  "violations": ["E1"]
+}

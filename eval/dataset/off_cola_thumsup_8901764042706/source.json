@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901764042706",
+  "barcode": "8901764042706",
+  "product_name": "Thumsup",
+  "brands": "Cola",
+  "quantity_on_db": "740ml",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/176/404/2706/front_en.26.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/176/404/2706/ingredients_en.11.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/176/404/2706/nutrition_en.13.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/176/404/2706/packaging_en.15.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      120,
+      408
+    ],
+    "ingredients": [
+      1570,
+      609
+    ],
+    "nutrition": [
+      1357,
+      988
+    ],
+    "packaging": [
+      615,
+      683
+    ]
+  }
+}

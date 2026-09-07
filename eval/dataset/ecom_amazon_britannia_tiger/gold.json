@@ -1,0 +1,9 @@
+{
+  "context": { "source": "ecommerce" },
+  "declarations": {
+    "generic_name": "Generic Name : Biscuit",
+    "manufacturer": "Manufacturer : Britannia Industries Ltd, Britannia Industries Ltd",
+    "net_quantity": "Net Quantity : 124.0 Grams"
+  },
+  "violations": ["E1"]
+}

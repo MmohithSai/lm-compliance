@@ -1,0 +1,8 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "generic_name": "Vacuum Evaporated Edible Common Salt",
+    "net_quantity": "NET QUANTITY: 1 kg"
+  },
+  "violations": ["D1", "D4", "D5", "D6", "D8"]
+}

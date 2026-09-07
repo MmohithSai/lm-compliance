@@ -1,0 +1,9 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "manufacturer": "MFD. BY: VARUN BEVERAGES LIMITED",
+    "net_quantity": "NET QUANTITY 400 ml (250 ml + 150 ml Free)",
+    "consumer_care": "CONTACT CUSTOMER SERVICE MANAGER AT: P.O. BOX 27, DLF QUTAB ENCLAVE-1, GURUGRAM-122002, HARYANA CONSUMER.FEEDBACK@PEPSICO.COM 1800 22 4020"
+  },
+  "violations": ["D1", "D2", "D4", "D5", "D8"]
+}

@@ -1,0 +1,28 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901030921667",
+  "barcode": "8901030921667",
+  "product_name": "kissan",
+  "brands": "Kissan",
+  "quantity_on_db": "1",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/103/092/1667/front_en.39.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/103/092/1667/ingredients_en.17.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/103/092/1667/nutrition_en.19.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      838,
+      1600
+    ],
+    "ingredients": [
+      1600,
+      735
+    ],
+    "nutrition": [
+      1600,
+      858
+    ]
+  }
+}

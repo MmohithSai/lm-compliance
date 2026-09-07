@@ -1,0 +1,23 @@
+{
+  "source": "world.openbeautyfacts.org",
+  "product_url": "https://world.openbeautyfacts.org/product/3282779035576",
+  "barcode": "3282779035576",
+  "product_name": "Eau thermale",
+  "brands": "Avene",
+  "quantity_on_db": "50 mL",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openbeautyfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openbeautyfacts.org/images/products/328/277/903/5576/front_de.15.full.jpg",
+    "ingredients": "https://images.openbeautyfacts.org/images/products/328/277/903/5576/ingredients_de.12.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      444,
+      1600
+    ],
+    "ingredients": [
+      819,
+      183
+    ]
+  }
+}

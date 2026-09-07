@@ -1,0 +1,10 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "generic_name": "BISCUIT",
+    "net_quantity": "BISCUITS NET WEIGHT 64 g",
+    "mrp": "MRP. ₹10.00 (INCL. OF ALL TAXES)",
+    "unit_sale_price": "Rs. 0.16 P.G."
+  },
+  "violations": ["D1", "D4", "D6"]
+}

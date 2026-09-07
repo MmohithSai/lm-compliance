@@ -1,0 +1,8 @@
+{
+  "context": { "source": "ecommerce" },
+  "declarations": {
+    "mrp": "₹128",
+    "unit_sale_price": "₹18.29 /100 g"
+  },
+  "violations": ["E1"]
+}

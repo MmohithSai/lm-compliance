@@ -1,0 +1,10 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "generic_name": "PACKAGED DRINKING WATER OZONISED",
+    "manufacturer": "MKT BY: BISLERI INTERNATIONAL PVT. LTD., 5TH FLOOR, CTS NO. 525/1A1/A, WESTERN EXPRESS HIGHWAY, ANDHERI (EAST), MUMBAI - 400 099, MAHARASHTRA.",
+    "best_before": "BEST BEFORE SIX MONTHS FROM MANUFACTURE",
+    "consumer_care": "CONTACT: CUSTOMER CARE EXECUTIVE 1800-121-1007 EMAIL: WECARE@BISLERI.CO.IN ADDRESS: SAME AS MKT BY ADDRESS"
+  },
+  "violations": ["D3", "D4", "D5", "D8"]
+}

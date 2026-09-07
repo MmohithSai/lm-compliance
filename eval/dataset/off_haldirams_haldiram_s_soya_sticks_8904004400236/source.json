@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8904004400236",
+  "barcode": "8904004400236",
+  "product_name": "Haldiram's Soya sticks",
+  "brands": "Haldirams",
+  "quantity_on_db": "22g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/400/440/0236/front_en.14.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/400/440/0236/ingredients_en.16.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/400/440/0236/nutrition_en.18.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/400/440/0236/packaging_en.20.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1200,
+      1600
+    ],
+    "ingredients": [
+      1200,
+      1600
+    ],
+    "nutrition": [
+      1200,
+      1600
+    ],
+    "packaging": [
+      1600,
+      419
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901491103794",
+  "barcode": "8901491103794",
+  "product_name": "Oats",
+  "brands": "Pepsico, Quaker",
+  "quantity_on_db": "400g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/149/110/3794/front_en.41.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/149/110/3794/ingredients_en.43.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/149/110/3794/nutrition_en.45.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/149/110/3794/packaging_en.13.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1100,
+      1600
+    ],
+    "ingredients": [
+      1600,
+      389
+    ],
+    "nutrition": [
+      1233,
+      1600
+    ],
+    "packaging": [
+      1200,
+      1600
+    ]
+  }
+}

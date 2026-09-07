@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901764032707",
+  "barcode": "8901764032707",
+  "product_name": "Sprite",
+  "brands": "Coca Cola",
+  "quantity_on_db": "600 ml",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/176/403/2707/front_en.20.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/176/403/2707/ingredients_en.12.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/176/403/2707/nutrition_en.22.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/176/403/2707/packaging_en.29.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      400,
+      1200
+    ],
+    "ingredients": [
+      1561,
+      379
+    ],
+    "nutrition": [
+      646,
+      491
+    ],
+    "packaging": [
+      1170,
+      1600
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "context": { "source": "ecommerce" },
+  "declarations": {
+    "generic_name": "Generic Name : Salt",
+    "manufacturer": "Manufacturer : Tata Chemicals Limited, P. 0. Mithapur-361 345, District-Devbhumi Dwarka, Gujarat, Lic. No. 10012021000351, Tata Sampann",
+    "net_quantity": "Net Quantity : 1000.0 Grams",
+    "mrp": "M.R.P.: ₹32.00",
+    "unit_sale_price": "₹2.90 /100 g"
+  },
+  "violations": ["E1"]
+}

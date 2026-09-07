@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901491361026",
+  "barcode": "8901491361026",
+  "product_name": "Kurkure Masala Munch",
+  "brands": "Kurkure, PepsiCo",
+  "quantity_on_db": "41.5g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/149/136/1026/front_en.51.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/149/136/1026/ingredients_en.30.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/149/136/1026/nutrition_en.53.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/149/136/1026/packaging_en.18.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      738,
+      978
+    ],
+    "ingredients": [
+      688,
+      601
+    ],
+    "nutrition": [
+      996,
+      1412
+    ],
+    "packaging": [
+      1600,
+      1600
+    ]
+  }
+}

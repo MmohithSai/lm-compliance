@@ -1,0 +1,28 @@
+{
+  "source": "world.openbeautyfacts.org",
+  "product_url": "https://world.openbeautyfacts.org/product/9102453113625",
+  "barcode": "9102453113625",
+  "product_name": "MUUCHSTAC Face wash",
+  "brands": "Muuchstac, Ocean",
+  "quantity_on_db": "100ml",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openbeautyfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openbeautyfacts.org/images/products/910/245/311/3625/front_en.18.full.jpg",
+    "ingredients": "https://images.openbeautyfacts.org/images/products/910/245/311/3625/ingredients_en.8.full.jpg",
+    "packaging": "https://images.openbeautyfacts.org/images/products/910/245/311/3625/packaging_en.10.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      849,
+      1600
+    ],
+    "ingredients": [
+      1200,
+      1600
+    ],
+    "packaging": [
+      1200,
+      1600
+    ]
+  }
+}
