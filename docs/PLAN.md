@@ -7,7 +7,7 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 ## P0 — dataset + eval harness
 - [x] `eval/run_eval.py` runs on an empty dataset and writes `eval/results/<date>_<label>.json`
 - [x] real package photos + 6 e-commerce screenshots in `eval/dataset/<case>/` — 31 package cases
-      (114 photographs) pulled from Open Food / Beauty Facts by `eval/fetch_openfoodfacts.py`, and
+      (102 photographs) pulled from Open Food / Beauty Facts by `eval/fetch_openfoodfacts.py`, and
       6 listing screenshots by `eval/fetch_ecommerce.py`. No camera needed after all.
 - [x] gold JSON per case (declarations + expected violation codes) — 37 written by reading the
       photographs; conventions in `eval/dataset/README.md`

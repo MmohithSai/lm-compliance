@@ -36,6 +36,23 @@ throwaway project.
 Claude Code reads `SUPABASE_ACCESS_TOKEN` from the OS environment at start-up. After `setx`,
 **restart Claude Code** or the MCP server comes up unauthorized.
 
+## Where the test images come from, and under what licence
+
+`eval/dataset/` is 25 MB of images committed to this repo. They are not ours, and the terms
+differ by prefix. Every case folder carries a `source.json` with its own URL, capture date and
+licence line.
+
+| Prefix | What | Source | Terms |
+|---|---|---|---|
+| `off_`, `obf_` | 31 cases, 102 photographs of Indian packaging | [Open Food Facts](https://world.openfoodfacts.org), [Open Beauty Facts](https://world.openbeautyfacts.org) | photographs **CC-BY-SA 3.0**, data ODbL. Redistributing them — which this repo does — carries the attribution and share-alike obligations that go with it. |
+| `ecom_` | 6 product-listing screenshots | amazon.in, flipkart.com | **Not openly licensed.** Screenshots of public pages, kept as fixed test images. Fine for testing a compliance checker; if this repo is ever published or redistributed, look at these first — they are the ones with no licence behind them. |
+| `synthetic_` | 16 rendered labels | `eval/make_synthetic.py` | ours |
+
+Nothing here is legal advice. The point is that the provenance is recorded per file rather than
+assumed, so the decision is available to whoever has to make it. `eval/fetch_openfoodfacts.py`
+and `eval/fetch_ecommerce.py` rebuild the whole set in a few minutes, so dropping the images from
+git is a real option if that is the call.
+
 ## Without `make` (Windows)
 
 Every Makefile target is one shell line. `scoop install make` if you want it. Otherwise copy the line.

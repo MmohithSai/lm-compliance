@@ -40,7 +40,7 @@ Last updated: 2026-09-07.
 | 3 | Gold format written down | done | [eval/dataset/README.md](eval/dataset/README.md) |
 | 4 | Gold files validated automatically | done | [test_dataset.py](worker/tests/test_dataset.py), 5 checks × 16 cases |
 | 5 | Shot list for the real set | done | [eval/dataset/README.md](eval/dataset/README.md) |
-| 6 | Real package photos | done | 31 cases / 114 photographs from Open Food & Beauty Facts, [fetch_openfoodfacts.py](eval/fetch_openfoodfacts.py) |
+| 6 | Real package photos | done | 31 cases / 102 photographs from Open Food & Beauty Facts, [fetch_openfoodfacts.py](eval/fetch_openfoodfacts.py) |
 | 7 | E-commerce screenshots | done | 6 listings from amazon.in and flipkart.com, [fetch_ecommerce.py](eval/fetch_ecommerce.py) |
 | 8 | gold.json for each real case | done | 37 written by reading the photographs |
 | 9 | OCR memoised so a rerun measures the change | done | `eval/.ocr_cache/`, keyed on the image + a hash of `preprocess.py` and `ocr.py` |

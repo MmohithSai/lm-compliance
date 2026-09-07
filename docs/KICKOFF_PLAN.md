@@ -1,3 +1,8 @@
+> **Historical.** This is the Day-1 kickoff plan as written on 2026-09-06, kept for the
+> record. It describes the repo before any pipeline code existed and is *not* a
+> description of the current state. For that see `docs/PLAN.md` (phases and decisions)
+> and `docs/PROGRESS.md` (what is built and how it was checked).
+
 # Plan: lm-compliance kickoff scaffold (SIH 26034)
 
 ## Context
