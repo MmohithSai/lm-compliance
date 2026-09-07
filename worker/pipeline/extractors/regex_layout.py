@@ -146,6 +146,7 @@ def continuations(block: list[Word], words: list[Word]) -> list[Word]:
             and last.y < w.y <= last.y + last.h + gap
             and abs(w.x - block[0].x) <= margin
             and claim(w.text) is None
+            and not POINTS_ELSEWHERE.search(w.text)
         ]
         if not below:
             return out

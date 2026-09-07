@@ -155,6 +155,7 @@ phase reaches for them.
 | storage buckets | `['scans']` |
 | `make db-types` | regenerated `frontend/lib/database.types.ts`; `tsc --noEmit` clean |
 | scan from a phone | `5e0811b8` — 1 image, resized 1205×1600, `done`, no error |
+| a real scan through the queue with the P2 pipeline, 2026-09-07 | scan `3b14da20`: queued -> claimed -> `done`, 46 `ocr_words` rows and 6 declarations written against the real schema (word ids remapped onto the ones Postgres assigned), then deleted. Score 100 because the rule engine is P3. |
 
 ---
 
@@ -194,6 +195,7 @@ are not comparable to each other. Within each group one variable changed per run
 | `p2-real-listing-labels` | `manufacturer` / `packer` anchors for listing tables | flat, 3 more false positives — reverted |
 | `p2-real-final-baseline` | the extractor as it was **before** all of the above, on the settled set | 52.7% (real 18.5%) |
 | `p2-real-final` | the extractor as it stands, on the settled set | 58.4% (real **28.9%**) |
+| `p2-real-wrap-stops-at-pointer` | a wrapped address stops at "scan barcode" / "same as" too | flat; the Kurkure manufacturer went from a four-line blob to one line |
 
 Real-only: **18.5% -> 28.9%**, measured on the same 53 cases with the same OCR cache.
 

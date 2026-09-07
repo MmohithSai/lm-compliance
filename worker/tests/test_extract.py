@@ -220,3 +220,19 @@ def test_a_line_that_points_somewhere_else_is_not_the_declaration() -> None:
 def test_see_the_neck_is_not_a_date() -> None:
     got = fields([line("FOR DATE OF MANUFACTURE & BATCH NO.: SEE NECK", 100, wid=1)])
     assert "mfg_date" not in got
+
+
+def test_a_wrapped_address_stops_at_a_line_that_points_somewhere_else() -> None:
+    """Kurkure prints "For Mkt. address, scan barcode" under "MARKETED BY:".
+
+    That line is a pointer, not the address, and the block has to stop at it.
+    """
+    got = fields(
+        [
+            line("MARKETED BY:", 100, x=60, w=300, h=34, wid=1),
+            line("PepsiCo India Holdings Pvt. Ltd.", 140, x=60, w=600, h=34, wid=2),
+            line("For Mkt. address, scan barcode", 180, x=60, w=600, h=34, wid=3),
+            line("For feedback or queries write to:", 220, x=60, w=600, h=34, wid=4),
+        ]
+    )
+    assert got["manufacturer"] == "MARKETED BY: PepsiCo India Holdings Pvt. Ltd"
