@@ -1,7 +1,6 @@
 """Behaviour of every rule in rules/pc_rules_2011.yaml: pass, fail and edge cases.
 
-Written before the engine (P3). Delete the xfail line below when CHECKS are filled in; strict
-mode makes the suite fail the moment the checks start passing, so it cannot be forgotten.
+Written before the engine (P3), and unchanged when it landed.
 """
 
 from __future__ import annotations
@@ -11,10 +10,6 @@ import pytest
 from pipeline.models import CheckStatus, ScaleSource, Severity, Source
 
 from .helpers import ctx, decl, good, ids, one, replace, run, without
-
-pytestmark = pytest.mark.xfail(
-    strict=True, raises=NotImplementedError, reason="P3: rule engine not built yet"
-)
 
 # ---------------------------------------------------------------- D1 manufacturer
 
@@ -120,11 +115,23 @@ def test_d5_valid_mrp_pass(value: str) -> None:
         "Price Rs 20 inclusive of all taxes",  # no MRP wording
         "MRP Rs 20",  # no inclusive of all taxes
         "MRP inclusive of all taxes",  # no amount
-        "MRP 20 inclusive of all taxes",  # no rupee sign
     ],
 )
 def test_d5_bad_mrp_fail(value: str) -> None:
     assert one(run(replace(good(), "mrp", value), only="D5"), "D5").severity == Severity.critical
+
+
+def test_d5_no_rupee_marker_is_unverifiable() -> None:
+    """Rule 2(m) wants the amount marked in rupees and this is the one part of D5 a photograph
+    cannot settle: no PP-OCR dictionary contains a rupee sign, so the extractor never delivers
+    one. Measured on 2026-09-08: requiring the glyph failed eleven cases whose price line was
+    read word for word right (eval/results/2026-09-08_p3-rules.json). Same argument as the
+    currency marker in the eval's own norm(): holding the pack to a glyph no model can emit
+    measures the dictionary. The other three parts of the rule still fail loudly above.
+    """
+    v = one(run(replace(good(), "mrp", "MRP 20.00 inclusive of all taxes"), only="D5"), "D5")
+    assert v.evidence.status == CheckStatus.unverifiable
+    assert v.severity == Severity.info
 
 
 def test_d5_missing_fails() -> None:
@@ -321,10 +328,17 @@ def test_p1_all_on_one_panel_pass() -> None:
     assert ids(run(good(), only="P1")) == []
 
 
-def test_p1_split_across_panels_is_major() -> None:
+def test_p1_split_across_photos_is_unverifiable() -> None:
+    """Two photographs are not two panels. Nothing places one photo relative to another, and
+    two shots of one back panel look exactly like a split pack. Measured on 2026-09-08: as a
+    major failure this accused five eval cases whose extra frames were overlapping crops of the
+    same panel (eval/results/2026-09-08_p3-rules.json). One frame holding them all is still
+    proof of grouping, so the pass side of the rule is unchanged; P4's scale reference is what
+    will make the failure side real.
+    """
     decls = replace(good(), "mrp", "MRP ₹20.00 (Inclusive of all taxes)", image_id="img2")
     v = one(run(decls, only="P1"), "P1")
-    assert v.severity == Severity.major
+    assert v.evidence.status == CheckStatus.unverifiable
     assert "mrp" in v.message
 
 

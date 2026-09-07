@@ -57,10 +57,25 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
   Nothing named in this plan is untried now. The next lever is the Stretch item.
 
 ## P3 — rule engine + scan detail page
-- [ ] fill `CHECKS` in `rules_engine.py`; delete the `xfail` line in `tests/test_rules.py`
-- [ ] exemption downgrades (X1 → info, X2/X3 → skip)
-- [ ] violations stored; detail page: image with boxes, declarations table, violations with rule refs, score
+- [x] fill `CHECKS` in `rules_engine.py`; delete the `xfail` line in `tests/test_rules.py`
+- [x] exemption downgrades (X1 → info, X2/X3 → skip)
+- [x] violations stored; detail page: image with boxes, declarations table, violations with rule refs, score
+- [x] the engine reproduces every gold verdict from gold declarations — 53/53 cases,
+      `tests/test_dataset.py::test_engine_reproduces_gold_from_gold_declarations`. This separates
+      the rules from the OCR: without it a rule bug hides behind an extraction miss.
 - Done when: `test_rules.py` green; one real scan shown start to finish.
+  **Green since 2026-09-08** (407 passed, 26 xfailed — the 26 left are P4's `measure`).
+  A real scan ran queued → processing → done against the hosted project on 2026-09-08:
+  `7f7eb986`, score 25, three critical violations with rule refs, four `unverifiable` info rows
+  with reasons, rows written to `declarations`, `violations` and `ocr_words`. The detail page
+  builds and typechecks; **seeing it on screen needs a login, which is yours to do.**
+
+  Violation accuracy, measured (`eval/results/2026-09-08_*.json`): precision 0.73, recall 0.98,
+  exact-set 49.1% — up from 0.67 / 0.99 / 28.3% over two labelled changes. **Every remaining
+  violation error is an extraction miss, not a rule bug**: for each rule the false positives are
+  fewer than that field's extraction misses, and the engine is exact on all 53 gold declaration
+  sets. The violation number is therefore P2's number wearing a different hat, and it will move
+  when extraction does.
 
 ## P4 — reference card scale + font / contrast / grouping
 - [ ] ArUco (DICT_4X4_50) and credit-card rectangle detection → mm/px; inspector PDP mm fallback
@@ -86,7 +101,8 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - Done when: viewer cannot upload; admin sees everything.
 
 ## P8 — e-commerce screenshot mode
-- [ ] source = ecommerce → E1/E2 rules, no font checks
+- [x] source = ecommerce → E1/E2 rules, no font checks — landed in P3 (`_applies` in
+      `rules_engine.py`): a screenshot is not the package, so only Rule 6(10) can be judged
 - [ ] error handling: blurry photo / OCR empty → clear message on the scan
 - Done when: a listing screenshot gives a Rule 6(10) report.
 
@@ -108,6 +124,43 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - Total monthly cost: ₹0.
 
 ## Decisions log
+- 2026-09-08 — P3. D5's rupee marker is reported `unverifiable`, not failed. Rule 2(m) wants the
+  amount marked ₹ or Rs, and that is the one part of the rule a photograph cannot settle: no
+  PP-OCR dictionary contains ₹ (all 56 checked in an earlier entry), so the extractor never
+  delivers one. Requiring the glyph failed eleven cases whose price line was read word for word
+  right, ten of them the rendered labels. Wording, amount and "inclusive of all taxes" are still
+  enforced and still critical. Third time this argument has been made in this file, and it is the
+  same one each time: holding a pack to a character no model can emit measures the dictionary.
+  Violation precision 0.67 → 0.71, exact-set accuracy 28.3% → 49.1%.
+- 2026-09-08 — P3. P1 (declarations grouped on one panel) can pass but not fail. One photograph
+  holding every declaration is proof they are grouped; two photographs are not proof of the
+  opposite, because nothing places one photo relative to another and two shots of one back panel
+  look exactly like a split pack. As a `major` failure it accused five eval cases whose extra
+  frames were overlapping crops — `1_ingredients.jpg` and `2_nutrition.jpg` are usually the same
+  panel. It now reports `unverifiable` with the reason. `eval/dataset/README.md` already said P1
+  was not measurable from this data; the engine now agrees with it. Precision 0.71 → 0.73.
+  P4's scale reference is what makes the failure side real.
+- 2026-09-08 — P3. A screenshot is not the package: on an `ecommerce` scan only Rule 6(10) rules
+  run. What is printed on the pack is not in the frame, so D1–D9, F1–F3 and P1–P4 have no
+  evidence to judge. This is what `eval/dataset/*/gold.json` has said since P0 — every listing
+  case expects `["E1"]` and nothing else — so the engine was disagreeing with the gold, not with
+  the law. One branch in `_applies`, pinned by a test.
+- 2026-09-08 — P3. `run_rules` fills `net_qty_g_or_ml` from the net quantity declaration when the
+  inspector did not enter it, the same way it already fills `is_imported` from an importer
+  declaration. Without it the Rule 26(a) ten gram exemption could never fire on a real scan and
+  X1 was dead code. The inspector's answer still wins; gold that sets the field explicitly is
+  unaffected.
+- 2026-09-08 — P3. `eval/dataset/obf_muuchstac_.../gold.json` had the MRP transcribed as
+  "MRP 299.00" and expected D5. The new gold-versus-engine test flagged it; enlarging the photo
+  shows the pack prints "MRP ₹ (Incl. of all taxes)" down the left of the batch sticker, with the
+  amount on the sticker — the phone's own watermark sits over it. Gold was wrong and the engine
+  was right, which is exactly what that test is for. The unit sale price is on the same sticker
+  with its leading digit under the watermark, so D8 stays: illegible is absent, as the dataset
+  README says.
+- 2026-09-08 — P3. The contrast floor for P2 lives in the YAML (`params.min_contrast: "0.5"`),
+  not in the code. The Rules say "in contrast with the background" and give no number, so unlike
+  Table I's heights or Rule 7's one-third width, this threshold is ours and has to be visible and
+  editable where the law is.
 - 2026-09-07 — CLAHE on the LAB lightness channel, after the denoise, kept. It took the rendered
   labels from 94.5% to 98.2%, fixing four of the six character-level misses that an earlier entry
   here had written off as "nothing the extractor can reach; the lever is a heavier recognition

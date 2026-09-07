@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Callable
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -18,8 +17,6 @@ from .models import PipelineResult, ScaleSource, ScanContext, ScanRow, Word
 from .ocr import ocr_words
 from .preprocess import preprocess
 from .rules_engine import run_rules, score
-
-log = logging.getLogger("worker")
 
 # (preprocessed image, image_id, languages) -> line boxes. Only the eval passes anything but
 # `ocr_words`: it wraps it in a disk cache so a rerun measures a changed extractor, not PaddleOCR
@@ -40,11 +37,7 @@ def run_local(images: list[Path], ctx: ScanContext, ocr: OcrFn = ocr_words) -> P
 
     declarations = RegexLayoutExtractor().extract(words, ctx)
     # measure is P4: without a scale mm_per_px stays None and the font checks say unverifiable.
-    try:
-        violations = run_rules(declarations, ctx)
-    except NotImplementedError:
-        log.warning("rule engine not built yet (P3), no violations and a score of 100")
-        violations = []
+    violations = run_rules(declarations, ctx)
 
     return PipelineResult(
         words=words,

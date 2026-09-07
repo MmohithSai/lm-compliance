@@ -147,6 +147,8 @@ rules:
     title: Legible and in contrast with the background
     severity: major
     check: contrast_ok
+    # The Rules say "in contrast" and give no number. 0.5 of full range is ours, not the law's.
+    params: { min_contrast: "0.5" }
     message_template: "'{field}' has low contrast against its background ({contrast})."
     applies_to: all
     exemptions: [X2, X3]

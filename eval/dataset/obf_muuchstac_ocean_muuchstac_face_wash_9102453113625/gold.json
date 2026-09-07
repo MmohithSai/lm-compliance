@@ -1,5 +1,7 @@
 {
-  "context": { "source": "package" },
+  "context": {
+    "source": "package"
+  },
   "declarations": {
     "generic_name": "FACE WASH",
     "manufacturer": "MARKETED BY: Triology Solutions Pvt. Ltd. CIN: U90009MH2017PTC294630 Address: D3 Kasturi Vandana Complex, Lane Opp Swagat Hotel, Goddev Phathak Road, Bhayandar (E), Maharashtra, India - 401105",
@@ -7,8 +9,10 @@
     "country_of_origin": "MADE IN INDIA",
     "mfg_date": "Mfd. 05/2025",
     "best_before": "Exp. Dt 04/2027",
-    "mrp": "MRP 299.00",
+    "mrp": "MRP ₹ (Incl. of all taxes) 299.00",
     "consumer_care": "Customer Care Contact at: Address: Same as above Mob. No./: +91-9892599660 Email Id: customercare@muuchstac.com Website: www.muuchstac.com"
   },
-  "violations": ["D8"]
+  "violations": [
+    "D8"
+  ]
 }

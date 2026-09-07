@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pipeline.models import Source
 
-from .helpers import ctx, good, ids, run, without
+from .helpers import ctx, decl, good, ids, run, without
 
 
 def test_d7_not_imported_not_applicable() -> None:
@@ -17,3 +17,11 @@ def test_e1_not_applied_to_packages() -> None:
 
 def test_e2_not_applied_to_packages() -> None:
     assert ids(run(good(), ctx(source=Source.package, is_imported=True), only="E2")) == []
+
+
+def test_package_rules_are_not_applied_to_a_listing() -> None:
+    """A screenshot is not the package: what is printed on it is not in the frame. Rule 6(10)
+    is the whole check on an e-commerce scan, which is also how eval/dataset gold is written."""
+    bare = [decl("generic_name", "Biscuits")]
+    assert ids(run(bare, ctx(source=Source.ecommerce))) == ["E1"]
+    assert ids(run(bare, ctx(source=Source.package))) != ["E1"]

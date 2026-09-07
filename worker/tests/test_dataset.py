@@ -7,14 +7,15 @@ invisible in the eval output: it just scores as a permanent miss. This test catc
 from __future__ import annotations
 
 import json
+from datetime import date
 from pathlib import Path
 from typing import Any
 
 import pytest
 
 from pipeline.extractors.regex_layout import ANCHORS
-from pipeline.models import ScanContext, Severity
-from pipeline.rules_engine import load_rules
+from pipeline.models import Declaration, ScanContext, Severity
+from pipeline.rules_engine import load_rules, run_rules
 
 DATASET = Path(__file__).resolve().parents[2] / "eval" / "dataset"
 IMAGE_EXT = {".jpg", ".jpeg", ".png", ".webp"}
@@ -22,6 +23,10 @@ FIELDS = set(ANCHORS)  # the canonical declaration names, single source of truth
 RULES = {r.rule_id: r for r in load_rules()}
 # the eval compares non-info predictions only, so an info code in gold could never be matched
 SCORING_CODES = {i for i, r in RULES.items() if r.severity != Severity.info}
+
+# Gold is a fixed transcript of a photograph, so the verdict has to be reproducible: pin
+# "today" instead of letting the calendar decide whether a date is in the future.
+TODAY = date(2026, 9, 8)
 
 CASES = sorted(p.name for p in DATASET.iterdir() if (p / "gold.json").exists())
 
@@ -63,3 +68,18 @@ def test_violation_codes_exist_and_score(case: str) -> None:
     assert not unknown, f"{case}: rule codes not in the YAML: {unknown}"
     info_only = set(codes) - SCORING_CODES
     assert not info_only, f"{case}: info-severity codes can never be matched: {info_only}"
+
+
+@pytest.mark.parametrize("case", CASES)
+def test_engine_reproduces_gold_from_gold_declarations(case: str) -> None:
+    """The rule engine, fed the declarations a human read off the photo, gets gold's verdict.
+
+    The eval measures extraction *and* rules together, so a rule bug hides behind an OCR miss.
+    This separates them: 37 hand written cases, no OCR. A failure here is either the engine or
+    the gold file, and both are worth knowing about.
+    """
+    data = gold(case)
+    decls = [Declaration(field=f, value=v) for f, v in data["declarations"].items()]
+    context = ScanContext.model_validate({"today": TODAY, **data.get("context", {})})
+    predicted = {v.rule_id for v in run_rules(decls, context) if v.severity != Severity.info}
+    assert predicted == set(data["violations"])

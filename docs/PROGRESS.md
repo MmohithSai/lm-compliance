@@ -8,7 +8,7 @@ commit.
 
 Status words: **done** · **partial** · **todo** · **blocked** (needs a person, not code).
 
-Last updated: 2026-09-07.
+Last updated: 2026-09-08.
 
 ---
 
@@ -19,7 +19,7 @@ Last updated: 2026-09-07.
 | P0 dataset + eval harness | **done** | photos with a reference card still need a person (F1/F2) |
 | P1 schema + auth + upload + worker loop | **done** | — |
 | P2 OCR + extractor baseline | measured, below target | 94.5% synthetic, **28.9% real**; target 70% |
-| P3 rule engine + detail page | todo | tests written, 130 `xfail` waiting |
+| P3 rule engine + detail page | **done** | seeing the detail page on screen needs a login |
 | P4 scale + font / contrast / grouping | todo | — |
 | P5 reports | todo | — |
 | P6 repository + search + history | todo | — |
@@ -240,16 +240,76 @@ That split is why the work went into the extractor and not into the OCR settings
 
 ---
 
-## P3–P9
+## P3 — rule engine + scan detail page
+
+**Done when:** `test_rules.py` green; one real scan shown start to finish.
+**Green since 2026-09-08**, with the caveat in item 6.
+
+| # | Item | Status | Where / evidence |
+|---|---|---|---|
+| 1 | All 20 checks in `CHECKS` | done | [rules_engine.py](worker/pipeline/rules_engine.py); the 130 `xfail`s are gone, 115 rule tests pass |
+| 2 | Rule 26 exemptions | done | X1 downgrades to info, X2/X3 skip the rule, X4 is a note. `EXEMPT_WHEN` + `SKIPS_THE_RULE` |
+| 3 | Violations stored with rule ref and evidence | done | `store()` was already writing them; scan `7f7eb986` has 3 fails + 4 `unverifiable` rows |
+| 4 | Detail page: image with boxes, declarations, violations, score | done | [scans/[id]/page.tsx](frontend/app/scans/[id]/page.tsx), [scan-evidence.tsx](frontend/components/scan-evidence.tsx). Click a violation, its boxes turn red |
+| 5 | Engine reproduces gold from gold declarations | done | 53/53, `test_engine_reproduces_gold_from_gold_declarations`. Found one wrong gold file on its first run |
+| 6 | One real scan end to end | done, not seen on screen | `7f7eb986` ran queued → processing → done against the hosted project, score 25. `pnpm build` and `tsc` clean. **The page itself needs a browser login** |
+
+### What the numbers say
+
+Violation accuracy over three labelled runs on 2026-09-08, extraction untouched throughout
+(field accuracy 60.0% / real 28.9% / synthetic 98.2% in all three):
+
+| Run | Precision | Recall | Exact set |
+|---|---|---|---|
+| `p3-rules` | 0.67 | 0.99 | 28.3% |
+| `p3-d5-marker-unverifiable` | 0.71 | 0.98 | 49.1% |
+| `p3-p1-photos-are-not-panels` | 0.73 | 0.98 | 49.1% |
+
+The remaining false positives, by rule, against that field's extraction misses:
+
+| Rule | False positives | Extraction misses for the field it reads |
+|---|---|---|
+| D2 generic name | 17 | 20 |
+| D6 consumer care | 10 | 11 |
+| D5 MRP | 6 | 10 |
+| D1 manufacturer | 6 | 17 |
+| D4 month/year | 5 | 7 |
+| D8 unit sale price | 5 | 9 |
+| D3 net quantity | 4 | 8 |
+
+Every rule is under its field's miss count, and the engine is exact on all 53 gold declaration
+sets. **There is no rule bug left in these numbers — they are P2's extraction numbers seen from
+the other end.** Three false negatives in total, all extraction artefacts.
+
+Not built here, on purpose: F1, F2 and P2 report `unverifiable` because nothing measures
+`height_mm`, `width_height_ratio` or `contrast` yet — that is P4. P3 pins what they say when the
+measurement is missing.
+
+## P4–P9
 
 Not started. See `docs/PLAN.md` for the item list and the "done when" line of each phase.
-The tests for P3 and P4 are already written and carry a strict
-`xfail(raises=NotImplementedError)`; 130 of them are waiting. Deleting the `xfail` line is how
-those phases get marked done.
+`tests/test_measure.py` carries 26 strict `xfail(raises=NotImplementedError)` for P4; deleting
+that line is how the phase gets marked done. P8's first item is already done — it landed in P3.
 
 ---
 
 ## Log
+
+- **2026-09-08** — **P3 done.** All 20 checks written against the tests that were waiting for
+  them; the 130 `xfail`s are gone and `make test` is 407 passed / 26 xfailed (the 26 are P4).
+  Two new tests: one pinning that a screenshot is judged only by Rule 6(10), and one running the
+  engine over every `eval/dataset` gold file's declarations and comparing the verdict to gold.
+  The second one earned its keep immediately — it disagreed with
+  `obf_muuchstac_.../gold.json`, and enlarging the photograph showed the gold was wrong, not the
+  engine: the pack does print "MRP ₹ (Incl. of all taxes)", with the phone's watermark over it.
+  Three measured changes to the engine, each its own labelled eval run: on an e-commerce scan
+  only Rule 6(10) applies; D5's rupee marker is `unverifiable` rather than a failure, because no
+  OCR model can emit ₹; and P1 can pass but not fail, because two photographs are not two panels.
+  Violation precision 0.67 → 0.73, exact-set accuracy 28.3% → 49.1%, extraction untouched.
+  What is left in the violation error is extraction, not rules, and that is measured rather than
+  asserted. The detail page draws a box round every declaration on the photo and turns a
+  violation's evidence boxes red when it is picked; it builds clean but has not been looked at in
+  a browser, which needs a login.
 
 - **2026-09-07** — **P0 done, P2 measured on real photographs.** The dataset blocker ("needs a
   camera") turned out not to need one: Open Food Facts and Open Beauty Facts are public databases
