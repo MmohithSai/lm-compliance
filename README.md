@@ -16,6 +16,15 @@ cd worker && uv run pytest -q
 
 Demo users: `cd worker && uv run --env-file ../.env python ../supabase/seed_users.py` (admin / inspector / viewer, see the script for passwords).
 
+## Supabase MCP (optional, for Claude Code)
+
+`.mcp.json` adds the Supabase MCP server **read-only**, so Claude can inspect the schema, run
+`select`s and read logs, but cannot write or migrate. It needs a personal access token in your
+OS environment (see `.env.example`), not in `.env`.
+
+Scope it to one project once you have the ref — add `"--project-ref=<your-ref>"` to the args.
+To allow writes, drop `"--read-only"`. Do that only against a throwaway project.
+
 ## Without `make` (Windows)
 
 Every Makefile target is one shell line. `scoop install make` if you want it. Otherwise copy the line.
