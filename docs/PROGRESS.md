@@ -162,7 +162,7 @@ phase reaches for them.
 ## P2 — OCR + regex/layout extractor (baseline)
 
 **Done when:** `make eval LABEL=baseline-v1` >= 70% field extraction on clean photos.
-**94.5% on the 16 synthetic labels. 28.9% on the 37 real cases.** Met on clean labels, not met on
+**98.2% on the 16 synthetic labels. 28.9% on the 37 real cases.** Met on clean labels, not met on
 photographs. The harness prints the two apart because one number hid which half moved.
 
 | # | Item | Status | Where / evidence |
@@ -196,12 +196,17 @@ are not comparable to each other. Within each group one variable changed per run
 | `p2-real-final-baseline` | the extractor as it was **before** all of the above, on the settled set | 52.7% (real 18.5%) |
 | `p2-real-final` | the extractor as it stands, on the settled set | 58.4% (real **28.9%**) |
 | `p2-real-wrap-stops-at-pointer` | a wrapped address stops at "scan barcode" / "same as" too | flat; the Kurkure manufacturer went from a four-line blob to one line |
+| `p2-real-clahe` | CLAHE on the lightness channel in `preprocess` | **60.0%** (synthetic 94.5% -> **98.2%**, real unchanged) |
+| `p2-real-sideways-pass` | a second OCR pass at 90° when the boxes look like a sideways page | 59.6% (real 28.9% -> 28.1%) — worse, reverted |
+| `p2-final` | the pipeline as it stands | **60.0%** (synthetic 98.2%, real 28.9%) |
 
 Real-only: **18.5% -> 28.9%**, measured on the same 53 cases with the same OCR cache.
 
 ### Where the remaining real-photo gap is
 
 Counting the 96 misses on the real cases:
+
+Counted on `p2-real-tighter-layout`, before CLAHE; CLAHE moved none of these.
 
 | Cause | Misses | Can the extractor reach it? |
 |---|---|---|
@@ -220,8 +225,12 @@ reverted rather than assumed.
 - No deskew, no scale, no measurement. `mm_per_px` stays `None`, `scale_source` stays `none`.
 - No rules: `run_local` catches `NotImplementedError` from `run_rules` and scores 100. That
   `try/except` is deleted in P3.
-- No second OCR pass for a pack held sideways, and no CLAHE. Both are untried levers, named in
-  `docs/PLAN.md`.
+- No second OCR pass for a pack held sideways: measured, and it made the real half worse
+  (28.9% -> 28.1%). The trigger fires on panels that merely *contain* vertical text — a Coke
+  bottle prints "MADE IN INDIA" sideways among horizontal lines — and rotating loses the rest.
+  A per-box orientation decision, not a per-page one, is what that would need.
+- Nothing else named in `docs/PLAN.md` is untried. The next lever is the Stretch item: a local
+  VLM extractor for the declarations that are printed with no label at all.
 
 ---
 
@@ -242,8 +251,10 @@ those phases get marked done.
   declarations are printed. 117 Indian products were pulled, 31 kept with hand-written gold, plus
   6 e-commerce listings screenshotted with headless Chrome. 81 were deleted for having no legible
   declaration. Gold was written by reading each photograph, never by running the pipeline.
-  Real-photo field extraction went 18.5% -> 28.9% over seven measured changes, two of which were
-  reverted for scoring worse. Combined with the synthetic set, 52.7% -> 58.4%. **The 70% line is
+  Real-photo field extraction went 18.5% -> 28.9% over seven measured changes; four further
+  hypotheses were measured and reverted for scoring worse or flat. Combined with the synthetic
+  set, 52.7% -> 60.0%, the last 1.6 points from CLAHE, which took the rendered labels to 98.2%
+  and corrected an earlier note that had blamed the recognition model for what was contrast. **The 70% line is
   met on rendered labels (94.5%) and not on photographs**; the three causes are counted above and
   the largest of them — a common name printed with no label — is not something an anchor
   extractor can reach. The eval now memoises OCR, without which one labelled run costs an hour.

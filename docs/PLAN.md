@@ -37,8 +37,8 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - [x] `run_local` wired: preprocess → ocr → extract → (measure: none) → rules → score
 - [x] measured on real photographs, one variable per run, every result file kept
 - Done when: `make eval LABEL=baseline-v1` ≥ 70% field extraction on clean photos. Save the result file.
-  **94.5% on the 16 synthetic labels. 28.9% on the 37 real cases** (2026-09-07,
-  `eval/results/2026-09-07_p2-real-final.json`; the harness now prints the two apart).
+  **98.2% on the 16 synthetic labels. 28.9% on the 37 real cases** (2026-09-07,
+  `eval/results/2026-09-07_p2-final.json`; the harness prints the two apart).
   **The 70% line is met on clean labels and not on real photographs.** Seven measured changes took
   the real half from 18.5% to 28.9%; the remaining gap is not one bug. It is three things, in
   order of size:
@@ -49,9 +49,12 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
      drops one or two of them on a curved bottle, so the merged block is never word for word.
   3. Everything the photograph itself loses: thumbs over the panel, packs held sideways, the
      value column cropped out of frame.
-  What the numbers rule out: `det_limit_side_len=1600` (measured, worse) and merging continuation
-  lines for short fields (measured, worse). What is untried: CLAHE in `preprocess`, and a second
-  OCR pass at 90° for the packs held sideways.
+  Four hypotheses were measured and rejected, result files kept: `det_limit_side_len=1600`
+  (54.5%), merging continuation lines for short fields (51.4%), `manufacturer`/`packer` as
+  listing-table anchors (flat, more false positives), and a second OCR pass at 90° for packs held
+  sideways (real 28.9% → 28.1%, and it doubles OCR time). CLAHE was measured and kept: it took the
+  rendered labels 94.5% → 98.2% and left the photographs where they were.
+  Nothing named in this plan is untried now. The next lever is the Stretch item.
 
 ## P3 — rule engine + scan detail page
 - [ ] fill `CHECKS` in `rules_engine.py`; delete the `xfail` line in `tests/test_rules.py`
@@ -105,6 +108,17 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - Total monthly cost: ₹0.
 
 ## Decisions log
+- 2026-09-07 — CLAHE on the LAB lightness channel, after the denoise, kept. It took the rendered
+  labels from 94.5% to 98.2%, fixing four of the six character-level misses that an earlier entry
+  here had written off as "nothing the extractor can reach; the lever is a heavier recognition
+  model". It was contrast, not the model — that entry was wrong and this one corrects it. The real
+  photographs did not move at all, which also rules out contrast as the reason PP-OCR misses whole
+  lines on a curved bottle.
+- 2026-09-07 — A second OCR pass at 90° for packs held sideways: measured, worse, reverted
+  (real 28.9% → 28.1%, and it doubles OCR time on any page that triggers it). The trigger was
+  "most boxes are taller than wide", and it fires on panels that merely *contain* vertical text —
+  a Coke bottle prints "MADE IN INDIA" sideways among horizontal lines — where rotating the page
+  loses everything else. Doing this properly means deciding orientation per box, not per page.
 - 2026-09-07 — `make worker` and `make eval` pass `--extra ocr`. PaddleOCR was an optional extra
   while the pipeline was a stub; since P2 it is the pipeline, and plain `uv run` syncs the venv
   back down to the default dependencies and uninstalls it. Both targets failed on a clean machine.
