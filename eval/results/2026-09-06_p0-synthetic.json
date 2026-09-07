@@ -1,0 +1,86 @@
+{
+  "label": "p0-synthetic",
+  "date": "2026-09-06",
+  "cases": 3,
+  "field_accuracy": 0.0,
+  "fields": {
+    "best_before": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 3
+    },
+    "consumer_care": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 3
+    },
+    "generic_name": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 3
+    },
+    "manufacturer": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 3
+    },
+    "mfg_date": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 3
+    },
+    "mrp": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 3
+    },
+    "net_quantity": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 3
+    },
+    "unit_sale_price": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 3
+    }
+  },
+  "violations": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "exact_set_accuracy": 0.3333333333333333
+  },
+  "per_case": [
+    {
+      "case": "synthetic_approx_no_email",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_compliant",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_no_tax_wording",
+      "pred": {},
+      "pred_violations": []
+    }
+  ]
+}

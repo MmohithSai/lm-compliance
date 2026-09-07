@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Legal Metrology compliance report — {{ scan.id }}</title>
+<style>
+  body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 11pt; margin: 20mm; color: #111; }
+  h1 { font-size: 18pt; margin: 0 0 4mm; }
+  .score { font-size: 28pt; font-weight: bold; }
+  table { border-collapse: collapse; width: 100%; margin: 4mm 0; }
+  th, td { border: 1px solid #999; padding: 2mm; text-align: left; vertical-align: top; }
+  .critical { color: #b00020; } .major { color: #c75000; } .minor { color: #806000; } .info { color: #555; }
+  footer { margin-top: 8mm; font-size: 9pt; color: #444; border-top: 1px solid #999; padding-top: 2mm; }
+</style>
+</head>
+<body>
+<h1>Legal Metrology (Packaged Commodities) Rules, 2011 — compliance report</h1>
+<p>Scan {{ scan.id }} · source: {{ scan.source }} · scale: {{ result.scale_source }}</p>
+<p class="score">{{ result.compliance_score }} / 100</p>
+
+<h2>Declarations found</h2>
+<table>
+  <tr><th>Field</th><th>Value</th><th>Height (mm)</th><th>Confidence</th></tr>
+  {% for d in result.declarations %}
+  <tr><td>{{ d.field }}</td><td>{{ d.value }}</td><td>{{ d.height_mm if d.height_mm is not none else "not verifiable" }}</td><td>{{ "%.2f" % d.confidence }}</td></tr>
+  {% endfor %}
+</table>
+
+<h2>Violations</h2>
+<table>
+  <tr><th>Rule</th><th>Severity</th><th>Finding</th></tr>
+  {% for v in result.violations %}
+  <tr class="{{ v.severity }}"><td>{{ v.rule_id }} · {{ v.rule_ref }}</td><td>{{ v.severity }}{% if v.evidence.status == "unverifiable" %} (not verifiable){% endif %}</td><td>{{ v.message }}</td></tr>
+  {% else %}
+  <tr><td colspan="3">No violations found.</td></tr>
+  {% endfor %}
+</table>
+
+<footer>
+Penalties: Section 36, Legal Metrology Act, 2009 — up to ₹25,000 for a first offence, ₹50,000 for a second, ₹1,00,000 and possible imprisonment thereafter. Net quantity errors: ₹10,000–50,000.
+Measurements marked "not verifiable" were not measured because no scale reference was available. Nothing in this report is estimated.
+</footer>
+</body>
+</html>

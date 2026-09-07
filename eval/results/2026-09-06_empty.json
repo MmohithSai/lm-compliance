@@ -1,0 +1,13 @@
+{
+  "label": "empty",
+  "date": "2026-09-06",
+  "cases": 0,
+  "field_accuracy": 0.0,
+  "fields": {},
+  "violations": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "exact_set_accuracy": 0.0
+  },
+  "per_case": []
+}

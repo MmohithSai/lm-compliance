@@ -1,0 +1,165 @@
+{
+  "label": "p0-synthetic-16",
+  "date": "2026-09-07",
+  "cases": 16,
+  "field_accuracy": 0.0,
+  "fields": {
+    "best_before": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 16
+    },
+    "consumer_care": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 15
+    },
+    "country_of_origin": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 1
+    },
+    "generic_name": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 15
+    },
+    "importer": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 2
+    },
+    "manufacturer": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 9
+    },
+    "mfg_date": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 13
+    },
+    "mrp": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 13
+    },
+    "net_quantity": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 14
+    },
+    "unit_sale_price": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 12
+    }
+  },
+  "violations": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "exact_set_accuracy": 0.0
+  },
+  "per_case": [
+    {
+      "case": "synthetic_approx_no_email",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_compliant",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_dpco_drug",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_ecom_complete",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_ecom_missing_qty",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_future_date",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_imported_no_origin",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_imported_ok",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_missing_three",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_no_date",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_no_generic_name",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_no_manufacturer",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_no_tax_wording",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_no_unit_price",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_restaurant_food",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_small_sachet",
+      "pred": {},
+      "pred_violations": []
+    }
+  ]
+}

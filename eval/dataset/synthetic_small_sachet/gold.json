@@ -1,0 +1,14 @@
+{
+  "context": {
+    "source": "package",
+    "net_qty_g_or_ml": 8.0
+  },
+  "declarations": {
+    "generic_name": "Generic name: Glucose Biscuits",
+    "net_quantity": "Net Qty: 8 g",
+    "mrp": "MRP ₹2.00 (Inclusive of all taxes)",
+    "mfg_date": "Mfd: 03/2026",
+    "best_before": "Best before 6 months from packaging"
+  },
+  "violations": []
+}

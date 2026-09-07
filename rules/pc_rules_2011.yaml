@@ -1,0 +1,229 @@
+# Legal Metrology (Packaged Commodities) Rules, 2011 — machine-readable digest.
+# rule_id  = code in docs/RULES.md
+# check    = function name in worker/pipeline/rules_engine.py (CHECK_NAMES)
+# verify   = rule_ref still to be cross-checked against the PDFs in docs/law/
+# Edit this file to change the law; no code change needed.
+version: "2026-09-06"
+rules:
+  # ------------------------------------------------------------ D: Rule 6 declarations
+  - rule_id: D1
+    rule_ref: Rule 6(1)(a)
+    title: Name and address of manufacturer / packer / importer
+    severity: critical
+    check: field_present
+    params: { field: manufacturer, alt: importer, needs_address: "true" }
+    message_template: "Name and full address of the manufacturer, packer or importer is missing or incomplete."
+    applies_to: all
+    exemptions: [X1, X2, X3]
+
+  - rule_id: D2
+    rule_ref: Rule 6(1)(b)
+    title: Common or generic name of the commodity
+    severity: major
+    check: field_present
+    params: { field: generic_name }
+    message_template: "Common or generic name of the commodity is missing."
+    applies_to: all
+    exemptions: [X1, X2, X3]
+
+  - rule_id: D3
+    rule_ref: Rule 6(1)(c)
+    title: Net quantity in standard units
+    severity: critical
+    check: net_quantity_valid
+    message_template: "Net quantity '{value}' is missing, uses a non-standard unit, or contains a qualifier such as 'approx'."
+    applies_to: all
+    exemptions: [X2, X3]
+
+  - rule_id: D4
+    rule_ref: Rule 6(1)(d)
+    title: Month and year of manufacture / packing / import
+    severity: major
+    check: date_valid_not_future
+    message_template: "Month and year '{value}' is missing, unreadable, or in the future."
+    applies_to: all
+    exemptions: [X1, X2, X3]
+
+  - rule_id: D5
+    rule_ref: Rule 6(1)(e) read with Rule 2(m)
+    title: Retail sale price wording
+    severity: critical
+    check: mrp_valid
+    message_template: "Retail sale price '{value}' must read 'MRP' or 'Maximum Retail Price', show a rupee amount, and state 'inclusive of all taxes'."
+    applies_to: all
+    exemptions: [X2, X3]
+
+  - rule_id: D5b
+    rule_ref: Rule 6(1)(e)
+    title: Only one retail sale price
+    severity: critical
+    check: single_mrp
+    message_template: "More than one MRP found: {found}."
+    applies_to: all
+    exemptions: [X2, X3]
+
+  - rule_id: D6
+    rule_ref: Rule 6(2)
+    title: Consumer care details
+    severity: major
+    check: consumer_care_valid
+    message_template: "Consumer care details must include a name or address, a telephone number and an e-mail address. Found: '{value}'."
+    applies_to: all
+    exemptions: [X1, X2, X3]
+
+  - rule_id: D7
+    rule_ref: Rule 6(1)(aa)
+    title: Country of origin on imported packages
+    severity: critical
+    check: origin_required_if_imported
+    message_template: "Imported package without a country of origin."
+    applies_to: imported
+    exemptions: [X2, X3]
+
+  - rule_id: D8
+    rule_ref: Rule 6(11)
+    title: Unit sale price
+    severity: minor
+    check: field_present
+    params: { field: unit_sale_price }
+    message_template: "Unit sale price (price per g / kg / ml / L / unit) is missing."
+    applies_to: all
+    exemptions: [X1, X2, X3]
+    verify: true
+
+  - rule_id: D9
+    rule_ref: FSS (Labelling and Display) Regulations, 2020
+    title: Best before / use by
+    severity: info
+    check: field_present
+    params: { field: best_before }
+    message_template: "No best-before / use-by date found. Food law, not Legal Metrology — for information."
+    applies_to: all
+    exemptions: [X2, X3]
+
+  # ------------------------------------------------------------ F: Rule 7 font size
+  - rule_id: F1
+    rule_ref: Rule 7, Table I
+    title: Minimum height of numerals for the PDP area
+    severity: major
+    check: font_height_table1
+    message_template: "'{field}' is {height_mm} mm high; Table I requires at least {min_mm} mm for a {pdp_area_cm2} cm² panel."
+    applies_to: all
+    exemptions: [X2, X3]
+    verify: true
+
+  - rule_id: F2
+    rule_ref: Rule 7
+    title: Width at least one third of height
+    severity: minor
+    check: font_width_ratio
+    message_template: "'{field}' characters are too narrow: width/height {ratio} (minimum 0.33, except 1, i, I, l)."
+    applies_to: all
+    exemptions: [X2, X3]
+    verify: true
+
+  - rule_id: F3
+    rule_ref: Medical Devices Rules, 2017 (LM PC Rules amendment, Oct 2025)
+    title: Medical device pack — font rules of the Medical Devices Rules apply
+    severity: info
+    check: medical_device_flag
+    message_template: "Medical device: Table I font checks skipped; the Medical Devices Rules, 2017 apply."
+    applies_to: all
+    verify: true
+
+  # ------------------------------------------------------------ P: Rule 9 manner of declaration
+  - rule_id: P1
+    rule_ref: Rule 9(1)(a)
+    title: Declarations grouped together on one panel
+    severity: major
+    check: grouped_on_one_panel
+    message_template: "Mandatory declarations are spread across panels: {found}."
+    applies_to: all
+    exemptions: [X2, X3]
+    verify: true
+
+  - rule_id: P2
+    rule_ref: Rule 9(1)(a)
+    title: Legible and in contrast with the background
+    severity: major
+    check: contrast_ok
+    message_template: "'{field}' has low contrast against its background ({contrast})."
+    applies_to: all
+    exemptions: [X2, X3]
+    verify: true
+
+  - rule_id: P3
+    rule_ref: Rule 9(1)(b)
+    title: Not on the bottom, crimp or seam
+    severity: major
+    check: not_on_bottom_or_seam
+    message_template: "Declarations are on the bottom, crimp or seam of the package."
+    applies_to: all
+    exemptions: [X2, X3]
+    verify: true
+
+  - rule_id: P4
+    rule_ref: Rule 9(3)
+    title: English or Hindi
+    severity: major
+    check: language_ok
+    message_template: "Declarations are not in English or Hindi (found: {found})."
+    applies_to: all
+    exemptions: [X2, X3]
+    verify: true
+
+  # ------------------------------------------------------------ E: Rule 6(10) e-commerce
+  - rule_id: E1
+    rule_ref: Rule 6(10)
+    title: All declarations except month/year on the e-commerce listing
+    severity: critical
+    check: ecommerce_all_declarations
+    message_template: "Listing is missing: {missing}."
+    applies_to: ecommerce
+    verify: true
+
+  - rule_id: E2
+    rule_ref: Rule 6(10A)
+    title: Country-of-origin filter for imported goods
+    severity: info
+    check: ecommerce_origin_filter
+    message_template: "Imported product listed without country of origin (platform filter requirement from 1 July 2026)."
+    applies_to: ecommerce
+    verify: true
+
+  # ------------------------------------------------------------ X: Rule 26 exemptions
+  - rule_id: X1
+    rule_ref: Rule 26(a)
+    title: Package of 10 g / 10 ml or less
+    severity: info
+    check: exemption_small_pack
+    message_template: "Net quantity {net_qty} is 10 g / 10 ml or less: partial exemption applies (D1, D2, D4, D6, D8 reported as info)."
+    applies_to: all
+    verify: true
+
+  - rule_id: X2
+    rule_ref: Rule 26(b)
+    title: Fast food packed by a restaurant or hotel
+    severity: info
+    check: exemption_restaurant_food
+    message_template: "Restaurant / hotel fast food: the Packaged Commodities Rules do not apply."
+    applies_to: all
+    verify: true
+
+  - rule_id: X3
+    rule_ref: Rule 26(c)
+    title: Drug under the Drugs (Prices Control) Order
+    severity: info
+    check: exemption_dpco_drug
+    message_template: "DPCO drug: the Packaged Commodities Rules do not apply."
+    applies_to: all
+    verify: true
+
+  - rule_id: X4
+    rule_ref: Rule 26 (pan masala amendment, Feb 2026)
+    title: Pan masala
+    severity: info
+    check: exemption_pan_masala
+    message_template: "Pan masala: check the February 2026 amendment before enforcement."
+    applies_to: all
+    verify: true
