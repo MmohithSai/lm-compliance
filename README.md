@@ -2,7 +2,9 @@
 
 Legal Metrology (Packaged Commodities) Rules, 2011 checker. Photo of a package → report with rule citations in under 30 s. SIH 26034. Runs for ₹0.
 
-See `CLAUDE.md` (how the repo works), `docs/PLAN.md` (phases), `docs/ARCHITECTURE.md`, `docs/RULES.md` (the law).
+See `CLAUDE.md` (how the repo works), `docs/PLAN.md` (phases + decisions), `docs/PROGRESS.md`
+(what is built and how it was checked), `docs/ARCHITECTURE.md`, `docs/EVAL.md` (how accuracy is
+measured), `docs/RULES.md` (the law).
 
 ## Run in 5 commands
 
@@ -45,6 +47,15 @@ cd worker && uv run --extra ocr python ../eval/run_eval.py --label baseline-v1
 ```
 Prints per-field precision/recall and violation accuracy; writes `eval/results/<date>_<label>.json`.
 Every labelled run is kept in git — a measurement nobody can look up is not a measurement.
+**`docs/EVAL.md` explains what the numbers mean, what the dataset can and cannot test, and every
+run so far including the four changes that were measured and rejected.**
+
+Diagnose a run without re-OCRing anything:
+
+```bash
+cd worker && uv run python ../eval/diagnose.py misses ../eval/results/2026-09-07_p2-final.json
+cd worker && uv run python ../eval/diagnose.py reach  ../eval/results/2026-09-07_p2-final.json
+```
 
 OCR is memoised under `eval/.ocr_cache/` on (image, languages, hash of `preprocess.py` + `ocr.py`),
 so a rerun measures the change you made, not PaddleOCR reading 260 photos again. Edit either file

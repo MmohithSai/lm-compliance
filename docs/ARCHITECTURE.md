@@ -13,14 +13,23 @@ Phone / laptop browser — Next.js PWA on Vercel
 
 Python worker — laptop / HF Space / Oracle VM, service-role key, talks *out* only
   loop every 3 s: rpc claim_scan()  -> one queued row flips to processing (atomic, skip locked)
-    a. preprocess   OpenCV deskew + denoise
-    b. scale        ArUco DICT_4X4_50 -> credit-card rectangle -> inspector PDP mm -> none
-    c. ocr          PaddleOCR PP-OCRv4 -> words [text, box, confidence]      -> ocr_words
-    d. extract      regex + keyword anchors + nearest-box layout -> declarations
+    a. preprocess   OpenCV bilateral denoise + CLAHE on the LAB lightness channel.  [P2, built]
+                    No deskew: PP-OCRv4 finds rotated quads itself, and rotating the page would
+                    put every box in a space the detail page cannot draw in.
+    b. ocr          PaddleOCR PP-OCRv4 -> one box per printed *line* [text, box, confidence]
+                    -> ocr_words.  Injectable (`run_local(..., ocr=)`) so the eval can memoise it.
+    c. extract      keyword anchors + nearest-box layout + wrapped-address merge -> declarations
+    d. scale        ArUco DICT_4X4_50 -> credit-card rectangle -> inspector PDP mm -> none  [P4]
     e. measure      height_mm, width/height ratio, contrast, same-panel grouping (only with scale)
-    f. rules        rules/pc_rules_2011.yaml -> violations [rule_id, rule_ref, severity, message, evidence]
-    g. score+report 100 - penalties; HTML -> PDF + DOCX + JSON -> Storage scans/<id>/report.*
-    h. write back   declarations, violations, reports, scans.status = done | failed (+ error)
+    f. rules        rules/pc_rules_2011.yaml -> violations [rule_id, rule_ref, severity, message,
+                    evidence]                                                            [P3]
+    g. score+report 100 - penalties; HTML -> PDF + DOCX + JSON -> Storage scans/<id>/report.*  [P5]
+    h. write back   ocr_words, declarations, violations, reports, scans.status = done | failed
+
+  Steps d-g are not built yet. `run_local` catches NotImplementedError from the rule engine and
+  scores 100, so the queue works before the rules do; that try/except is deleted in P3.
+  One `Word` is one PP-OCR line box, never a split of one — the split coordinates would be
+  invented, and this project does not invent measurements.
 
 Supabase — Postgres + Auth + Storage + Realtime, RLS on every table
 Dashboard — Next.js server components read the views directly under the caller's RLS
@@ -43,11 +52,23 @@ Function `claim_scan()` (service role only). Trigger: new auth user → profile 
 
 Storage bucket `scans` (private): authenticated read; inspector/admin insert/update; admin delete.
 
+## Measurement
+
+`eval/` is a first-class part of the system, not a test folder: 53 cases (37 real photographs and
+listing screenshots, 16 rendered labels), a hand-written `gold.json` per case, and a committed
+result file per labelled run. `docs/EVAL.md` is the method; `docs/PROGRESS.md` is the numbers.
+
+The one architectural concession to it is that `run_local` takes its OCR step as an argument, so
+the eval can memoise PaddleOCR on disk and a rerun measures the change rather than re-reading 260
+photographs. Nothing else passes anything but the default.
+
 ## Why it is defensible
 
 - The rule engine is deterministic and cites the rule. No AI decides compliance. No external AI API anywhere.
 - Nothing is estimated: no scale reference → the font check says "not verifiable" and costs no points.
 - Every part is open source and self-hostable. Rules live in a YAML file DoCA can edit without code.
+- Every claim about accuracy has a committed result file behind it, including the four changes
+  that were measured and rejected.
 
 ## Deployment (₹0)
 

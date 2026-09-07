@@ -14,12 +14,15 @@ Inspector photographs a package (or uploads an e-commerce screenshot) â†’ OCR â†
 ## Folder map
 
 ```
-docs/            PLAN.md (phases + Decisions log), ARCHITECTURE.md, RULES.md (law digest), law/ (PDFs), KICKOFF_PLAN.md
+docs/            PLAN.md (phases + Decisions log), PROGRESS.md (per-item status + evidence),
+                 ARCHITECTURE.md, EVAL.md (how accuracy is measured), RULES.md (law digest),
+                 law/ (PDFs), KICKOFF_PLAN.md
 rules/           pc_rules_2011.yaml
 supabase/        config.toml, migrations/, seed_users.py
 frontend/        Next.js app: app/{login,upload,scans,scans/[id],dashboard}, lib/supabase, lib/database.types.ts
 worker/          main.py (loop), pipeline/{models,preprocess,ocr,extractors/,measure,rules_engine,report}.py, templates/, tests/
-eval/            dataset/<case>/{image.jpg,gold.json}, run_eval.py, results/
+eval/            dataset/<case>/{*.jpg,gold.json,source.json}, run_eval.py, results/,
+                 make_synthetic.py, fetch_openfoodfacts.py, fetch_ecommerce.py, diagnose.py
 ```
 
 ## Commands

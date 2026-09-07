@@ -215,10 +215,16 @@ Counted on `p2-real-tighter-layout`, before CLAHE; CLAHE moved none of these.
 | The photograph itself lost it | ~14 | No. Thumb over the panel, pack held sideways, value column cropped out of frame. |
 | Everything else (recognition slips, wrong neighbour) | ~31 | Some. |
 
-A separate check ("does the OCR text contain half the gold words anywhere in the case?") says 81
-of 88 misses were *reachable* at the time — the text was on the page. That is why the work went
-into the extractor and not into the OCR settings, and why `det_limit_side_len` was tried and
-reverted rather than assumed.
+A separate check — "does the OCR text contain half the gold words anywhere in the case?" — says
+**85 of the 96 misses are reachable**: the text was on the page and the extractor did not use it.
+Reproduce it with
+
+```bash
+cd worker && uv run python ../eval/diagnose.py reach ../eval/results/2026-09-07_p2-final.json
+```
+
+That split is why the work went into the extractor and not into the OCR settings, and why
+`det_limit_side_len` was tried and reverted rather than assumed.
 
 ### What P2 does not do
 
