@@ -2,11 +2,26 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import Any, cast
 
 from supabase import Client
 
-from .models import PipelineResult, ScanContext, ScanRow
+from .models import PipelineResult, ScaleSource, ScanContext, ScanRow
+
+log = logging.getLogger("worker")
+
+# P1 stand-in for run_local. Delete the try/except in run_scan when P2 lands.
+_EMPTY = PipelineResult(
+    words=[],
+    declarations=[],
+    violations=[],
+    mm_per_px=None,
+    scale_source=ScaleSource.none,
+    compliance_score=100,
+)
 
 
 def run_local(images: list[Path], ctx: ScanContext) -> PipelineResult:
@@ -14,6 +29,76 @@ def run_local(images: list[Path], ctx: ScanContext) -> PipelineResult:
     raise NotImplementedError("P2")
 
 
+def context_for(scan: ScanRow) -> ScanContext:
+    """What the inspector told us on the upload form. Everything else stays at its default."""
+    area = None
+    if scan.pdp_width_mm and scan.pdp_height_mm:
+        area = scan.pdp_width_mm * scan.pdp_height_mm / 100  # mm² -> cm²
+    return ScanContext(source=scan.source, pdp_area_cm2=area)
+
+
 def run_scan(sb: Client, scan: ScanRow) -> PipelineResult:
-    """Download the scan's images, run_local, write words/declarations/violations/reports back."""
-    raise NotImplementedError("P1")
+    """Download the scan's images, run_local, write words/declarations/violations back."""
+    images = cast(
+        list[dict[str, Any]],
+        sb.table("scan_images").select("id, storage_path").eq("scan_id", scan.id).execute().data,
+    )
+    if not images:
+        raise ValueError("scan has no images")
+
+    with TemporaryDirectory() as tmp:
+        # Named by scan_images.id so Word.image_id maps straight back to a row.
+        paths = []
+        for img in images:
+            path = Path(tmp) / f"{img['id']}.jpg"
+            path.write_bytes(sb.storage.from_("scans").download(img["storage_path"]))
+            paths.append(path)
+        try:
+            result = run_local(paths, context_for(scan))
+        except NotImplementedError:
+            log.warning("scan %s: no pipeline yet (P2), storing an empty result", scan.id)
+            result = _EMPTY
+
+    store(sb, scan.id, result)
+    return result
+
+
+def store(sb: Client, scan_id: str, result: PipelineResult) -> None:
+    """Write the result rows. ocr_words ids are assigned by Postgres, so word_ids are remapped."""
+    word_id = {}
+    if result.words:
+        rows = cast(
+            list[dict[str, Any]],
+            sb.table("ocr_words")
+            .insert([{"scan_id": scan_id, **w.model_dump(exclude={"id"})} for w in result.words])
+            .execute()
+            .data,
+        )
+        word_id = {w.id: row["id"] for w, row in zip(result.words, rows, strict=True)}
+
+    if result.declarations:
+        sb.table("declarations").insert(
+            [
+                {
+                    "scan_id": scan_id,
+                    **d.model_dump(exclude={"word_ids", "contrast"}),
+                    "word_ids": [word_id[i] for i in d.word_ids],
+                }
+                for d in result.declarations
+            ]
+        ).execute()
+
+    if result.violations:
+        sb.table("violations").insert(
+            [
+                {
+                    "scan_id": scan_id,
+                    **v.model_dump(exclude={"evidence"}),
+                    "evidence": {
+                        **v.evidence.model_dump(exclude={"word_ids"}),
+                        "word_ids": [word_id[i] for i in v.evidence.word_ids],
+                    },
+                }
+                for v in result.violations
+            ]
+        ).execute()
