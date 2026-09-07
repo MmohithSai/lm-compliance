@@ -16,9 +16,9 @@ Last updated: 2026-09-07.
 
 | Phase | State | Blocking item |
 |---|---|---|
-| P0 dataset + eval harness | partial | 40–60 real photos (needs a camera) |
+| P0 dataset + eval harness | **done** | photos with a reference card still need a person (F1/F2) |
 | P1 schema + auth + upload + worker loop | **done** | — |
-| P2 OCR + extractor baseline | **done on synthetics** | 94.5%; re-measure on real photos |
+| P2 OCR + extractor baseline | measured, below target | 94.5% synthetic, **28.9% real**; target 70% |
 | P3 rule engine + detail page | todo | tests written, 130 `xfail` waiting |
 | P4 scale + font / contrast / grouping | todo | — |
 | P5 reports | todo | — |
@@ -40,9 +40,11 @@ Last updated: 2026-09-07.
 | 3 | Gold format written down | done | [eval/dataset/README.md](eval/dataset/README.md) |
 | 4 | Gold files validated automatically | done | [test_dataset.py](worker/tests/test_dataset.py), 5 checks × 16 cases |
 | 5 | Shot list for the real set | done | [eval/dataset/README.md](eval/dataset/README.md) |
-| 6 | 40–60 real package photos | **blocked** | needs a person with a phone and a shelf |
-| 7 | 5 e-commerce screenshots | **blocked** | same — synthetic stand-ins exist |
-| 8 | gold.json for each real case | **blocked** | follows item 6 |
+| 6 | Real package photos | done | 31 cases / 114 photographs from Open Food & Beauty Facts, [fetch_openfoodfacts.py](eval/fetch_openfoodfacts.py) |
+| 7 | E-commerce screenshots | done | 6 listings from amazon.in and flipkart.com, [fetch_ecommerce.py](eval/fetch_ecommerce.py) |
+| 8 | gold.json for each real case | done | 37 written by reading the photographs |
+| 9 | OCR memoised so a rerun measures the change | done | `eval/.ocr_cache/`, keyed on the image + a hash of `preprocess.py` and `ocr.py` |
+| 10 | Photos with a reference card / two panels / two MRPs | **blocked** | needs a person; the web set cannot test F1, F2, P1, P3 or D5b |
 
 ### What the 16 synthetic cases cover
 
@@ -75,12 +77,27 @@ the real photos. The unit tests in `worker/tests/test_rules.py` already pin thei
 That is correct: `run_local` raises `NotImplementedError("P2")`. The number is the baseline to
 beat. The table lists all 10 canonical fields, so nothing is silently missing from the gold.
 
-### To finish P0
+### How the real set was built
 
-1. Shoot the packs from the shot list into `eval/dataset/<case>/`.
-2. Write `gold.json` for each from the printed pack.
-3. `make test` — the dataset tests catch typos in field names and rule codes.
-4. `make eval LABEL=real-set-v1` and keep the result file.
+1. `eval/fetch_openfoodfacts.py` searched Open Food Facts and Open Beauty Facts for Indian
+   products and downloaded every selected front / ingredients / nutrition / packaging photo at
+   1600 px — the size the frontend uploads. 117 candidate products.
+2. `eval/fetch_ecommerce.py` rendered six public product listings with headless Chrome and sliced
+   each capture into 1600 px tiles.
+3. Every image was OCR'd once to find which ones carry a Legal Metrology declaration at all. That
+   text was a finding aid only; **gold was written by reading the photograph**.
+4. 81 candidates were deleted: an ingredients close-up, a nutrition table on its own, a studio
+   render whose declarations contradicted the photographs in the same folder, or print too small
+   or too cut to write gold honestly.
+5. `make test` (the dataset tests catch typos in field names and rule codes), then
+   `make eval LABEL=…`.
+
+### What the real set does not cover
+
+No photo on Open Food Facts has an ArUco marker or a credit card in frame, and OFF crops rarely
+show two panels at once. So F1, F2 (font), P1 (grouping), P3 (seam) and D5b (two MRPs) have no
+real case and never appear in gold — they are `unverifiable` without a scale and cost no points.
+Those are the photos the shot list still asks for.
 
 ---
 
@@ -143,54 +160,66 @@ phase reaches for them.
 
 ## P2 — OCR + regex/layout extractor (baseline)
 
-**Done when:** `make eval LABEL=baseline-v1` ≥ 70% field extraction on clean photos.
-**94.5% on the 16 synthetic labels.** Clean photos are still blocked on a camera, so this is a
-floor to re-measure, not the last word.
+**Done when:** `make eval LABEL=baseline-v1` >= 70% field extraction on clean photos.
+**94.5% on the 16 synthetic labels. 28.9% on the 37 real cases.** Met on clean labels, not met on
+photographs. The harness prints the two apart because one number hid which half moved.
 
 | # | Item | Status | Where / evidence |
 |---|---|---|---|
 | 1 | `preprocess.py` | done | [preprocess.py](worker/pipeline/preprocess.py) — bilateral denoise; deskew deliberately dropped |
-| 2 | `ocr.py` PP-OCRv4 → boxes + confidence | done | [ocr.py](worker/pipeline/ocr.py); one `Word` = one line box |
+| 2 | `ocr.py` PP-OCRv4 -> boxes + confidence | done | [ocr.py](worker/pipeline/ocr.py); one `Word` = one line box |
 | 3 | `extractors/regex_layout.py` | done | [regex_layout.py](worker/pipeline/extractors/regex_layout.py), [test_extract.py](worker/tests/test_extract.py) |
-| 4 | `run_local` wired end to end | done | [pipeline/__init__.py](worker/pipeline/__init__.py); the P1 empty-result stand-in is gone |
-| 5 | Measured | done | `eval/results/2026-09-07_p2-baseline.json` |
+| 4 | `run_local` wired end to end | done | [pipeline/__init__.py](worker/pipeline/__init__.py) |
+| 5 | Measured on rendered labels | done | 94.5%, `eval/results/2026-09-07_p2-baseline.json` |
+| 6 | Measured on real photographs | done | 28.9%, `eval/results/2026-09-07_p2-real-final.json` |
+| 7 | 70% on real photographs | **not met** | see the three causes below |
 
-### Latest eval run
+### Every labelled run, in order
 
-`2026-09-07_p2-baseline` — 16 cases, pipeline ran on all 16, **field accuracy 94.5%** (up from
-0.0%). Violations are still 0: `CHECKS` is P3, and `run_local` logs and scores 100 until then.
+The first five ran on a 48-case set; the last two on the settled 53-case set, so the two groups
+are not comparable to each other. Within each group one variable changed per run.
 
-| field | prec | rec | misses |
-|---|---|---|---|
-| best_before, consumer_care, country_of_origin, mfg_date, mrp, unit_sale_price, manufacturer | 1.00 | 1.00 | — |
-| net_quantity | 1.00 | 0.93 | 1 — OCR read `Net Qty` as `Net Qtv`, so no anchor matched |
-| generic_name | 0.73 | 0.73 | 4 — `Glucose Bjscuits` |
-| importer | 0.50 | 0.50 | 1 — `Mumbai 400o59` |
-
-All six misses are character-level recognition errors. No amount of extractor work reaches them;
-the lever is a heavier recognition model, and only if the real photos show the same rate.
-
-### How the score moved, one variable at a time
-
-| Run | Change | Field accuracy |
+| Run | Change | Combined |
 |---|---|---|
-| `p2-baseline-v1` | pipeline wired, nothing tuned | 57.3% |
-| `p2-strip-punct` | extractor trims the stray terminator OCR adds to a line | 69.1% |
-| `p2-currency` | eval folds the currency marker; extractor drops the `<` printed for `₹` | 91.8% |
-| `p2-baseline` | eval ignores a dot that is not between digits | 94.5% |
+| `p2-real-baseline` | the real set as first assembled | 55.9% |
+| `p2-real-continuations` | wrapped lines merged for **every** field | 51.4% — worse |
+| `p2-real-wrap-address-only` | merged only where the law prints an address block | 55.9% |
+| `p2-real-anchors` | wordings off the packs (`mkt by`, `n. qty`, `net content`, six consumer-care phrasings); bare `origin` dropped | 56.8% |
+| `p2-real-tighter-layout` | a bare anchor takes a box on its own row, in reach, that is not a declaration itself | 57.7% |
+| `p2-real-det1600` | PP-OCR detects at 1600 px instead of 960 | 54.5% — worse, reverted |
+| `p2-real-glued-anchors` | an anchor may end against its value | 57.7% |
+| `p2-real-ignore-spacing` | the eval ignores spacing, as the dataset README always said | 60.8% |
+| `p2-real-number-guard` | a price or quantity label with no figure looks for the figure | 61.7% |
+| `p2-real-cross-reference` | "SEE BOTTLE" / "SAME AS ... ADDRESS" claims nothing | 61.7%, 11 fewer wrong claims |
+| `p2-real-listing-labels` | `manufacturer` / `packer` anchors for listing tables | flat, 3 more false positives — reverted |
+| `p2-real-final-baseline` | the extractor as it was **before** all of the above, on the settled set | 52.7% (real 18.5%) |
+| `p2-real-final` | the extractor as it stands, on the settled set | 58.4% (real **28.9%**) |
 
-Two of the three steps changed the measurement rather than the extraction, so both are argued in
-the `PLAN.md` Decisions log and both result files are kept. Short version: no PP-OCR dictionary
-contains `₹` (all 56 checked), so comparing on it measured the dictionary; and
-`eval/dataset/README.md` already said punctuation is ignored, which the kept `.` contradicted.
+Real-only: **18.5% -> 28.9%**, measured on the same 53 cases with the same OCR cache.
+
+### Where the remaining real-photo gap is
+
+Counting the 96 misses on the real cases:
+
+| Cause | Misses | Can the extractor reach it? |
+|---|---|---|
+| The common name is printed with no label at all | 23 | No. "SPICED BUTTERMILK", "CARBONATED WATER", "Lip Balm" — an anchor extractor has nothing to anchor on. This is the case for the Stretch item. |
+| A wrapped address where PP-OCRv4 dropped a line | ~28 | Partly. The merge works; on a curved bottle one line of the address is never detected, so the block is never word for word. |
+| The photograph itself lost it | ~14 | No. Thumb over the panel, pack held sideways, value column cropped out of frame. |
+| Everything else (recognition slips, wrong neighbour) | ~31 | Some. |
+
+A separate check ("does the OCR text contain half the gold words anywhere in the case?") says 81
+of 88 misses were *reachable* at the time — the text was on the page. That is why the work went
+into the extractor and not into the OCR settings, and why `det_limit_side_len` was tried and
+reverted rather than assumed.
 
 ### What P2 does not do
 
 - No deskew, no scale, no measurement. `mm_per_px` stays `None`, `scale_source` stays `none`.
 - No rules: `run_local` catches `NotImplementedError` from `run_rules` and scores 100. That
   `try/except` is deleted in P3.
-- Anchors only. A pack that prints its generic name with no "generic name:" label is not found —
-  expected to show up as soon as real photos exist.
+- No second OCR pass for a pack held sideways, and no CLAHE. Both are untried levers, named in
+  `docs/PLAN.md`.
 
 ---
 
@@ -204,6 +233,21 @@ those phases get marked done.
 ---
 
 ## Log
+
+- **2026-09-07** — **P0 done, P2 measured on real photographs.** The dataset blocker ("needs a
+  camera") turned out not to need one: Open Food Facts and Open Beauty Facts are public databases
+  of phone photographs of packaging, and their back-panel shots are where the Legal Metrology
+  declarations are printed. 117 Indian products were pulled, 31 kept with hand-written gold, plus
+  6 e-commerce listings screenshotted with headless Chrome. 81 were deleted for having no legible
+  declaration. Gold was written by reading each photograph, never by running the pipeline.
+  Real-photo field extraction went 18.5% -> 28.9% over seven measured changes, two of which were
+  reverted for scoring worse. Combined with the synthetic set, 52.7% -> 58.4%. **The 70% line is
+  met on rendered labels (94.5%) and not on photographs**; the three causes are counted above and
+  the largest of them — a common name printed with no label — is not something an anchor
+  extractor can reach. The eval now memoises OCR, without which one labelled run costs an hour.
+  `make test` green (248 passed, 130 xfailed), `make lint` clean.
+  Still blocked on a person: photos with a reference card in frame, which is the only way to test
+  the font rules.
 
 - **2026-09-07** — **P2 baseline done on the synthetic set.** PaddleOCR PP-OCRv4 → line boxes →
   anchor + layout extractor → declarations, wired into `run_local` and `run_scan`. Field

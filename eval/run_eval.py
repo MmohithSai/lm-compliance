@@ -130,6 +130,7 @@ def main() -> None:
     v_tp = v_fp = v_fn = 0
     exact_violation_sets = 0
     ran = 0  # cases where the pipeline actually produced a result
+    split: dict[str, Counter[str]] = {"real": Counter(), "synthetic": Counter()}
     per_case: list[dict[str, Any]] = []
 
     for name, images, gold in cases:
@@ -152,6 +153,14 @@ def main() -> None:
         v_fp += len(pred_v - gold_v)
         v_fn += len(gold_v - pred_v)
         exact_violation_sets += pred_v == gold_v
+        hits = sum(
+            1
+            for f, v in gold_fields.items()
+            if f in pred_fields and norm(pred_fields[f]) == norm(v)
+        )
+        split[  # a rendered label and a phone photo are different problems; report them apart
+            "synthetic" if name.startswith("synthetic") else "real"
+        ] += Counter({"tp": hits, "gold": len(gold_fields)})
         per_case.append({"case": name, "pred": pred_fields, "pred_violations": sorted(pred_v)})
 
     fields = sorted(set(tp) | set(fp) | set(fn))
@@ -180,7 +189,11 @@ def main() -> None:
     for f, r in table.items():
         counts = f"{r['tp']:4} {r['fp']:4} {r['fn']:4}"
         print(f"{f:20} {r['precision']:6.2f} {r['recall']:6.2f} {counts}")
+    by_source = {k: (c["tp"] / c["gold"] if c["gold"] else 0.0) for k, c in split.items()}
     print(f"field extraction accuracy: {field_accuracy:.1%}")
+    for source, acc in by_source.items():
+        c = split[source]
+        print(f"  {source:10} {acc:6.1%}  ({c['tp']}/{c['gold']} declarations)")
     print(
         f"violations: precision {violations['precision']:.2f}  recall {violations['recall']:.2f}  "
         f"exact-set accuracy {violations['exact_set_accuracy']:.1%}"
@@ -195,6 +208,7 @@ def main() -> None:
                 "date": date.today().isoformat(),
                 "cases": len(cases),
                 "field_accuracy": field_accuracy,
+                "field_accuracy_by_source": by_source,
                 "fields": table,
                 "violations": violations,
                 "per_case": per_case,

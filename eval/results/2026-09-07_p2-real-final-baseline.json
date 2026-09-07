@@ -1,25 +1,21 @@
 {
-  "label": "p2-real-final",
+  "label": "p2-real-final-baseline",
   "date": "2026-09-07",
   "cases": 53,
-  "field_accuracy": 0.5836734693877551,
-  "field_accuracy_by_source": {
-    "real": 0.28888888888888886,
-    "synthetic": 0.9454545454545454
-  },
+  "field_accuracy": 0.5265306122448979,
   "fields": {
     "best_before": {
-      "precision": 0.7037037037037037,
+      "precision": 0.6785714285714286,
       "recall": 0.7037037037037037,
       "tp": 19,
-      "fp": 8,
+      "fp": 9,
       "fn": 8
     },
     "consumer_care": {
-      "precision": 0.6521739130434783,
+      "precision": 1.0,
       "recall": 0.5769230769230769,
       "tp": 15,
-      "fp": 8,
+      "fp": 0,
       "fn": 11
     },
     "country_of_origin": {
@@ -44,39 +40,39 @@
       "fn": 2
     },
     "manufacturer": {
-      "precision": 0.42857142857142855,
+      "precision": 0.45,
       "recall": 0.34615384615384615,
       "tp": 9,
-      "fp": 12,
+      "fp": 11,
       "fn": 17
     },
     "mfg_date": {
-      "precision": 0.5185185185185185,
-      "recall": 0.6363636363636364,
-      "tp": 14,
-      "fp": 13,
-      "fn": 8
+      "precision": 0.4642857142857143,
+      "recall": 0.5909090909090909,
+      "tp": 13,
+      "fp": 15,
+      "fn": 9
     },
     "mrp": {
-      "precision": 0.7083333333333334,
-      "recall": 0.6296296296296297,
-      "tp": 17,
-      "fp": 7,
-      "fn": 10
+      "precision": 0.48484848484848486,
+      "recall": 0.5925925925925926,
+      "tp": 16,
+      "fp": 17,
+      "fn": 11
     },
     "net_quantity": {
-      "precision": 0.85,
-      "recall": 0.7906976744186046,
-      "tp": 34,
-      "fp": 6,
-      "fn": 9
+      "precision": 0.6486486486486487,
+      "recall": 0.5581395348837209,
+      "tp": 24,
+      "fp": 13,
+      "fn": 19
     },
     "unit_sale_price": {
-      "precision": 0.9333333333333333,
-      "recall": 0.6086956521739131,
-      "tp": 14,
+      "precision": 0.9230769230769231,
+      "recall": 0.5217391304347826,
+      "tp": 12,
       "fp": 1,
-      "fn": 9
+      "fn": 11
     }
   },
   "violations": {
@@ -88,7 +84,6 @@
     {
       "case": "ecom_amazon_britannia_tiger",
       "pred": {
-        "consumer_care": "Customer Service New Releases",
         "mrp": "M.R.P: 10.00",
         "net_quantity": "Net Quantity : 124.0 Grams",
         "generic_name": "Generic Name : Biscuit"
@@ -98,11 +93,10 @@
     {
       "case": "ecom_amazon_figaro_olive_oil",
       "pred": {
-        "consumer_care": "Customer Service New Releases",
         "mrp": "M.R.P.: 649",
         "best_before": "Use by: 01 DEC 2026",
         "mfg_date": "Cold Pressed Oil|Packed |200ml Tin",
-        "importer": "Importer Deoleo India Pvt. Ltd. Notan",
+        "importer": "Importer Heights, 1st Floor, 20",
         "net_quantity": "Net Quantity 500.0 Milliliters",
         "generic_name": "Generic Name Olive Oil",
         "country_of_origin": "Country of Origin Espana"
@@ -112,8 +106,7 @@
     {
       "case": "ecom_amazon_parle_g_800g",
       "pred": {
-        "consumer_care": "Customer Service New Releases",
-        "mrp": "M.R.P10.00",
+        "mrp": "M.R.P: 25.00",
         "country_of_origin": "Country of Origin : India",
         "net_quantity": "Net Quantity : 800.0 Grams",
         "mfg_date": "Mfg. Date: 21/12/17",
@@ -124,7 +117,6 @@
     {
       "case": "ecom_amazon_parle_krackjack",
       "pred": {
-        "consumer_care": "Customer Service New Releases",
         "mrp": "M.R.P:150.00"
       },
       "pred_violations": []
@@ -132,7 +124,6 @@
     {
       "case": "ecom_amazon_tata_salt_1kg",
       "pred": {
-        "consumer_care": "Customer Service New Releases",
         "mrp": "M.R.P.32.00",
         "net_quantity": "Net Quantity : 1000.0 Grams",
         "generic_name": "Generic Name : Salt"
@@ -142,23 +133,25 @@
     {
       "case": "ecom_flipkart_tata_salt",
       "pred": {
-        "net_quantity": "NET WEIGHT 1 kg"
+        "net_quantity": "NET WEIGHT 4"
       },
       "pred_violations": []
     },
     {
       "case": "obf_cetaphil_gentle_skin_cleanser_8906005274106",
       "pred": {
-        "net_quantity": "Net Qty. 125 mL"
+        "net_quantity": "Net Qty 125 mL",
+        "mrp": "MRP (incl. of all taxes)"
       },
       "pred_violations": []
     },
     {
       "case": "obf_cetaphil_moisturising_lotion_8906005274137",
       "pred": {
-        "net_quantity": "Net Qty. 100mL",
-        "mfg_date": "Mfg. Use",
-        "manufacturer": "Manufactured by: Encube Ethicals Pvt. Ltd. Plot No.C1,Madkaim Ind.Estate,Madkaim Doet"
+        "net_quantity": "Net Qty 100mL",
+        "mrp": "MRP (Inclusive of all taxes)",
+        "mfg_date": "Mfg 04/23",
+        "manufacturer": "Manufactured by: Encube Ethicals Pvt. Ltd"
       },
       "pred_violations": []
     },
@@ -172,10 +165,10 @@
     {
       "case": "obf_muuchstac_ocean_muuchstac_face_wash_9102453113625",
       "pred": {
-        "manufacturer": "MFD.BY Address: Plot No. 01, Survey No. 101/P, Gala No.02 & 03,Rakholi Silvassa, UT Of DNH & DD,India 396230",
+        "manufacturer": "MFD.BY Mfg Lic.no.:DNH/C/18",
         "mfg_date": "Mfg Lic.no.:DNH/C/18",
         "country_of_origin": "MADE IN INDIA",
-        "net_quantity": "Net Vol. 100ml (3.38 FL.OZ)",
+        "net_quantity": "Net Vol 100ml (3.38 FL.OZ)",
         "best_before": "Exp.Dt",
         "mrp": "MRP 22 June20"
       },
@@ -184,40 +177,40 @@
     {
       "case": "obf_patanjali_saundarya_aloe_vera_gel_8904109400643",
       "pred": {
-        "net_quantity": "Net Volume. 15०",
-        "mfg_date": "Mfg. Date"
+        "net_quantity": "Net Volume 15०",
+        "mfg_date": "Mfg Date",
+        "mrp": "MRP Oncl"
       },
       "pred_violations": []
     },
     {
       "case": "off_amul_amul_masti_spiced_buttermilk_200ml_8901262200196",
       "pred": {
-        "net_quantity": "Net Content:200 mL",
+        "mrp": "For MRP (incl.of all taxes)Date of Packaging (Pkd.&",
+        "best_before": "Expiry (Exp.) Batch No.BN) see top of the pack",
         "manufacturer": "Marketed by:Gujarat Co-operative Milk Marketing"
       },
       "pred_violations": []
     },
     {
       "case": "off_amul_amul_taaza_amul_taaza_milky_milk_8901262260121",
-      "pred": {
-        "net_quantity": "Net Content: 500 mL"
-      },
+      "pred": {},
       "pred_violations": []
     },
     {
       "case": "off_balaji_balaji_wafers_chataka_pataka_8906010500764",
       "pred": {
-        "net_quantity": "NET WEIGHT: 25g",
-        "unit_sale_price": "UNIT SALE PRICE0.20PER g"
+        "net_quantity": "NET WEIGHT 25g",
+        "mrp": "MRP? 25g"
       },
       "pred_violations": []
     },
     {
       "case": "off_balaji_balaji_wafers_panjabi_tadka_8906010502232",
       "pred": {
-        "net_quantity": "NET WEIGHT : 222",
-        "unit_sale_price": "UNIT SALE PRICE0.23 PERg",
-        "mfg_date": "PKD. : 01JUL25",
+        "net_quantity": "NET WEIGHT 222",
+        "mrp": "MRP UNIT SALE PRICE0.23 PERg",
+        "mfg_date": "PKD 02MAR25",
         "best_before": "EXPIRY DATE"
       },
       "pred_violations": []
@@ -225,23 +218,24 @@
     {
       "case": "off_balaji_chataka_pataka_8906010502119",
       "pred": {
-        "net_quantity": "NET WEIGHT: 25g",
-        "unit_sale_price": "UNIT SALE PRICE3020C"
+        "net_quantity": "NET WEIGHT 25g",
+        "mrp": "MRP 25g"
       },
       "pred_violations": []
     },
     {
       "case": "off_bisleri_bisleri_1ltr_made_in_india_8906017290040",
       "pred": {
-        "best_before": "BEST BEFORE SIX MONTHS FROM MANUFACTURE\""
+        "best_before": "BEST BEFORE SIX MONTHS FROM MANUFACTURE\"",
+        "mrp": "MRP (INCL OFALLTAXES):SEE BOTTLE"
       },
       "pred_violations": []
     },
     {
       "case": "off_britannia_jimjam_57g_57_8901063029255",
       "pred": {
-        "mfg_date": "For Mfg.unit address & Lic.No.read the last two characters of",
-        "net_quantity": "BISCUITS NET WEIGHT 57g"
+        "net_quantity": "BISCUITS NET WEIGHT o sn nens   s",
+        "mfg_date": "For Mfg.unit address & Lic.No.read the last two characters of"
       },
       "pred_violations": []
     },
@@ -255,17 +249,15 @@
     {
       "case": "off_bru_bru_instant_coffee_8901030535895",
       "pred": {
-        "manufacturer": "MKTD.BY NDHE",
         "mfg_date": "BELOW.MFG.BYA ABISHER",
-        "net_quantity": "NET WT.: 1.2g",
-        "mrp": "MRP2.00 INCL.OF ALL TAXES)"
+        "net_quantity": "NET WT 901030535895>",
+        "manufacturer": "Pkg.trl.Mfd.By Amcor Puducherry"
       },
       "pred_violations": []
     },
     {
       "case": "off_ching_s_secret_schezwan_chutney_8901595862962",
       "pred": {
-        "manufacturer": "MKT BY: CAPITAL FOODS PVT. LTD., Lic.No.10013022001865",
         "mfg_date": "For MFG unit ad"
       },
       "pred_violations": []
@@ -273,9 +265,9 @@
     {
       "case": "off_ching_secret_dark_soy_sauce_8901595862818",
       "pred": {
-        "mrp": "MRP 25Rs.0.28/9)",
-        "mfg_date": "DATE OF MFG BATCH NO",
-        "best_before": "USE BY: (incl.of all taxes)"
+        "mrp": "MRP May contain Nuts, Sesame seeds, Mustard and Milk",
+        "mfg_date": "DATE OF MFG MRP",
+        "best_before": "USE BY (incl.of all taxes)"
       },
       "pred_violations": []
     },
@@ -288,8 +280,9 @@
       "case": "off_coca_cola_sprite_sprite_8901764032905",
       "pred": {
         "best_before": "EXPIRY, BA",
-        "consumer_care": "CONTACT CONSUMER RESPONSE COORDINATOR AT: 1800-208-2653indiahelpline@coca-cola.com SPVILTO",
-        "country_of_origin": "MADE IN INDIA"
+        "net_quantity": "NET QUANTITY STOREINACOLA",
+        "country_of_origin": "MADE IN INDIA",
+        "mfg_date": "ADDRESS:SAME AS MFG/MKT BY ADDRESS"
       },
       "pred_violations": []
     },
@@ -297,30 +290,33 @@
       "case": "off_coca_cola_sprite_sprite_8901764032912",
       "pred": {
         "mfg_date": "MANUFACTURED SY BOGA F",
-        "manufacturer": "MANUFACTURED BY BENGAL BEVERAGES PVT.LTD. (UNIT-11).DURGAPUR EXPRESSWAT.P.O.OANKUNI COAL COMPLEXDIST:HOOGHLY-712 310.WESTBENGAL fssalLic No.1001203100008 N",
-        "net_quantity": "NET QUANTITY: 250 ml"
+        "manufacturer": "MANUFACTURED BY BENGAL BEVERAGES PVT.LTD",
+        "net_quantity": "NET QUANTITY 250 ml"
       },
       "pred_violations": []
     },
     {
       "case": "off_coke_diet_coke_can_250ml_8901764061257",
       "pred": {
-        "net_quantity": "NET QUANTITY: 300 ml"
+        "manufacturer": "ADDRESS:SAME AS MANUFACTURED BY FORDATEOF MANUFACTURE BATCHNO",
+        "mrp": "&M.R.P.INCL.OFALL TAXES)SEEBO",
+        "net_quantity": "NET QUANTITY A2CI11A"
       },
       "pred_violations": []
     },
     {
       "case": "off_haldiram_phalhari_chiwda_8904004402261",
       "pred": {
-        "mfg_date": "MFG. DATE"
+        "unit_sale_price": "per g FEEDBACK",
+        "mfg_date": "MFG DATE"
       },
       "pred_violations": []
     },
     {
       "case": "off_hindustan_coca_cola_beverages_pvt_ltd_ma_8901764092305",
       "pred": {
-        "manufacturer": "AS MFG BY ADDRESS PPANNY",
-        "net_quantity": "NET QUANTITY: 1.2L"
+        "manufacturer": "AS MFG BY ADDRESS",
+        "net_quantity": "NET QUANTITY 1.2L"
       },
       "pred_violations": []
     },
@@ -329,15 +325,16 @@
       "pred": {
         "manufacturer": "MFG BY SOUTH INDIA BOTTLING Co.PVT.LTD..B163-170",
         "best_before": "BEST BEFORE TWELVE MONTHS",
-        "net_quantity": "NET QUANTITY: 1L"
+        "net_quantity": "NET QUANTITY TRADEMARK&BRAND OWNER:THE COCA-COLA COMPANY"
       },
       "pred_violations": []
     },
     {
       "case": "off_kissan_mixed_fruit_jam_8901030922787",
       "pred": {
+        "mrp": "MRP  (INCL.OF ALL TAXES)",
         "best_before": "PKD.USE BY &BATCHNO",
-        "net_quantity": "NET WEIGHT: 90 g"
+        "net_quantity": "NET WEIGHT 90 g"
       },
       "pred_violations": []
     },
@@ -349,19 +346,17 @@
     {
       "case": "off_kurkure_pepsico_kurkure_masala_munch_8901491361026",
       "pred": {
-        "manufacturer": "MARKETED BY: fssai Lic.No.10014064000435 For Mkt.address, scan barcode For feedback or queries write indicating Batch No. and Manufacturing Date) to",
+        "manufacturer": "MARKETED BY fssai",
         "mrp": "MRP Rs.10.00 (INCL.OF ALL TAXES)",
-        "net_quantity": "N.QTY: 44 g (29.3 g +14.7 g Extra)",
-        "consumer_care": "THE CONSUMER SERVICES MANAGER PEPSICO INDIA HOLDINGS PVT.LTD., P.O.BOX-27,DLF QUTAB ENCLAVE,PHASE-1 GURUGRAM-122002,HARYANA,INDIA ORCALL USAT 1800224020 OR EMAILUSAT",
-        "mfg_date": "MFD: 26/02/22",
-        "best_before": "USE BY: 26/06/22"
+        "mfg_date": "MFD AF260222",
+        "best_before": "USE BY 26/06/22"
       },
       "pred_violations": []
     },
     {
       "case": "off_mazza_the_coca_cola_company_maaza_8901764092206",
       "pred": {
-        "manufacturer": "MFG BY:HINDUSTAN COCA-COLABEN GURUGRAM-122011,HARYANA BDHINDUSTAN COCA-COLA BEVERA",
+        "manufacturer": "MFG BY:HINDUSTAN COCA-COLABEN",
         "country_of_origin": "MADE IN INDIA"
       },
       "pred_violations": []
@@ -369,20 +364,17 @@
     {
       "case": "off_pepsi_cola_pepsi_8902080104581",
       "pred": {
-        "manufacturer": "MFD.BY:VARUN BEVERAGESLIMITED FOR MANUFACTURING UNIT ADDRESS AND FSSAI LICENSE NO PLEASE SEE FIRST ONE/TWO LETTER(S OF THE BATCH NO.AND SCAN THE QR CODE",
-        "consumer_care": "CONTACT CUSTOMER SERVICE MANAGER AT:P.O.BOX27.DLF OUTABENCLAVE-1, CONSUMER.FEEDBACK@PEPSICO.COM KEEP IN COOL AND DRY PLACE AWAY FROM DIRECT SUNLIGHT",
+        "manufacturer": "MFD.BY:VARUN BEVERAGESLIMITED",
         "net_quantity": "NET QUANTITY (250 ml+150 mlFree",
-        "mrp": "MRP INCL.OF ALL TAXES),USP (250 ml+150 mlFree"
+        "mrp": "MRP INCL.OF ALL TAXES),USP"
       },
       "pred_violations": []
     },
     {
       "case": "off_pepsico_quaker_oats_8901491103794",
       "pred": {
-        "manufacturer": "MKT.BY DEDCICn",
-        "net_quantity": "N.QTY: 400g",
-        "mfg_date": "MFD: 01:16-02",
-        "best_before": "USE BY: 79/-",
+        "mfg_date": "MFD 05SEP24",
+        "best_before": "USE BY 05SEP24",
         "mrp": "MRP USP0.20/-perg"
       },
       "pred_violations": []
@@ -390,7 +382,7 @@
     {
       "case": "off_tata_tata_salt_8904043901015",
       "pred": {
-        "net_quantity": "NET QUANTITY: 1 kg"
+        "net_quantity": "NET QUANTITY 1 kg"
       },
       "pred_violations": []
     },

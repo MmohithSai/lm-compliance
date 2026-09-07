@@ -6,10 +6,17 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 
 ## P0 — dataset + eval harness
 - [x] `eval/run_eval.py` runs on an empty dataset and writes `eval/results/<date>_<label>.json`
-- [ ] 40–60 real package photos + 5 e-commerce screenshots in `eval/dataset/<case>/` — needs a camera; shot list in `eval/dataset/README.md`
-- [ ] gold JSON per case (declarations + expected violation codes) — format and validator ready, follows the photos
+- [x] real package photos + 6 e-commerce screenshots in `eval/dataset/<case>/` — 31 package cases
+      (114 photographs) pulled from Open Food / Beauty Facts by `eval/fetch_openfoodfacts.py`, and
+      6 listing screenshots by `eval/fetch_ecommerce.py`. No camera needed after all.
+- [x] gold JSON per case (declarations + expected violation codes) — 37 written by reading the
+      photographs; conventions in `eval/dataset/README.md`
+- [ ] photos with a reference card in frame, two panels in one shot, or a second MRP — the only
+      photos the web cannot supply, and the only ones that can test F1/F2/P1/P3/D5b. Shot list in
+      `eval/dataset/README.md`; this is what still needs a person with a phone.
 - [x] 16 synthetic PIL labels covering D1–D8, D7 imported, E1 and the X1/X2/X3 exemptions — `eval/make_synthetic.py`
 - [x] every `gold.json` checked by `worker/tests/test_dataset.py` (canonical fields, real rule codes, valid context keys, image present)
+- [x] OCR memoised per image so a rerun measures the change, not PaddleOCR
 - Done when: `make eval LABEL=empty` prints a per-field table (0% is fine). **True since 2026-09-07** (`eval/results/2026-09-07_p0-synthetic-16.json`).
 
 ## P1 — Supabase schema + auth + upload + worker loop
@@ -28,10 +35,23 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - [x] `ocr.py` PaddleOCR PP-OCRv4 → line boxes with confidence, stored in `ocr_words`
 - [x] `extractors/regex_layout.py` anchors + nearest-box layout rule
 - [x] `run_local` wired: preprocess → ocr → extract → (measure: none) → rules → score
+- [x] measured on real photographs, one variable per run, every result file kept
 - Done when: `make eval LABEL=baseline-v1` ≥ 70% field extraction on clean photos. Save the result file.
-  **94.5% on the 16 synthetic labels**, 2026-09-07 (`eval/results/2026-09-07_p2-baseline.json`).
-  Clean photos are still blocked on a camera (P0 item 6): a rendered PNG is not a phone photo, so
-  this number is a floor to re-measure, not the phase's final answer.
+  **94.5% on the 16 synthetic labels. 28.9% on the 37 real cases** (2026-09-07,
+  `eval/results/2026-09-07_p2-real-final.json`; the harness now prints the two apart).
+  **The 70% line is met on clean labels and not on real photographs.** Seven measured changes took
+  the real half from 18.5% to 28.9%; the remaining gap is not one bug. It is three things, in
+  order of size:
+  1. **generic_name** — 23 of 37 misses. Indian packs print the common name with no label at all
+     ("SPICED BUTTERMILK", "CARBONATED WATER", "Lip Balm"). An anchor extractor structurally
+     cannot find it. This is the case for the Stretch item, not for more regex.
+  2. **manufacturer / consumer_care** — the address wraps over four printed lines and PP-OCRv4
+     drops one or two of them on a curved bottle, so the merged block is never word for word.
+  3. Everything the photograph itself loses: thumbs over the panel, packs held sideways, the
+     value column cropped out of frame.
+  What the numbers rule out: `det_limit_side_len=1600` (measured, worse) and merging continuation
+  lines for short fields (measured, worse). What is untried: CLAHE in `preprocess`, and a second
+  OCR pass at 90° for the packs held sideways.
 
 ## P3 — rule engine + scan detail page
 - [ ] fill `CHECKS` in `rules_engine.py`; delete the `xfail` line in `tests/test_rules.py`
@@ -85,6 +105,52 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - Total monthly cost: ₹0.
 
 ## Decisions log
+- 2026-09-07 — P0's "needs a camera" was wrong. Open Food Facts and Open Beauty Facts are public
+  databases of phone photographs of packaging, Indian products included, and their
+  ingredients / nutrition / packaging shots are the back panel — which is where the Legal Metrology
+  declarations are printed. `eval/fetch_openfoodfacts.py` pulls them at 1600 px, the size the
+  frontend uploads. Photos are CC-BY-SA 3.0 and every case keeps a `source.json` with the product
+  URL and the licence. What the web cannot supply is a photo with a reference card in frame, so
+  F1/F2 (and P1/P3/D5b) still need a person; that is all the shot list is for now.
+- 2026-09-07 — E-commerce cases are headless-Chrome screenshots of public listings
+  (`eval/fetch_ecommerce.py`), sliced into 1600 px tiles because that is what an inspector
+  uploads: two or three phone screenshots, not one 9000 px strip. A capture under two tiles is a
+  404 or a bot block and is discarded rather than stored as a fixture. BigBasket and JioMart both
+  refuse headless Chrome; Amazon and Flipkart do not.
+- 2026-09-07 — Gold describes **the images in the case folder**, not the pack they came from. If
+  the MRP is printed on a panel nobody photographed, the MRP is absent and the expected violation
+  is the one the inspector would actually get from that upload. A declaration that is present but
+  cut off by the frame counts as absent: the evidence has to be legible or there is nothing to
+  cite. 81 candidate products were fetched and deleted for having no legible declaration at all.
+- 2026-09-07 — The eval memoises OCR under `eval/.ocr_cache/`, keyed on the image plus a hash of
+  `preprocess.py` and `ocr.py`. Without it a labelled run costs an hour and "one variable per run"
+  stops being affordable. Keying on the source means there is no stale-cache footgun and no flag
+  to remember. `run_local` grew one defaulted argument to make this possible; nothing else passes it.
+- 2026-09-07 — The eval prints real and synthetic accuracy apart. A rendered label and a phone
+  photo are different problems and one number hides which half moved: the combined 58.4% is
+  94.5% synthetic and 28.9% real.
+- 2026-09-07 — Two P2 changes measured and reverted, both result files kept.
+  `det_limit_side_len=1600` (PP-OCR shrinks a 1600 px photo to 960 before detection) scored 54.5%
+  against 57.7%: detecting at full size splits lines into more, smaller boxes, and the extractor's
+  "one box is one printed line" assumption is what pays for the anchors. Adding "manufacturer" and
+  "packer" as manufacturer anchors for listing tables scored flat with three more false positives.
+- 2026-09-07 — Continuation-line merging is limited to `manufacturer`, `importer`, `consumer_care`.
+  Merging every field cost 4.5 points: "Net Qty: 200 g" and "MADE IN INDIA" are one line by
+  construction and swallowed the line below them. The law prints an address block for those three
+  fields and a single line for the rest, so the rule follows the law, not the layout.
+- 2026-09-07 — The eval drops spacing entirely instead of collapsing it. `eval/dataset/README.md`
+  has said spacing is ignored since P0, but collapsing runs of spaces is not ignoring them: gold
+  "NET WEIGHT 64 g" failed a correct read of "NET WEIGHT 64g", because PP-OCR does not put a space
+  back where the print had one. Third measurement fix of this kind, same argument as the currency
+  marker and the sentence dot: the comparison was measuring the OCR's spacing, not the extraction.
+- 2026-09-07 — An anchor may end against its value (`(?![a-z])`, not `\b`). PP-OCR reads
+  "UNIT SALE PRICE : ₹ 0.20 PER g" as "UNIT SALE PRICE0.20PER g", and a word boundary refused it.
+  A following letter is still another word, so "exp" still does not claim "export".
+- 2026-09-07 — A price or quantity label with no figure in it is a label: look for the figure
+  beside or under it, and report nothing if the panel has none. Indian packs print
+  "MRP ₹ (INCL. OF ALL TAXES): SEE BOTTLE" constantly. Same reason for the cross-reference guard
+  ("same as", "see neck/cap/bottom", "scan barcode"): the line names a declaration without carrying
+  it, and claiming it hides the real one printed further down.
 - 2026-09-07 — P2. `paddlepaddle` pinned to `==3.0.0`. On 3.3.1 every PP-OCRv4 model dies in
   `NotFoundError: OneDnnContext does not have the input Filter` at the first conv, with
   `enable_mkldnn` off and with `FLAGS_use_mkldnn=0`. `setuptools` joins the `ocr` extra because
