@@ -26,3 +26,6 @@ supabase/.branches/
 # misc
 .DS_Store
 *.log
+
+# eval OCR cache: derived from the images, rebuilt on demand (see eval/run_eval.py)
+eval/.ocr_cache/

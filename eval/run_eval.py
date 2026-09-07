@@ -8,21 +8,70 @@ Out:  eval/results/<date>_<label>.json
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
 from collections import Counter
 from datetime import date
+from importlib import import_module
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+from numpy.typing import NDArray
+
 from pipeline import run_local
-from pipeline.models import PipelineResult, ScanContext
+from pipeline.models import PipelineResult, ScanContext, Word
+from pipeline.ocr import ocr_words
 
 ROOT = Path(__file__).resolve().parent
 DATASET = ROOT / "dataset"
 RESULTS = ROOT / "results"
+CACHE = ROOT / ".ocr_cache"
 IMAGE_EXT = {".jpg", ".jpeg", ".png", ".webp"}
+
+
+def pipeline_fingerprint() -> str:
+    """Hash of the code that produces the boxes. Edit preprocess or ocr and the cache misses.
+
+    `import_module`, not `pipeline.preprocess`: the package re-exports a *function* of that name,
+    which shadows the module it lives in.
+    """
+    src = b"".join(
+        Path(import_module(f"pipeline.{name}").__file__ or "").read_bytes()
+        for name in ("preprocess", "ocr")
+    )
+    return hashlib.sha256(src).hexdigest()[:12]
+
+
+FINGERPRINT = pipeline_fingerprint()
+
+
+def cached_ocr(images: list[Path]) -> Any:
+    """`run_local`'s OCR step, memoised on disk per image.
+
+    PaddleOCR on the real set is about 15 s a case, which makes "one variable per run" cost an
+    hour a run. The boxes only depend on the file and on preprocess/ocr, so they are cached on
+    (path, mtime, size, languages, code fingerprint) — change any of those and it re-reads.
+    """
+    by_id = {p.stem: p for p in images}  # run_local hands us image_id, not the path
+
+    def run(_img: NDArray[np.uint8], image_id: str, langs: list[str]) -> list[Word]:
+        path = by_id[image_id]
+        stat = path.stat()
+        key = f"{path}|{stat.st_mtime_ns}|{stat.st_size}|{','.join(langs)}|{FINGERPRINT}"
+        entry = CACHE / f"{hashlib.sha256(key.encode()).hexdigest()[:32]}.json"
+        if entry.exists():
+            return [Word.model_validate(w) for w in json.loads(entry.read_text(encoding="utf-8"))]
+        words = ocr_words(_img, image_id, langs)
+        CACHE.mkdir(exist_ok=True)
+        entry.write_text(
+            json.dumps([w.model_dump() for w in words], ensure_ascii=False), encoding="utf-8"
+        )
+        return words
+
+    return run
 
 
 # None of PP-OCR's 56 dictionaries contains ₹, so no model it ships can ever emit one. Held
@@ -57,7 +106,7 @@ def load_cases() -> list[tuple[str, list[Path], dict[str, Any]]]:
 def predict(images: list[Path], gold: dict[str, Any]) -> PipelineResult | None:
     ctx = ScanContext.model_validate(gold.get("context", {}))
     try:
-        return run_local(images, ctx)
+        return run_local(images, ctx, ocr=cached_ocr(images))
     except NotImplementedError:
         return None  # pipeline not built yet: counts as "predicted nothing"
 

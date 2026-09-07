@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, cast
@@ -20,8 +21,13 @@ from .rules_engine import run_rules, score
 
 log = logging.getLogger("worker")
 
+# (preprocessed image, image_id, languages) -> line boxes. Only the eval passes anything but
+# `ocr_words`: it wraps it in a disk cache so a rerun measures a changed extractor, not PaddleOCR
+# reading the same 280 photos again.
+OcrFn = Callable[[NDArray[np.uint8], str, list[str]], list[Word]]
 
-def run_local(images: list[Path], ctx: ScanContext) -> PipelineResult:
+
+def run_local(images: list[Path], ctx: ScanContext, ocr: OcrFn = ocr_words) -> PipelineResult:
     """preprocess -> ocr -> extract -> measure -> rules -> score. No network."""
     words: list[Word] = []
     for path in images:
@@ -29,7 +35,7 @@ def run_local(images: list[Path], ctx: ScanContext) -> PipelineResult:
         if img is None:
             raise ValueError(f"unreadable image: {path.name}")
         page = preprocess(cast("NDArray[np.uint8]", img))
-        for word in ocr_words(page, path.stem, ctx.languages):
+        for word in ocr(page, path.stem, ctx.languages):
             words.append(word.model_copy(update={"id": len(words)}))
 
     declarations = RegexLayoutExtractor().extract(words, ctx)
