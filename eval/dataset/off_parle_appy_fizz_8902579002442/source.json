@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8902579002442",
+  "barcode": "8902579002442",
+  "product_name": "Appy fizz",
+  "brands": "Parle",
+  "quantity_on_db": null,
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/257/900/2442/front_en.3.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/257/900/2442/ingredients_en.11.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/257/900/2442/nutrition_en.9.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/257/900/2442/packaging_en.13.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      831,
+      1600
+    ],
+    "ingredients": [
+      900,
+      1600
+    ],
+    "nutrition": [
+      900,
+      1600
+    ],
+    "packaging": [
+      900,
+      1600
+    ]
+  }
+}

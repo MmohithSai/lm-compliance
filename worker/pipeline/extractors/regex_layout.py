@@ -62,6 +62,23 @@ ANCHORS: dict[str, list[str]] = {
 # is a deletion, not a guess: no price line carries these characters before a digit.
 NOT_A_RUPEE = re.compile(r"[<>?]\s*(?=\d)")
 
+# A quantity or a price is a number. Packs print the label on its own and the figure beside or
+# under it ("MRP (Inclusive of all taxes)" / "486.00"), and they also print labels that point
+# somewhere else entirely ("MRP (INCL OF ALL TAXES): SEE BOTTLE"). Requiring a digit tells the
+# two apart without reading the wording.
+NEEDS_A_NUMBER = {"mrp", "net_quantity", "unit_sale_price"}
+DIGIT = re.compile(r"\d")
+
+# Indian packs cross-refer rather than repeat: "MRP (INCL OF ALL TAXES): SEE BOTTLE",
+# "ADDRESS: SAME AS MKT BY ADDRESS", "For Mkt. address, scan barcode". The line names the
+# declaration but does not carry it, and claiming it hides the real one printed further down.
+POINTS_ELSEWHERE = re.compile(
+    r"\bsame as\b"
+    r"|\bsee\b.{0,24}?\b(neck|cap|bottle|bottom|top|crimp|pack|packet|panel|below|above)\b"
+    r"|\bscan\b.{0,24}?\b(qr|barcode|code)\b",
+    re.IGNORECASE | re.DOTALL,
+)
+
 
 def clean(text: str) -> str:
     """Trim the stray terminator OCR adds to a line, drop the glyph it prints for ₹."""
@@ -91,7 +108,10 @@ def claim(text: str) -> tuple[str, bool] | None:
     """(field, anchor_is_the_whole_box) for the longest anchor in this box, or None."""
     normalized = norm(text)
     for field, anchor in ANCHOR_LIST:
-        match = re.search(rf"\b{re.escape(anchor)}\b", normalized)
+        # `(?![a-z])`, not `\b`: PP-OCR drops the space before a value, so the anchor comes back
+        # glued to it ("UNIT SALE PRICE0.20PER g"). A following *letter* is still another word,
+        # so "exp" does not claim "export".
+        match = re.search(rf"\b{re.escape(anchor)}(?![a-z])", normalized)
         if match:
             return field, match.end() >= len(normalized)
     return None
@@ -134,7 +154,7 @@ def continuations(block: list[Word], words: list[Word]) -> list[Word]:
     return out
 
 
-def nearest(anchor: Word, words: list[Word]) -> Word | None:
+def nearest(anchor: Word, words: list[Word], needs_number: bool = False) -> Word | None:
     """The value box for a bare anchor: same row to the right, else the line directly below.
 
     Three guards, each one a mistake seen on the real packs:
@@ -152,7 +172,10 @@ def nearest(anchor: Word, words: list[Word]) -> Word | None:
     candidates = [
         w
         for w in words
-        if w.image_id == anchor.image_id and w.id != anchor.id and claim(w.text) is None
+        if w.image_id == anchor.image_id
+        and w.id != anchor.id
+        and claim(w.text) is None
+        and (not needs_number or DIGIT.search(w.text))
     ]
     right = [
         w
@@ -184,9 +207,16 @@ class RegexLayoutExtractor:
             field, bare_anchor = hit
             if field in found:  # first box in reading order wins
                 continue
+            if POINTS_ELSEWHERE.search(word.text):
+                continue
+            # A label with no figure in it is a label: go looking for the figure.
+            needs_number = field in NEEDS_A_NUMBER and not DIGIT.search(word.text)
             block = [word]
-            if bare_anchor and (value_box := nearest(word, words)) is not None:
+            value_box = nearest(word, words, needs_number) if bare_anchor or needs_number else None
+            if value_box is not None:
                 block.append(value_box)
+            elif needs_number:
+                continue  # nothing on this panel carries the figure
             if field in WRAPS:
                 block += continuations(block, words)
             value = join_lines(block)

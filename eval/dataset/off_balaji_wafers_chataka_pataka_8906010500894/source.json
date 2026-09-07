@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8906010500894",
+  "barcode": "8906010500894",
+  "product_name": "Chataka pataka",
+  "brands": "Balaji Wafers",
+  "quantity_on_db": "25g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/601/050/0894/front_en.4.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/601/050/0894/ingredients_en.6.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/601/050/0894/nutrition_en.17.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/601/050/0894/packaging_en.10.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1200,
+      1600
+    ],
+    "ingredients": [
+      1501,
+      1600
+    ],
+    "nutrition": [
+      1600,
+      999
+    ],
+    "packaging": [
+      1342,
+      1600
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901725118921",
+  "barcode": "8901725118921",
+  "product_name": "tedha medha",
+  "brands": "bingo",
+  "quantity_on_db": "75",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/172/511/8921/front_en.7.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/172/511/8921/ingredients_en.19.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/172/511/8921/nutrition_en.16.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/172/511/8921/packaging_en.13.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1200,
+      1600
+    ],
+    "ingredients": [
+      1600,
+      1371
+    ],
+    "nutrition": [
+      1200,
+      1600
+    ],
+    "packaging": [
+      1200,
+      1600
+    ]
+  }
+}

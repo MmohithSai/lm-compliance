@@ -142,22 +142,81 @@ def test_the_value_box_must_share_the_anchors_row_not_just_be_near_it() -> None:
 
 
 def test_a_bare_anchor_will_not_take_a_box_that_is_a_declaration_itself() -> None:
-    """The line under a bare "MRP" is sometimes the next declaration, not its value."""
+    """The line under a bare "MRP" is sometimes the next declaration, not its value.
+
+    Nothing else on this panel carries a figure, so there is no price here to report.
+    """
     got = fields(
         [
             line("MRP", 100, x=60, w=120, h=40, wid=1),
             line("UNIT SALE PRICE : 0.23 PER g", 150, x=60, w=700, h=40, wid=2),
         ]
     )
-    assert got.get("mrp") == "MRP"
+    assert "mrp" not in got
     assert got["unit_sale_price"] == "UNIT SALE PRICE : 0.23 PER g"
 
 
 def test_a_box_across_the_panel_is_not_the_value_of_a_bare_anchor() -> None:
     got = fields(
         [
-            line("MRP", 100, x=60, w=120, h=40, wid=1),
-            line("STORE IN A COOL PLACE", 100, x=1400, w=600, h=40, wid=2),
+            line("Made in", 100, x=60, w=200, h=40, wid=1),
+            line("SPAIN", 100, x=1400, w=300, h=40, wid=2),
         ]
     )
-    assert got.get("mrp") == "MRP"
+    assert got["country_of_origin"] == "Made in"
+
+
+def test_an_anchor_still_counts_when_ocr_glues_the_value_to_it() -> None:
+    """PP-OCR reads "UNIT SALE PRICE : ₹ 0.20 PER g" as one run with the space missing."""
+    got = fields([line("UNIT SALE PRICE0.20PER g", 100, wid=1)])
+    assert got["unit_sale_price"] == "UNIT SALE PRICE0.20PER g"
+
+
+def test_a_glued_letter_is_still_a_different_word() -> None:
+    """'exp' must not claim 'export', or every export declaration becomes a best-before."""
+    got = fields([line("EXPORT QUALITY", 100, wid=1)])
+    assert "best_before" not in got
+
+
+def test_a_price_label_pointing_somewhere_else_is_not_a_price() -> None:
+    """Bottles print "MRP (INCL OF ALL TAXES): SEE BOTTLE". There is no price on that panel."""
+    got = fields([line("MRP (INCL OF ALL TAXES): SEE BOTTLE", 100, wid=1)])
+    assert "mrp" not in got
+
+
+def test_a_price_label_finds_the_number_printed_under_it() -> None:
+    got = fields(
+        [
+            line("MRP (Inclusive of all taxes)", 100, x=60, w=500, h=40, wid=1),
+            line("486.00 (Rs. 4.86/ml)", 150, x=60, w=500, h=40, wid=2),
+        ]
+    )
+    assert got["mrp"] == "MRP (Inclusive of all taxes) 486.00 (Rs. 4.86/ml)"
+
+
+def test_a_quantity_label_skips_a_neighbour_with_no_number_in_it() -> None:
+    """ "Net Content:" took "COOL. STOR" off the storage line printed beside it."""
+    got = fields(
+        [
+            line("Net Content:", 100, x=60, w=300, h=40, wid=1),
+            line("COOL.STOR", 100, x=380, w=200, h=40, wid=2),
+            line("500 mL", 150, x=60, w=200, h=40, wid=3),
+        ]
+    )
+    assert got["net_quantity"] == "Net Content: 500 mL"
+
+
+def test_a_line_that_points_somewhere_else_is_not_the_declaration() -> None:
+    """Packs cross-refer constantly. "ADDRESS: SAME AS MKT BY ADDRESS" is not the address."""
+    got = fields(
+        [
+            line("ADDRESS: SAME AS MKT BY ADDRESS", 100, wid=1),
+            line("MKT BY: Brite Foods Pvt Ltd, Pune 411019", 400, wid=2),
+        ]
+    )
+    assert got["manufacturer"] == "MKT BY: Brite Foods Pvt Ltd, Pune 411019"
+
+
+def test_see_the_neck_is_not_a_date() -> None:
+    got = fields([line("FOR DATE OF MANUFACTURE & BATCH NO.: SEE NECK", 100, wid=1)])
+    assert "mfg_date" not in got

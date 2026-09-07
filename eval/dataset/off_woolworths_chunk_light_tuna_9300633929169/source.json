@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/9300633929169",
+  "barcode": "9300633929169",
+  "product_name": "Chunk Light Tuna",
+  "brands": "Woolworths",
+  "quantity_on_db": "",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/930/063/392/9169/front_en.27.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/930/063/392/9169/ingredients_en.14.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/930/063/392/9169/nutrition_en.30.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/930/063/392/9169/packaging_en.18.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      858,
+      1600
+    ],
+    "ingredients": [
+      960,
+      1280
+    ],
+    "nutrition": [
+      1200,
+      1600
+    ],
+    "packaging": [
+      960,
+      1280
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8410076601445",
+  "barcode": "8410076601445",
+  "product_name": "Nature valley crunchy",
+  "brands": "Nature Valley",
+  "quantity_on_db": "10 Barres",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/841/007/660/1445/front_fr.49.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/841/007/660/1445/ingredients_fr.21.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/841/007/660/1445/nutrition_fr.51.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/841/007/660/1445/packaging_fr.35.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1279,
+      1200
+    ],
+    "ingredients": [
+      1600,
+      1166
+    ],
+    "nutrition": [
+      1151,
+      1200
+    ],
+    "packaging": [
+      1200,
+      1600
+    ]
+  }
+}

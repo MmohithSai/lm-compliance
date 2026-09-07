@@ -1,0 +1,28 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8906017290033",
+  "barcode": "8906017290033",
+  "product_name": "Bisleri",
+  "brands": "BISLERI",
+  "quantity_on_db": "500ml",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/601/729/0033/front_en.34.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/601/729/0033/ingredients_en.29.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/601/729/0033/packaging_en.31.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      490,
+      1600
+    ],
+    "ingredients": [
+      1590,
+      1600
+    ],
+    "packaging": [
+      954,
+      1600
+    ]
+  }
+}

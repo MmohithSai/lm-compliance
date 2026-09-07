@@ -1,0 +1,28 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8906017290064",
+  "barcode": "8906017290064",
+  "product_name": "Packaged Drinking Water",
+  "brands": "Bisleri",
+  "quantity_on_db": "2L",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/601/729/0064/front_en.3.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/601/729/0064/ingredients_en.5.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/601/729/0064/packaging_en.7.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      815,
+      1600
+    ],
+    "ingredients": [
+      1600,
+      335
+    ],
+    "packaging": [
+      574,
+      471
+    ]
+  }
+}

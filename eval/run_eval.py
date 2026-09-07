@@ -87,9 +87,16 @@ SENTENCE_DOT = re.compile(r"(?<!\d)\.|\.(?!\d)")
 
 
 def norm(s: str) -> str:
-    """Loose text equality: casefold, fold the currency marker, drop punctuation, collapse."""
+    """Loose text equality: casefold, fold the currency marker, drop punctuation and spacing.
+
+    eval/dataset/README.md has said from the start that spacing is ignored, but *collapsing* runs
+    of spaces is not the same as ignoring them: gold "NET WEIGHT 64 g" failed a correct read of
+    "NET WEIGHT 64g", because PP-OCR does not put a space back where the print had one. Dropping
+    every space is what the README promises. It cannot merge two different values: "1C g" and
+    "10 g" stay different.
+    """
     text = SENTENCE_DOT.sub(" ", CURRENCY.sub("", s))
-    return " ".join(re.sub(r"[^\w@./-]", " ", text).casefold().split())
+    return re.sub(r"[^\w@./-]", " ", text).casefold().replace(" ", "")
 
 
 def load_cases() -> list[tuple[str, list[Path], dict[str, Any]]]:

@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901595862818",
+  "barcode": "8901595862818",
+  "product_name": "Dark Soy sauce",
+  "brands": "Ching secret",
+  "quantity_on_db": "90g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/159/586/2818/front_en.20.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/159/586/2818/ingredients_en.11.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/159/586/2818/nutrition_en.7.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/159/586/2818/packaging_en.14.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1600,
+      1600
+    ],
+    "ingredients": [
+      1600,
+      661
+    ],
+    "nutrition": [
+      1600,
+      1200
+    ],
+    "packaging": [
+      1200,
+      1600
+    ]
+  }
+}

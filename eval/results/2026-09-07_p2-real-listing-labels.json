@@ -1,0 +1,560 @@
+{
+  "label": "p2-real-listing-labels",
+  "date": "2026-09-07",
+  "cases": 48,
+  "field_accuracy": 0.6171171171171171,
+  "fields": {
+    "best_before": {
+      "precision": 0.782608695652174,
+      "recall": 0.782608695652174,
+      "tp": 18,
+      "fp": 5,
+      "fn": 5
+    },
+    "consumer_care": {
+      "precision": 0.6818181818181818,
+      "recall": 0.6,
+      "tp": 15,
+      "fp": 7,
+      "fn": 10
+    },
+    "country_of_origin": {
+      "precision": 1.0,
+      "recall": 0.6,
+      "tp": 6,
+      "fp": 0,
+      "fn": 4
+    },
+    "generic_name": {
+      "precision": 0.7647058823529411,
+      "recall": 0.37142857142857144,
+      "tp": 13,
+      "fp": 4,
+      "fn": 22
+    },
+    "importer": {
+      "precision": 0.5,
+      "recall": 0.5,
+      "tp": 1,
+      "fp": 1,
+      "fn": 1
+    },
+    "manufacturer": {
+      "precision": 0.391304347826087,
+      "recall": 0.375,
+      "tp": 9,
+      "fp": 14,
+      "fn": 15
+    },
+    "mfg_date": {
+      "precision": 0.6086956521739131,
+      "recall": 0.7368421052631579,
+      "tp": 14,
+      "fp": 9,
+      "fn": 5
+    },
+    "mrp": {
+      "precision": 0.7619047619047619,
+      "recall": 0.6666666666666666,
+      "tp": 16,
+      "fp": 5,
+      "fn": 8
+    },
+    "net_quantity": {
+      "precision": 0.8378378378378378,
+      "recall": 0.775,
+      "tp": 31,
+      "fp": 6,
+      "fn": 9
+    },
+    "unit_sale_price": {
+      "precision": 0.9333333333333333,
+      "recall": 0.7,
+      "tp": 14,
+      "fp": 1,
+      "fn": 6
+    }
+  },
+  "violations": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "exact_set_accuracy": 0.14583333333333334
+  },
+  "per_case": [
+    {
+      "case": "ecom_amazon_britannia_tiger",
+      "pred": {
+        "consumer_care": "Customer Service New Releases",
+        "mrp": "M.R.P: 10.00",
+        "manufacturer": "Manufacturer : Britannia Industries Ltd ASIN : B0CRF29ZJR Item part number : 100023525",
+        "net_quantity": "Net Quantity : 124.0 Grams",
+        "generic_name": "Generic Name : Biscuit"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "ecom_amazon_parle_g_800g",
+      "pred": {
+        "consumer_care": "Customer Service New Releases",
+        "mrp": "M.R.P10.00",
+        "manufacturer": "Manufacturer : Parle Biscuits Pvt Ltd ASIN : B0754HP7X2 Item part number : 8901719102820",
+        "country_of_origin": "Country of Origin : India",
+        "net_quantity": "Net Quantity : 800.0 Grams",
+        "mfg_date": "Mfg. Date: 21/12/17",
+        "best_before": "Exp. Date: 5 months"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "ecom_amazon_parle_krackjack",
+      "pred": {
+        "consumer_care": "Customer Service New Releases",
+        "mrp": "M.R.P:150.00"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "ecom_amazon_tata_salt_1kg",
+      "pred": {
+        "consumer_care": "Customer Service New Releases",
+        "mrp": "M.R.P.32.00",
+        "manufacturer": "From the manufacturer",
+        "net_quantity": "Net Quantity : 1000.0 Grams",
+        "generic_name": "Generic Name : Salt"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "ecom_flipkart_tata_salt",
+      "pred": {
+        "net_quantity": "NET WEIGHT 1 kg"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "obf_cetaphil_gentle_skin_cleanser_8906005274106",
+      "pred": {
+        "net_quantity": "Net Qty. 125 mL"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "obf_cetaphil_moisturising_lotion_8906005274137",
+      "pred": {
+        "net_quantity": "Net Qty. 100mL",
+        "mfg_date": "Mfg. Use",
+        "manufacturer": "Manufactured by: Encube Ethicals Pvt. Ltd. Plot No.C1,Madkaim Ind.Estate,Madkaim Doet"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "obf_himalaya_lip_balm_8901138509231",
+      "pred": {
+        "net_quantity": "Net Wt. 1C g"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "obf_muuchstac_ocean_muuchstac_face_wash_9102453113625",
+      "pred": {
+        "manufacturer": "MFD.BY Address: Plot No. 01, Survey No. 101/P, Gala No.02 & 03,Rakholi Silvassa, UT Of DNH & DD,India 396230",
+        "mfg_date": "Mfg Lic.no.:DNH/C/18",
+        "country_of_origin": "MADE IN INDIA",
+        "net_quantity": "Net Vol. 100ml (3.38 FL.OZ)",
+        "best_before": "Exp.Dt",
+        "mrp": "MRP 22 June20"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "obf_patanjali_saundarya_aloe_vera_gel_8904109400643",
+      "pred": {
+        "net_quantity": "Net Volume. 15०",
+        "mfg_date": "Mfg. Date"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_amul_amul_masti_spiced_buttermilk_200ml_8901262200196",
+      "pred": {
+        "net_quantity": "Net Content:200 mL",
+        "manufacturer": "Marketed by:Gujarat Co-operative Milk Marketing"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_amul_amul_taaza_amul_taaza_milky_milk_8901262260121",
+      "pred": {
+        "net_quantity": "Net Content: 500 mL"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_balaji_balaji_wafers_chataka_pataka_8906010500764",
+      "pred": {
+        "net_quantity": "NET WEIGHT: 25g",
+        "unit_sale_price": "UNIT SALE PRICE0.20PER g"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_balaji_balaji_wafers_panjabi_tadka_8906010502232",
+      "pred": {
+        "net_quantity": "NET WEIGHT : 222",
+        "unit_sale_price": "UNIT SALE PRICE0.23 PERg",
+        "mfg_date": "PKD. : 01JUL25",
+        "best_before": "EXPIRY DATE"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_balaji_chataka_pataka_8906010502119",
+      "pred": {
+        "net_quantity": "NET WEIGHT: 25g",
+        "unit_sale_price": "UNIT SALE PRICE3020C"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_bisleri_bisleri_1ltr_made_in_india_8906017290040",
+      "pred": {
+        "best_before": "BEST BEFORE SIX MONTHS FROM MANUFACTURE\""
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_britannia_jimjam_57g_57_8901063029255",
+      "pred": {
+        "mfg_date": "For Mfg.unit address & Lic.No.read the last two characters of",
+        "net_quantity": "BISCUITS NET WEIGHT 57g"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_britannia_marie_gold_biscuit_8901063162914",
+      "pred": {
+        "net_quantity": "BISCUITS NET WEIGHT 64g"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_bru_bru_instant_coffee_8901030535895",
+      "pred": {
+        "manufacturer": "MKTD.BY NDHE",
+        "mfg_date": "BELOW.MFG.BYA ABISHER",
+        "net_quantity": "NET WT.: 1.2g",
+        "mrp": "MRP2.00 INCL.OF ALL TAXES)"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_ching_s_secret_schezwan_chutney_8901595862962",
+      "pred": {
+        "manufacturer": "MKT BY: CAPITAL FOODS PVT. LTD., Lic.No.10013022001865",
+        "mfg_date": "For MFG unit ad"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_coca_cola_sprite_8901764032707",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "off_coca_cola_sprite_sprite_8901764032905",
+      "pred": {
+        "best_before": "EXPIRY, BA",
+        "consumer_care": "CONTACT CONSUMER RESPONSE COORDINATOR AT: 1800-208-2653indiahelpline@coca-cola.com SPVILTO",
+        "country_of_origin": "MADE IN INDIA"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_coca_cola_sprite_sprite_8901764032912",
+      "pred": {
+        "mfg_date": "MANUFACTURED SY BOGA F",
+        "manufacturer": "MANUFACTURED BY BENGAL BEVERAGES PVT.LTD. (UNIT-11).DURGAPUR EXPRESSWAT.P.O.OANKUNI COAL COMPLEXDIST:HOOGHLY-712 310.WESTBENGAL fssalLic No.1001203100008 N",
+        "net_quantity": "NET QUANTITY: 250 ml"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_coke_diet_coke_can_250ml_8901764061257",
+      "pred": {
+        "net_quantity": "NET QUANTITY: 300 ml"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_hindustan_coca_cola_beverages_pvt_ltd_ma_8901764092305",
+      "pred": {
+        "manufacturer": "AS MFG BY ADDRESS PPANNY",
+        "net_quantity": "NET QUANTITY: 1.2L"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_kinley_kinley_mineral_water_1ltr_8901764082405",
+      "pred": {
+        "manufacturer": "MFG BY SOUTH INDIA BOTTLING Co.PVT.LTD..B163-170",
+        "best_before": "BEST BEFORE TWELVE MONTHS",
+        "net_quantity": "NET QUANTITY: 1L"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_kitkat_nestle_nutrition_kitkat_mini_choc_8901058005233",
+      "pred": {},
+      "pred_violations": []
+    },
+    {
+      "case": "off_kurkure_pepsico_kurkure_masala_munch_8901491361026",
+      "pred": {
+        "manufacturer": "MARKETED BY: fssai Lic.No.10014064000435 For Mkt.address, scan barcode For feedback or queries write indicating Batch No. and Manufacturing Date) to",
+        "mrp": "MRP Rs.10.00 (INCL.OF ALL TAXES)",
+        "net_quantity": "N.QTY: 44 g (29.3 g +14.7 g Extra)",
+        "consumer_care": "THE CONSUMER SERVICES MANAGER PEPSICO INDIA HOLDINGS PVT.LTD., P.O.BOX-27,DLF QUTAB ENCLAVE,PHASE-1 GURUGRAM-122002,HARYANA,INDIA ORCALL USAT 1800224020 OR EMAILUSAT",
+        "mfg_date": "MFD: 26/02/22",
+        "best_before": "USE BY: 26/06/22"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_mazza_the_coca_cola_company_maaza_8901764092206",
+      "pred": {
+        "manufacturer": "MFG BY:HINDUSTAN COCA-COLABEN GURUGRAM-122011,HARYANA BDHINDUSTAN COCA-COLA BEVERA",
+        "country_of_origin": "MADE IN INDIA"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_pepsi_cola_pepsi_8902080104581",
+      "pred": {
+        "manufacturer": "MFD.BY:VARUN BEVERAGESLIMITED FOR MANUFACTURING UNIT ADDRESS AND FSSAI LICENSE NO PLEASE SEE FIRST ONE/TWO LETTER(S OF THE BATCH NO.AND SCAN THE QR CODE",
+        "consumer_care": "CONTACT CUSTOMER SERVICE MANAGER AT:P.O.BOX27.DLF OUTABENCLAVE-1, CONSUMER.FEEDBACK@PEPSICO.COM KEEP IN COOL AND DRY PLACE AWAY FROM DIRECT SUNLIGHT",
+        "net_quantity": "NET QUANTITY (250 ml+150 mlFree",
+        "mrp": "MRP INCL.OF ALL TAXES),USP (250 ml+150 mlFree"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_tata_tata_salt_8904043901015",
+      "pred": {
+        "net_quantity": "NET QUANTITY: 1 kg"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "off_thumsup_thums_up_3948764042911",
+      "pred": {
+        "country_of_origin": "MADE IN INDIA"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_approx_no_email",
+      "pred": {
+        "generic_name": "Generic name: Glucose Biscuits",
+        "net_quantity": "Net Qty: approx 500 g",
+        "mrp": "MRP 20.00 (Inclusive of all taxes)",
+        "mfg_date": "Mfd: 03/2026",
+        "manufacturer": "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC, Pune 411019",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_compliant",
+      "pred": {
+        "generic_name": "Generic name: Glucose Bjscuits",
+        "net_quantity": "Net Qty: 200 g",
+        "mrp": "MRP 20.00 (Inclusive of all taxes)",
+        "mfg_date": "Mfd: 03/2026",
+        "manufacturer": "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC, Pune 411019",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_dpco_drug",
+      "pred": {
+        "generic_name": "Generic name: Glucose Biscuits",
+        "net_quantity": "Net Qty: 200 g",
+        "mfg_date": "Mfd: 03/2026",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_ecom_complete",
+      "pred": {
+        "generic_name": "Generic name: Glucose Biscuits",
+        "net_quantity": "Net Qty: 200 g",
+        "mrp": "MRP 20.00 (Inclusive of all taxes)",
+        "manufacturer": "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC. Pune 411019",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_ecom_missing_qty",
+      "pred": {
+        "generic_name": "Generic name: Glucose Bjscuits",
+        "mrp": "MRP 20.00 (Inclusive of all taxes)",
+        "manufacturer": "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC, Pune 411019",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_future_date",
+      "pred": {
+        "generic_name": "Generic name: Glucose Bjscuits",
+        "net_quantity": "Net Qty: 200 g",
+        "mrp": "MRP 20.00 (Inclusive of all taxes)",
+        "mfg_date": "Mfd: 12/2031",
+        "manufacturer": "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC, Pune 411019",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_imported_no_origin",
+      "pred": {
+        "generic_name": "Generic name: Olive Oil",
+        "mrp": "MRP 20.00 (Inclusive of all taxes)",
+        "mfg_date": "Mfd: 03/2026",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 90.00 per 100 ml",
+        "best_before": "Best before 6 months from packaging",
+        "importer": "Imported by: Global Foods India Pvt Ltd, Andheri, Mumbai 400059"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_imported_ok",
+      "pred": {
+        "generic_name": "Generic name: Olive Oil",
+        "net_quantity": "Net Qty: 500 ml",
+        "mrp": "MRP 20.00 (Inclusive of all taxes)",
+        "mfg_date": "Mfd: 03/2026",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 90.00 per 100 ml",
+        "best_before": "Best before 6 months from packaging",
+        "importer": "Imported by: Global Foods India Pvt Ltd, Andheri, Mumbai 400o59",
+        "country_of_origin": "Country of origin: Spain"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_missing_three",
+      "pred": {
+        "generic_name": "Generic name: Glucose Biscuits",
+        "mfg_date": "Mfd: 03/2026",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_no_date",
+      "pred": {
+        "generic_name": "Generic name: Glucose Biscuits",
+        "net_quantity": "Net Qty: 200 g",
+        "mrp": "MRP 20.00 (Inclusive of all taxes)",
+        "manufacturer": "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC. Pune 411019",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_no_generic_name",
+      "pred": {
+        "net_quantity": "Net Qty: 200 g",
+        "mrp": "MRP 20.00 (Inclusive of all taxes)",
+        "mfg_date": "Mfd: 03/2026",
+        "manufacturer": "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC. Pune 411019",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_no_manufacturer",
+      "pred": {
+        "generic_name": "Generic name: Glucose Biscuits",
+        "net_quantity": "Net Qty: 200 g",
+        "mrp": "MRP 20.00 (Inclusive of all taxes)",
+        "mfg_date": "Mfd: 03/2026",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_no_tax_wording",
+      "pred": {
+        "generic_name": "Generic name: Glucose Bjscuits",
+        "net_quantity": "Net Qty: 200 g",
+        "mrp": "MRP 20.00",
+        "mfg_date": "Mfd: 03/2026",
+        "manufacturer": "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC, Pune 411019",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "unit_sale_price": "Unit sale price: 10.00 per 100 g",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_no_unit_price",
+      "pred": {
+        "generic_name": "Generic name: Glucose Biscuits",
+        "net_quantity": "Net Qty: 200 g",
+        "mrp": "MRP 20.00 (Inclusive of all taxes)",
+        "mfg_date": "Mfd: 03/2026",
+        "manufacturer": "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC, Pune 411019",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_restaurant_food",
+      "pred": {
+        "generic_name": "Generic name: Glucose Biscuits",
+        "net_quantity": "Net Qty: 200 g",
+        "mfg_date": "Mfd: 03/2026",
+        "consumer_care": "Consumer care: Brite Foods, Pune, 1800-123-4567, care@britefoods.in",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    },
+    {
+      "case": "synthetic_small_sachet",
+      "pred": {
+        "generic_name": "Generic name: Glucose Biscuits",
+        "net_quantity": "Net Qty: 8 g",
+        "mrp": "MRP 2.00 (Inclusive of all taxes)",
+        "mfg_date": "Mfd: 03/2026",
+        "best_before": "Best before 6 months from packaging"
+      },
+      "pred_violations": []
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8901719130144",
+  "barcode": "8901719130144",
+  "product_name": "Parle Hide & Seek Cookies",
+  "brands": "Parle Biscuits PVT Ltd",
+  "quantity_on_db": "412.5g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/171/913/0144/front_en.29.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/171/913/0144/ingredients_en.31.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/171/913/0144/nutrition_en.33.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/171/913/0144/packaging_en.43.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1600,
+      958
+    ],
+    "ingredients": [
+      1600,
+      679
+    ],
+    "nutrition": [
+      846,
+      838
+    ],
+    "packaging": [
+      671,
+      585
+    ]
+  }
+}

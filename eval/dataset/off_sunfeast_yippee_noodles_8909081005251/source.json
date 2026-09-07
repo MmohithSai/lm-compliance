@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8909081005251",
+  "barcode": "8909081005251",
+  "product_name": "Yippee Noodles",
+  "brands": "Sunfeast",
+  "quantity_on_db": "72.6 g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/908/100/5251/front_en.16.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/908/100/5251/ingredients_en.18.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/908/100/5251/nutrition_en.20.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/908/100/5251/packaging_en.22.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1458,
+      1600
+    ],
+    "ingredients": [
+      1247,
+      1600
+    ],
+    "nutrition": [
+      1600,
+      1552
+    ],
+    "packaging": [
+      541,
+      521
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8906010500030",
+  "barcode": "8906010500030",
+  "product_name": "Malasa Masti",
+  "brands": "Balaji Wafers",
+  "quantity_on_db": "30g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/601/050/0030/front_en.26.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/601/050/0030/ingredients_en.19.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/601/050/0030/nutrition_en.28.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/601/050/0030/packaging_en.31.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1277,
+      1600
+    ],
+    "ingredients": [
+      1600,
+      577
+    ],
+    "nutrition": [
+      1393,
+      1600
+    ],
+    "packaging": [
+      473,
+      1115
+    ]
+  }
+}

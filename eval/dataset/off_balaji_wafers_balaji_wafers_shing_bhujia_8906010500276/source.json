@@ -1,0 +1,33 @@
+{
+  "source": "world.openfoodfacts.org",
+  "product_url": "https://world.openfoodfacts.org/product/8906010500276",
+  "barcode": "8906010500276",
+  "product_name": "Balaji Wafers Shing Bhujia",
+  "brands": "Balaji Wafers",
+  "quantity_on_db": "25g",
+  "license": "photos CC-BY-SA 3.0, data ODbL — https://world.openfoodfacts.org/terms-of-use",
+  "images": {
+    "front": "https://images.openfoodfacts.org/images/products/890/601/050/0276/front_en.3.full.jpg",
+    "ingredients": "https://images.openfoodfacts.org/images/products/890/601/050/0276/ingredients_en.10.full.jpg",
+    "nutrition": "https://images.openfoodfacts.org/images/products/890/601/050/0276/nutrition_en.11.full.jpg",
+    "packaging": "https://images.openfoodfacts.org/images/products/890/601/050/0276/packaging_en.9.full.jpg"
+  },
+  "resized_to": {
+    "front": [
+      1200,
+      1600
+    ],
+    "ingredients": [
+      1481,
+      609
+    ],
+    "nutrition": [
+      1301,
+      1600
+    ],
+    "packaging": [
+      1200,
+      1600
+    ]
+  }
+}
