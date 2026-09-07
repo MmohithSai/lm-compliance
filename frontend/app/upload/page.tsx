@@ -9,9 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { ImageKind, ScanSource } from "@/lib/db";
 import { resizeImage } from "@/lib/image";
+import { uuid } from "@/lib/uuid";
 import { createClient } from "@/lib/supabase/client";
 
 const KINDS: ImageKind[] = ["front", "back", "other"];
+const SLOTS = ["Front panel", "Back panel", "With the reference card"];
 
 export default function UploadPage() {
   const router = useRouter();
@@ -37,7 +39,7 @@ export default function UploadPage() {
 
       // id first: images land in scans/<scan_id>/ before the row exists, so the worker never
       // claims a scan whose photos are still uploading.
-      const scanId = crypto.randomUUID();
+      const scanId = uuid();
       const images = [];
       for (const [i, file] of files.entries()) {
         setStatus(`Uploading photo ${i + 1} of ${files.length}…`);
@@ -97,11 +99,36 @@ export default function UploadPage() {
               id="photos"
               type="file"
               accept="image/*"
-              capture="environment"
               multiple
-              onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 3))}
+              disabled={files.length >= 3}
+              onChange={(e) => {
+                setFiles((prev) => [...prev, ...Array.from(e.target.files ?? [])].slice(0, 3));
+                e.target.value = ""; // so re-picking the same file still fires onChange
+              }}
             />
-            <p className="text-xs text-muted-foreground">Up to 3. Resized to 1600 px before upload.</p>
+            <p className="text-xs text-muted-foreground">
+              {files.length}/3 chosen. Add them together or one at a time — the camera is in your
+              phone&rsquo;s file chooser. Resized to 1600 px before upload.
+            </p>
+            {files.length > 0 && (
+              <ul className="space-y-1 pt-1">
+                {files.map((f, i) => (
+                  <li key={`${f.name}-${f.lastModified}-${i}`} className="flex items-center gap-2 text-sm">
+                    <span className="w-40 shrink-0 text-muted-foreground">{SLOTS[i]}</span>
+                    <span className="truncate">{f.name}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="ml-auto"
+                      onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
+                    >
+                      Remove
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           {source === "package" && (
