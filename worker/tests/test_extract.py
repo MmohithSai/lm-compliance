@@ -367,6 +367,25 @@ def test_best_before_in_months_needs_no_figure() -> None:
     assert got["best_before"] == "BEST BEFORE SIX MONTHS FROM MANUFACTURE"
 
 
+def test_a_best_before_sentence_wraps_onto_one_more_line_without_a_figure() -> None:
+    """The Kinley bottle prints "BEST BEFORE TWELVE MONTHS" over "FROM MANUFACTURE". A line with
+    a figure under it — a batch number, a date — is something else and is left alone."""
+    got = fields(
+        [
+            line("BEST BEFORE TWELVE MONTHS", 707, x=41, w=560, h=122, wid=1),
+            line("FROMMANUFACTURE", 765, x=36, w=360, h=108, wid=2),
+        ]
+    )
+    assert got["best_before"] == "BEST BEFORE TWELVE MONTHS FROMMANUFACTURE"
+    got = fields(
+        [
+            line("BEST BEFORE SIX MONTHS", 100, wid=1),
+            line("B.NO. 4521 PKD 03/26", 134, wid=2),
+        ]
+    )
+    assert got["best_before"] == "BEST BEFORE SIX MONTHS"
+
+
 def test_a_price_glued_to_its_label_is_still_a_price() -> None:
     assert fields([line("M.R.P10.00", 100, wid=1)]) == {"mrp": "M.R.P10.00"}
 

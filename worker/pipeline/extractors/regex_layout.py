@@ -634,6 +634,11 @@ class RegexLayoutExtractor:
                 continue  # nothing on this panel carries the figure
             if wrap and field in WRAPS:
                 block += continuations(block, free, field)
+            elif wrap and field == "best_before" and anchor == "best before":
+                # "BEST BEFORE TWELVE MONTHS" / "FROM MANUFACTURE" wraps like a sentence, and a
+                # sentence carries no figure: the one line under it that holds no digit is its
+                # end. A date ("USE BY 23/01/26") is one line and wraps into nothing.
+                block += [w for w in continuations(block, free, field)[:1] if not has_digit(w.text)]
             if bare_anchor and len(block) == 1 and anchor not in SUFFIX_ANCHORS:
                 # "Made in", "MKT. BY", "A QUALITY PRODUCT OF" with nothing beside or under
                 # them: the label names the declaration and does not carry one. A suffix is
