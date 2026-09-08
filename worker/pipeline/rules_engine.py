@@ -9,6 +9,7 @@ from typing import Any
 
 import yaml
 
+from .measure import MIN_RATIO, RATIO_EXEMPT_CHARS, min_height_mm
 from .models import (
     CheckStatus,
     Declaration,
@@ -108,10 +109,6 @@ EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 # code in the same address block is not mistaken for one.
 PHONE_RUN = re.compile(r"\d[\d\s().+-]{6,}\d")
 
-# Rule 7 exempts these characters from the width rule: they are narrow by design.
-NARROW_EXEMPT = set("1iIl")
-MIN_RATIO = 0.33
-
 OK_LANGUAGES = {"en", "hi"}
 
 # Rule 9(1)(a) groups the declarations of Rule 6(1). unit_sale_price and best_before are not
@@ -128,15 +125,6 @@ MANDATORY = (
 )
 # Rule 6(10): everything under Rule 6(1) except the month and year.
 LISTING_REQUIRED = ("generic_name", "net_quantity", "mrp", "consumer_care")
-
-# Rule 7, Table I: minimum height of the numerals by principal display panel area.
-# (area is at most, mm normally, mm when raised, embossed or perforated)
-TABLE_I: list[tuple[float, float, float]] = [
-    (100.0, 1.0, 2.0),
-    (500.0, 2.0, 4.0),
-    (2500.0, 4.0, 6.0),
-    (float("inf"), 6.0, 6.0),
-]
 
 
 def _squash(s: str) -> str:
@@ -170,13 +158,6 @@ def month_and_year(value: str) -> tuple[int, int] | None:
 def _price(value: str) -> float | None:
     m = AMOUNT.search(value)
     return float(m.group().replace(",", "")) if m else None
-
-
-def _min_height_mm(area_cm2: float, embossed: bool) -> float:
-    for limit, normal, raised in TABLE_I:
-        if area_cm2 <= limit:
-            return raised if embossed else normal
-    return 6.0  # unreachable: the last row of Table I has no upper limit
 
 
 # ---------------------------------------------------------------- the checks
@@ -290,7 +271,7 @@ def _font_height_table1(decls: list[Declaration], ctx: ScanContext, rule: Rule) 
         return _unverifiable(
             rule, "The principal display panel area is unknown, so Table I has no row to apply."
         )
-    need = _min_height_mm(ctx.pdp_area_cm2, ctx.embossed)
+    need = min_height_mm(ctx.pdp_area_cm2, ctx.embossed)
     short = sorted(((h, d) for h, d in measured if h < need), key=lambda p: (p[0], p[1].field))
     if not short:
         return []
@@ -309,7 +290,7 @@ def _font_width_ratio(decls: list[Declaration], ctx: ScanContext, rule: Rule) ->
     """F2: characters at least a third as wide as they are tall."""
     if ctx.is_medical_device:
         return []
-    eligible = [d for d in decls if set(re.sub(r"\W", "", d.value)) - NARROW_EXEMPT]
+    eligible = [d for d in decls if set(re.sub(r"\W", "", d.value)) - RATIO_EXEMPT_CHARS]
     if not eligible:
         return []  # nothing but 1, i, I and l on the panel: Rule 7 exempts them
     measured = [(r, d) for d in eligible if (r := d.width_height_ratio) is not None]
@@ -366,7 +347,10 @@ def _contrast_ok(decls: list[Declaration], ctx: ScanContext, rule: Rule) -> list
     measured = [(c, d) for d in decls if (c := d.contrast) is not None]
     if not measured:
         return _unverifiable(
-            rule, "Contrast was not measured; P4 adds it once the panel can be located."
+            rule,
+            "No scale: contrast is only judged on a photo shot to be measured, with an ArUco "
+            "marker or a card in the frame. Without one this number is the lighting and the "
+            "focus, not the print.",
         )
     faint = sorted(((c, d) for c, d in measured if c < floor), key=lambda p: (p[0], p[1].field))
     if not faint:

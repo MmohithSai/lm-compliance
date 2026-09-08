@@ -64,6 +64,10 @@ class ScanContext(BaseModel):
     source: Source = Source.package
     is_imported: bool = False
     pdp_area_cm2: float | None = None
+    # The inspector's own tape measure, and the last resort for a scale: with no marker and no
+    # card in the frame, the panel's width in millimetres against the photo's width in pixels.
+    pdp_width_mm: float | None = None
+    has_reference_card: bool = False  # only then is a card-shaped rectangle a card
     mm_per_px: float | None = None
     scale_source: ScaleSource = ScaleSource.none
     embossed: bool = False

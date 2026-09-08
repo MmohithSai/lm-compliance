@@ -13,6 +13,7 @@ from numpy.typing import NDArray
 from supabase import Client
 
 from .extractors.regex_layout import RegexLayoutExtractor
+from .measure import measure_declarations, pdp_area_cm2, resolve_scale
 from .models import PipelineResult, ScaleSource, ScanContext, ScanRow, Word
 from .ocr import ocr_words
 from .preprocess import preprocess
@@ -27,24 +28,48 @@ OcrFn = Callable[[NDArray[np.uint8], str, list[str]], list[Word]]
 def run_local(images: list[Path], ctx: ScanContext, ocr: OcrFn = ocr_words) -> PipelineResult:
     """preprocess -> ocr -> extract -> measure -> rules -> score. No network."""
     words: list[Word] = []
+    # The photographs as uploaded, and one scale each. Measurements are taken off these and not
+    # off the preprocessed copies: preprocess equalises contrast, and measuring contrast after
+    # that would measure the equalisation. It moves no pixel, so the OCR boxes fit both.
+    pages: dict[str, NDArray[np.uint8]] = {}
+    scales: dict[str, tuple[float | None, ScaleSource]] = {}
     for path in images:
         img = cv2.imread(str(path))
         if img is None:
             raise ValueError(f"unreadable image: {path.name}")
-        page = preprocess(cast("NDArray[np.uint8]", img))
+        raw = cast("NDArray[np.uint8]", img)
+        page = preprocess(raw)
         for word in ocr(page, path.stem, ctx.languages):
             words.append(word.model_copy(update={"id": len(words)}))
+        pages[path.stem] = raw
+        # Per photograph, never borrowed: a marker in one frame says nothing about the distance
+        # the next frame was shot from. The inspector's panel width is read against this photo's
+        # own width, which assumes the panel fills the frame — what the upload form asks for.
+        scales[path.stem] = resolve_scale(
+            raw, ctx.pdp_width_mm, raw.shape[1], ctx.has_reference_card
+        )
 
-    declarations = RegexLayoutExtractor().extract(words, ctx)
-    # measure is P4: without a scale mm_per_px stays None and the font checks say unverifiable.
-    violations = run_rules(declarations, ctx)
+    declarations = measure_declarations(
+        RegexLayoutExtractor().extract(words, ctx),
+        words,
+        pages,
+        {image_id: scale for image_id, (scale, _source) in scales.items()},
+    )
+    # The scan carries one scale, and it is the first frame that had a reference in it. The font
+    # checks read each declaration's own height_mm; this only says whether anything was measured.
+    mm_per_px, scale_source = next(
+        ((s, src) for s, src in scales.values() if s is not None), (None, ScaleSource.none)
+    )
+    violations = run_rules(
+        declarations, ctx.model_copy(update={"mm_per_px": mm_per_px, "scale_source": scale_source})
+    )
 
     return PipelineResult(
         words=words,
         declarations=declarations,
         violations=violations,
-        mm_per_px=None,
-        scale_source=ScaleSource.none,
+        mm_per_px=mm_per_px,
+        scale_source=scale_source,
         compliance_score=score(violations),
     )
 
@@ -53,8 +78,13 @@ def context_for(scan: ScanRow) -> ScanContext:
     """What the inspector told us on the upload form. Everything else stays at its default."""
     area = None
     if scan.pdp_width_mm and scan.pdp_height_mm:
-        area = scan.pdp_width_mm * scan.pdp_height_mm / 100  # mm² -> cm²
-    return ScanContext(source=scan.source, pdp_area_cm2=area)
+        area = pdp_area_cm2(scan.pdp_width_mm, scan.pdp_height_mm)
+    return ScanContext(
+        source=scan.source,
+        pdp_area_cm2=area,
+        pdp_width_mm=scan.pdp_width_mm,
+        has_reference_card=scan.has_reference_card,
+    )
 
 
 def run_scan(sb: Client, scan: ScanRow) -> PipelineResult:
