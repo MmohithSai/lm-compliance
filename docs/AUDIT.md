@@ -294,6 +294,29 @@ VLM, each as its own labelled run.
   `off_coke_diet_coke_can_250ml_8901764061257`, whose gold records it. This gold omits it and
   expects D2. If corrected, one field and one violation move.
 
+### Gold review — recommendations (2026-09-08, with the PP-OCRv5 experiment; nothing changed)
+
+Each file was re-read against the photographs and against the two rules in
+`eval/dataset/README.md` that decide these cases: *gold describes the images, and includes
+declarations no keyword anchors*; *a declaration cut off by the frame counts as absent — the
+evidence has to be legible*. None of these edits was made; the numbers in this document were
+measured against the gold as it stands.
+
+| File | What the photograph shows | Policy says | Recommendation |
+|---|---|---|---|
+| `off_coca_cola_sprite_8901764032707` | "CARBONATED WATER" on its own line above the ingredients (`1_ingredients.jpg`), the Diet Coke layout | include it | **Correct**: add `generic_name`, drop D2. One field and one verdict move; the extractor already finds it |
+| `off_haldiram_phalhari_chiwda_8904004402261` | `3_packaging.jpg`: "MRP: ₹ 10.00 / (Incl. of all taxes)", "USP: ₹ 0.25 per g", a full consumer-care block with phone and e-mail, "Marketed By: HALDIRAM FOODS INTERNATIONAL PVT. LTD., Plot No. 145/146, Old Pardi Naka, Bh…" — each with its first letter under the fold, exactly as "MFG. DATE" and "USE BY" are, which gold does record. The marketer's address is cut at the right edge; the net quantity's figure is cut at the top | the rule is legibility, and it is applied to two lines and not to four | **Correct for consistency**: add `mrp`, `unit_sale_price`, `consumer_care` as printed; drop D5, D6, D8; keep D1 (address cut), D3 (figure cut), D2. If the owner prefers the strict reading, drop `mfg_date` and `best_before` too and add D4 — either is consistent, the current file is not. Note: the legible reading would *lower* measured accuracy today (the extractor reads "RP10.00", "SP0.25 per g"), which is the point of not editing gold for the score |
+| `ecom_amazon_parle_g_800g`, `ecom_amazon_parle_krackjack` (MRP ₹90, ₹128) | the listed product shows one price with "Inclusive of all taxes" and a unit price, and **no** "M.R.P." row of its own (`0_screen1.jpg` of each); the "M.R.P" rows the extractor quotes are the related-products carousel | the displayed price is the only price declaration on the page | **Keep.** Write the convention into the README: the listed product's own price line is the MRP, a struck-through "M.R.P." row of the listed product overrides it when present, carousel tiles never count. The miss is the extractor's |
+| `ecom_amazon_britannia_tiger` (no MRP) | "Currently unavailable", no price anywhere for the listed product | absent means absent | **Keep**; the extractor's "M.R.P10.00" is a carousel tile and rightly counts as spurious |
+| `ecom_amazon_parle_g_800g` (no mfg_date / best_before) | the product-details table prints "Mfg. Date: 21/12/17" and "Exp. Date: 5 months" | gold describes the images; E1 excludes month/year so no verdict moves | **Correct**: add both as printed (field accuracy only), or say in the README that listing table rows count |
+| `obf_cetaphil_moisturising_lotion_8906005274137` | `2_nutrition.jpg`: "Marketed by: Galderma India Pvt. Ltd." followed by a six-line address (8th floor, D Wing … Mumbai, 400063), and "Manufactured by: Encube Ethicals Pvt. Ltd., Plot No. C1, Madkaim Ind. Estate, … Ponda, Goa - 403404"; gold keeps one line and expects D1 | a wrapped address is one declaration | **Correct**: the full marketer block (or the maker's), drop D1. The pack does not deserve D1 |
+| `obf_muuchstac_ocean_muuchstac_face_wash_9102453113625` | marketer block with address, then "MFD. BY: Universal Cosmetics …" with address; gold takes the marketer, the extractor the fuller maker | both are Rule 6(1)(a) subjects; D1 is unaffected | **Keep**; genuinely ambiguous at field level only. If the owner wants the field scored fairly, the eval would have to accept either — a criteria change, not proposed here |
+| `off_pepsi_cola_pepsi_8902080104581` | "MFD. BY: VARUN BEVERAGES LIMITED" and "MKT. BY: PEPSICO INDIA HOLDINGS PVT. LTD.", neither with an address (both point to the QR code / app); D1 holds either way | same | **Keep**; ambiguous at field level only |
+
+Two of the eight are inconsistencies with the README's own rules (Sprite, Haldiram), two are
+gold errors (Cetaphil's truncated block and its D1, Parle-G's omitted dates), four are
+conventions the README should state. None was edited during the experiment.
+
 ---
 
 ## Remaining issues, in priority order
@@ -348,3 +371,18 @@ findings above:
 
 The remaining-issues list stands with item 1 at 50.4%, and P9 should still not promise 70% on
 real photographs.
+
+### Addendum 2 — the PP-OCRv5 experiment (2026-09-08, later still)
+
+The "next step is a model" line above was tested the same day, with the owner's approval, as
+one controlled experiment: PaddleOCR 3.7.0 / PP-OCRv5 on branch `exp/pp-ocrv5`, in a separate
+environment, nothing but `ocr.py` changed. **Rejected**: real 50.4% → 33.3%, synthetic 98.4% →
+77.0%, violation precision 0.83 → 0.77, exact-set 64.3% → 48.2%, 1 of the 33 OCR misses
+recovered, 19 false violations gained. The model reads more of the print (53% more lines, the
+Bru and Bisleri address blocks whole) and undoes it twice over: the English recogniser writes a
+digit where ₹ is printed, and the server detector boxes large print word by word, which the
+extractor's line assumptions cannot use. Peak memory 2.95 GB, 4.3 s per image. Full table and
+the ADOPT path in `docs/EVAL.md`. Two findings for P9 that came out of the measurement: the
+**2.x process itself peaked at 7.7 GB** reading 152 photographs in one process (the predictor
+grows with each new image size), and PP-OCRv5's detector is the only one tried that reaches the
+twelve-pixel print — if the extractor is ever rebuilt on word boxes, that is the detector.

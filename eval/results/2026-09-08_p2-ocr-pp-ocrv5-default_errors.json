@@ -1,0 +1,3094 @@
+{
+  "source": "2026-09-08_p2-ocr-pp-ocrv5-default.json",
+  "real_cases": 38,
+  "gold_declarations": 141,
+  "correct": 47,
+  "misses": 94,
+  "spurious": 17,
+  "categories": {
+    "ocr_missed": "1. OCR did not detect the text (under half the gold words are anywhere in the output)",
+    "layout": "2. OCR read the words but they span several boxes and the extractor did not group them",
+    "anchor": "3. The gold sits on one OCR line and no anchor / regex claimed it",
+    "recognition": "4. OCR read the line with character errors, so the value can never match gold",
+    "wrong_field": "5. The value was assigned to a different field",
+    "wrapped": "6. A wrapped / multi-line value was cut short or over-merged",
+    "unlabeled": "7. The declaration is printed with no label at all (nothing to anchor on)",
+    "association": "11. The anchor fired and took the wrong neighbouring box as its value",
+    "spurious": "3b. A box that is not a declaration was claimed (anchor false positive)"
+  },
+  "miss_counts": {
+    "layout": 26,
+    "unlabeled": 21,
+    "ocr_missed": 16,
+    "association": 15,
+    "recognition": 11,
+    "wrapped": 4,
+    "anchor": 1
+  },
+  "miss_counts_by_field": {
+    "best_before": {
+      "unlabeled": 1,
+      "layout": 5,
+      "association": 1,
+      "ocr_missed": 1
+    },
+    "consumer_care": {
+      "layout": 8,
+      "unlabeled": 1,
+      "recognition": 3
+    },
+    "country_of_origin": {
+      "layout": 5,
+      "ocr_missed": 2
+    },
+    "generic_name": {
+      "unlabeled": 14,
+      "ocr_missed": 1,
+      "association": 1
+    },
+    "manufacturer": {
+      "recognition": 1,
+      "association": 6,
+      "layout": 2,
+      "wrapped": 1,
+      "ocr_missed": 3
+    },
+    "mfg_date": {
+      "association": 2,
+      "wrapped": 1,
+      "ocr_missed": 3
+    },
+    "mrp": {
+      "recognition": 1,
+      "unlabeled": 2,
+      "ocr_missed": 2,
+      "association": 2,
+      "layout": 3,
+      "wrapped": 1
+    },
+    "net_quantity": {
+      "anchor": 1,
+      "wrapped": 1,
+      "layout": 3,
+      "recognition": 5,
+      "ocr_missed": 2,
+      "association": 1
+    },
+    "unit_sale_price": {
+      "unlabeled": 3,
+      "recognition": 1,
+      "association": 2,
+      "ocr_missed": 2
+    }
+  },
+  "spurious_by_field": {
+    "mrp": 3,
+    "best_before": 3,
+    "manufacturer": 3,
+    "unit_sale_price": 2,
+    "consumer_care": 2,
+    "net_quantity": 2,
+    "mfg_date": 1,
+    "generic_name": 1
+  },
+  "rows": [
+    {
+      "case": "ecom_amazon_britannia_tiger",
+      "field": "generic_name",
+      "gold": "Generic Name : Biscuit",
+      "final": "Generic Name : Biscuit",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 0.33,
+        "1_screen2": 1.0,
+        "2_screen3": 0.0,
+        "3_screen4": 0.0
+      },
+      "ocr_best_line": "Generic Name : Biscuit",
+      "ocr_best_line_image": "1_screen2",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.974,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "ecom_amazon_britannia_tiger",
+      "field": "manufacturer",
+      "gold": "Manufacturer : Britannia Industries Ltd, Britannia Industries Ltd",
+      "final": "Manufacturer : Britannia Industries Ltd, Britannia Industries Ltd",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 0.29,
+        "1_screen2": 1.0,
+        "2_screen3": 0.0,
+        "3_screen4": 0.0
+      },
+      "ocr_best_line": "Manufacturer :Britannia Industries Ltd",
+      "ocr_best_line_image": "1_screen2",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.988,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "ecom_amazon_britannia_tiger",
+      "field": "mrp",
+      "gold": null,
+      "final": "M.R.P: 10.00",
+      "status": "spurious",
+      "category": "spurious",
+      "why": "predicted a field gold does not have"
+    },
+    {
+      "case": "ecom_amazon_britannia_tiger",
+      "field": "net_quantity",
+      "gold": "Net Quantity : 124.0 Grams",
+      "final": "Net Quantity : 124.0 Grams",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 0.25,
+        "1_screen2": 1.0,
+        "2_screen3": 0.5,
+        "3_screen4": 0.0
+      },
+      "ocr_best_line": "Net Quantity : 124.0 Grams",
+      "ocr_best_line_image": "1_screen2",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.977,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "ecom_amazon_britannia_tiger",
+      "field": "unit_sale_price",
+      "gold": null,
+      "final": "29.00/100 g",
+      "status": "spurious",
+      "category": "spurious",
+      "why": "predicted a field gold does not have"
+    },
+    {
+      "case": "ecom_amazon_figaro_olive_oil",
+      "field": "best_before",
+      "gold": "Use by: 01 DEC 2026",
+      "final": "Use by: 01 DEC 2026",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 1.0,
+        "1_screen2": 0.0,
+        "2_screen3": 0.33,
+        "3_screen4": 0.33,
+        "4_screen5": 0.0,
+        "5_screen6": 0.33
+      },
+      "ocr_best_line": "Use by: 01 DEC 2026",
+      "ocr_best_line_image": "0_screen1",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.955,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "ecom_amazon_figaro_olive_oil",
+      "field": "country_of_origin",
+      "gold": "Country of Origin España",
+      "final": "Country of Origin España",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 0.0,
+        "1_screen2": 0.0,
+        "2_screen3": 1.0,
+        "3_screen4": 0.0,
+        "4_screen5": 0.0,
+        "5_screen6": 1.0
+      },
+      "ocr_best_line": "Country of Origin : España",
+      "ocr_best_line_image": "5_screen6",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.986,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "ecom_amazon_figaro_olive_oil",
+      "field": "generic_name",
+      "gold": "Generic Name Olive Oil",
+      "final": "Generic Name Olive Oil",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 0.5,
+        "1_screen2": 0.5,
+        "2_screen3": 1.0,
+        "3_screen4": 0.5,
+        "4_screen5": 0.5,
+        "5_screen6": 1.0
+      },
+      "ocr_best_line": "Generic Name : Olive Oil",
+      "ocr_best_line_image": "5_screen6",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.963,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "ecom_amazon_figaro_olive_oil",
+      "field": "importer",
+      "gold": "Importer Deoleo India Pvt. Ltd. Notan Heights, 1st Floor, 20, Gurunanak Marg, Bandra West Mumbai-400050 India. 18001030494",
+      "final": "Importer : Deoleo India Pvt. Ltd. Notan Heights, 1st Floor, 20, Gurunanak Marg, Bandra West Mumbai-400050 India. 18001030494",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 0.12,
+        "1_screen2": 0.12,
+        "2_screen3": 0.88,
+        "3_screen4": 0.12,
+        "4_screen5": 0.12,
+        "5_screen6": 1.0
+      },
+      "ocr_best_line": "Importer : Deoleo India Pvt. Ltd. Notan Heights, 1st Floor, 20, Gurunanak Marg, Bandra West Mumbai-400050 India. 18001030494",
+      "ocr_best_line_image": "5_screen6",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.987,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "ecom_amazon_figaro_olive_oil",
+      "field": "manufacturer",
+      "gold": "Manufacturer Deoleo SA, Deoleo SA, Ctra N-IV , km 388, 14610 Alcolea (Cordoba)- Spain. 18001030494",
+      "final": "Manufacturer : Deoleo SA, Deoleo SA, Ctra N-IV , km 388, 14610 Alcolea (Cordoba)- Spain. 18001030494",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 0.09,
+        "1_screen2": 0.09,
+        "2_screen3": 0.91,
+        "3_screen4": 0.18,
+        "4_screen5": 0.18,
+        "5_screen6": 1.0
+      },
+      "ocr_best_line": "Manufacturer : Deoleo SA, Deoleo SA, Ctra N-IV , km 388, 14610 Alcolea (Cordoba)- Spain. 18001030494",
+      "ocr_best_line_image": "5_screen6",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.978,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "ecom_amazon_figaro_olive_oil",
+      "field": "mrp",
+      "gold": "M.R.P: ₹649",
+      "final": "M.R.P.: 7649",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 1.0,
+        "1_screen2": 0.5,
+        "2_screen3": 1.0,
+        "3_screen4": 0.0,
+        "4_screen5": 0.0,
+        "5_screen6": 0.0
+      },
+      "ocr_best_line": "M.R.P.: 7649",
+      "ocr_best_line_image": "0_screen1",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.892,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.92,
+      "category": "recognition",
+      "why": "prediction is 92% similar to gold: characters OCR misread"
+    },
+    {
+      "case": "ecom_amazon_figaro_olive_oil",
+      "field": "net_quantity",
+      "gold": "Net Quantity 500.0 Milliliters",
+      "final": "Net Quantity 500.0 Milliliters",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 0.5,
+        "1_screen2": 0.0,
+        "2_screen3": 1.0,
+        "3_screen4": 0.5,
+        "4_screen5": 0.5,
+        "5_screen6": 1.0
+      },
+      "ocr_best_line": "Net Quantity : 500.0 Milliliters",
+      "ocr_best_line_image": "5_screen6",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.986,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "ecom_amazon_figaro_olive_oil",
+      "field": "unit_sale_price",
+      "gold": "₹119.80 /100 ml",
+      "final": "2119.80/100 ml",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 1.0,
+        "1_screen2": 1.0,
+        "2_screen3": 0.5,
+        "3_screen4": 0.0,
+        "4_screen5": 0.0,
+        "5_screen6": 0.0
+      },
+      "ocr_best_line": "-8%599(119.80 /100 ml)",
+      "ocr_best_line_image": "0_screen1",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.975,
+      "gold_is_labelled": false,
+      "status": "wrong",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "ecom_amazon_parle_g_800g",
+      "field": "country_of_origin",
+      "gold": "Country of Origin : India",
+      "final": "Country of Origin : India",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 0.33,
+        "1_screen2": 1.0,
+        "2_screen3": 0.33,
+        "3_screen4": 0.33
+      },
+      "ocr_best_line": "Country of Origin : India",
+      "ocr_best_line_image": "1_screen2",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.996,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "ecom_amazon_parle_g_800g",
+      "field": "manufacturer",
+      "gold": "Manufacturer : Parle Biscuits Pvt Ltd",
+      "final": "Manufacturer : Parle Biscuits Pvt Ltd",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 0.4,
+        "1_screen2": 1.0,
+        "2_screen3": 0.4,
+        "3_screen4": 0.0
+      },
+      "ocr_best_line": "Manufacturer : Parle Biscuits Pvt Ltd",
+      "ocr_best_line_image": "1_screen2",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.986,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "ecom_amazon_parle_g_800g",
+      "field": "mfg_date",
+      "gold": null,
+      "final": "Mfg. Date: 21/12/17",
+      "status": "spurious",
+      "category": "spurious",
+      "why": "predicted a field gold does not have"
+    },
+    {
+      "case": "ecom_amazon_parle_g_800g",
+      "field": "mrp",
+      "gold": "₹90",
+      "final": "M.R.P: 10.00",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 1.0,
+        "1_screen2": 1.0,
+        "2_screen3": 0.0,
+        "3_screen4": 1.0
+      },
+      "ocr_best_line": "amazon.in",
+      "ocr_best_line_image": "0_screen1",
+      "ocr_best_line_coverage": 0.0,
+      "ocr_best_line_confidence": 0.994,
+      "gold_is_labelled": false,
+      "status": "wrong",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "ecom_amazon_parle_g_800g",
+      "field": "net_quantity",
+      "gold": "Net Quantity : 800.0 Grams",
+      "final": "Net Quantity : 800.0 Grams",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 0.5,
+        "1_screen2": 1.0,
+        "2_screen3": 0.0,
+        "3_screen4": 0.0
+      },
+      "ocr_best_line": "Net Quantity : 800.0 Grams",
+      "ocr_best_line_image": "1_screen2",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.994,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "ecom_amazon_parle_g_800g",
+      "field": "unit_sale_price",
+      "gold": "₹11.25 /100 g",
+      "final": "211.25/100 g",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 1.0,
+        "1_screen2": 0.5,
+        "2_screen3": 0.0,
+        "3_screen4": 0.5
+      },
+      "ocr_best_line": "amazon.in",
+      "ocr_best_line_image": "0_screen1",
+      "ocr_best_line_coverage": 0.0,
+      "ocr_best_line_confidence": 0.994,
+      "gold_is_labelled": false,
+      "status": "wrong",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "ecom_amazon_parle_krackjack",
+      "field": "mrp",
+      "gold": "₹128",
+      "final": "M.R.P:150.00",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 1.0,
+        "1_screen2": 0.0,
+        "2_screen3": 0.0,
+        "3_screen4": 1.0,
+        "4_screen5": 0.0
+      },
+      "ocr_best_line": "amazon.in",
+      "ocr_best_line_image": "0_screen1",
+      "ocr_best_line_coverage": 0.0,
+      "ocr_best_line_confidence": 0.992,
+      "gold_is_labelled": false,
+      "status": "wrong",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "ecom_amazon_parle_krackjack",
+      "field": "unit_sale_price",
+      "gold": "₹18.29 /100 g",
+      "final": "218.29 /100 g",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 1.0,
+        "1_screen2": 0.5,
+        "2_screen3": 0.5,
+        "3_screen4": 0.5,
+        "4_screen5": 0.0
+      },
+      "ocr_best_line": "(218.29 /100 g)",
+      "ocr_best_line_image": "0_screen1",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.974,
+      "gold_is_labelled": false,
+      "status": "wrong",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "ecom_amazon_tata_salt_1kg",
+      "field": "generic_name",
+      "gold": "Generic Name : Salt",
+      "final": "Generic Name : Salt",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 0.33,
+        "1_screen2": 0.67,
+        "2_screen3": 0.33,
+        "3_screen4": 1.0,
+        "4_screen5": 0.33,
+        "5_screen6": 0.33
+      },
+      "ocr_best_line": "Generic Name : Salt",
+      "ocr_best_line_image": "3_screen4",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.981,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "ecom_amazon_tata_salt_1kg",
+      "field": "manufacturer",
+      "gold": "Manufacturer : Tata Chemicals Limited, P. 0. Mithapur-361 345, District-Devbhumi Dwarka, Gujarat, Lic. No. 10012021000351, Tata Sampann",
+      "final": "Manufacturer : Tata Chemicals Limited, P. 0. Mithapur-361 345, District-Devbhumi Dwarka, Gujarat, Lic. No. 10012021000351, Tata Sampann",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 0.23,
+        "1_screen2": 0.31,
+        "2_screen3": 0.15,
+        "3_screen4": 1.0,
+        "4_screen5": 0.15,
+        "5_screen6": 0.0
+      },
+      "ocr_best_line": "Manufacturer : Tata Chemicals Limited, P. 0. Mithapur-361 345, District-Devbhumi Dwarka, Gujarat, Lic. No. 10012021000351, Tata Sampann",
+      "ocr_best_line_image": "3_screen4",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.992,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "ecom_amazon_tata_salt_1kg",
+      "field": "mrp",
+      "gold": "M.R.P.: ₹32.00",
+      "final": "M.R.P.: 32.00",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 1.0,
+        "1_screen2": 0.5,
+        "2_screen3": 0.0,
+        "3_screen4": 0.0,
+        "4_screen5": 0.0,
+        "5_screen6": 0.0
+      },
+      "ocr_best_line": "M.R.P.: 32.00",
+      "ocr_best_line_image": "0_screen1",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.951,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "ecom_amazon_tata_salt_1kg",
+      "field": "net_quantity",
+      "gold": "Net Quantity : 1000.0 Grams",
+      "final": "Net Quantity : 1000.0 Grams",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 0.0,
+        "1_screen2": 0.0,
+        "2_screen3": 0.0,
+        "3_screen4": 1.0,
+        "4_screen5": 0.0,
+        "5_screen6": 0.0
+      },
+      "ocr_best_line": "Net Quantity : 1000.0 Grams",
+      "ocr_best_line_image": "3_screen4",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.972,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "ecom_amazon_tata_salt_1kg",
+      "field": "unit_sale_price",
+      "gold": "₹2.90 /100 g",
+      "final": "2.90/100 g",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 1.0,
+        "1_screen2": 0.5,
+        "2_screen3": 0.0,
+        "3_screen4": 0.0,
+        "4_screen5": 0.0,
+        "5_screen6": 0.0
+      },
+      "ocr_best_line": "amazon.in",
+      "ocr_best_line_image": "0_screen1",
+      "ocr_best_line_coverage": 0.0,
+      "ocr_best_line_confidence": 0.975,
+      "gold_is_labelled": false,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "ecom_flipkart_tata_salt",
+      "field": "best_before",
+      "gold": null,
+      "final": "BEST BEFORE TWENTY FOUR",
+      "status": "spurious",
+      "category": "spurious",
+      "why": "predicted a field gold does not have"
+    },
+    {
+      "case": "ecom_flipkart_tata_salt",
+      "field": "manufacturer",
+      "gold": "Marketed by: TATA CONSUMER PRODUCTS LIMITED, 1, Bishop Lefroy Road, Kolkata, West Bengal - 700 020.",
+      "final": "Marketed by: TATA CONSUMER PRODUCTS LIMITED, 1, Bishop Letroy Road, Kolkata",
+      "ocr_coverage_all_images": 0.92,
+      "ocr_coverage_by_image": {
+        "0_screen1": 0.31,
+        "1_screen2": 0.92,
+        "2_screen3": 0.23,
+        "3_screen4": 0.31,
+        "4_screen5": 0.0
+      },
+      "ocr_best_line": "Marketed by: TATA CONSUMER PRODUCTS LIMITED, 1, Bishop Letroy Road, Kolkata,",
+      "ocr_best_line_image": "1_screen2",
+      "ocr_best_line_coverage": 0.62,
+      "ocr_best_line_confidence": 0.942,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.86,
+      "category": "recognition",
+      "why": "prediction is 86% similar to gold: characters OCR misread"
+    },
+    {
+      "case": "ecom_flipkart_tata_salt",
+      "field": "net_quantity",
+      "gold": "Quantity 1000 g",
+      "final": "Quantity 1000 g",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_screen1": 1.0,
+        "1_screen2": 0.5,
+        "2_screen3": 0.5,
+        "3_screen4": 0.0,
+        "4_screen5": 0.0
+      },
+      "ocr_best_line": "T lodized Salt (1000 g)",
+      "ocr_best_line_image": "0_screen1",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.994,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "obf_cetaphil_gentle_skin_cleanser_8906005274106",
+      "field": "generic_name",
+      "gold": "Gentle Skin Cleanser",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 1.0,
+        "1_ingredients": 0.0
+      },
+      "ocr_best_line": "FOR SENSITIVE SKIN",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.33,
+      "ocr_best_line_confidence": 0.998,
+      "gold_is_labelled": false,
+      "status": "missed",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "obf_cetaphil_gentle_skin_cleanser_8906005274106",
+      "field": "net_quantity",
+      "gold": "Net Qty.: 125 mL",
+      "final": "Net Qty: 125 mL",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 1.0,
+        "1_ingredients": 0.0
+      },
+      "ocr_best_line": "Net Qty:",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.67,
+      "ocr_best_line_confidence": 0.936,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "obf_cetaphil_moisturising_lotion_8906005274137",
+      "field": "best_before",
+      "gold": "Use Before: 04/26",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 1.0,
+        "2_nutrition": 1.0
+      },
+      "ocr_best_line": "use:",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.33,
+      "ocr_best_line_confidence": 0.999,
+      "gold_is_labelled": false,
+      "status": "missed",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "obf_cetaphil_moisturising_lotion_8906005274137",
+      "field": "generic_name",
+      "gold": "Moisturising Lotion",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 1.0,
+        "1_ingredients": 1.0,
+        "2_nutrition": 1.0
+      },
+      "ocr_best_line": "Moisturising",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 1.0,
+      "gold_is_labelled": false,
+      "status": "missed",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "obf_cetaphil_moisturising_lotion_8906005274137",
+      "field": "manufacturer",
+      "gold": "Marketed by: Galderma India Pvt. Ltd.",
+      "final": "Marketed by: Galderma Inda Pvt. Ltd. 8th floor, D Wing, Unit 8o1 & 802, 6 Wing 2 Lotu Corporat ark O Wsten Express Highway, Goregaon East Mumbai, 400063, Maharashtra, India. For consumerp or contact +51 22 4033n818 or emal at info.india@galderma.com",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.8,
+        "2_nutrition": 1.0
+      },
+      "ocr_best_line": "Marketed by: Galderma Inda Pvt. Ltd.",
+      "ocr_best_line_image": "2_nutrition",
+      "ocr_best_line_coverage": 0.8,
+      "ocr_best_line_confidence": 0.897,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.25,
+      "category": "association",
+      "why": "anchor fired but the value came from another box (25% similar)"
+    },
+    {
+      "case": "obf_cetaphil_moisturising_lotion_8906005274137",
+      "field": "mfg_date",
+      "gold": "Mfg. Date: 04/23",
+      "final": "Mfg. Date: 04/23",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 1.0,
+        "2_nutrition": 1.0
+      },
+      "ocr_best_line": "Mfg.",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.33,
+      "ocr_best_line_confidence": 0.97,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "obf_cetaphil_moisturising_lotion_8906005274137",
+      "field": "mrp",
+      "gold": "MRP (Inclusive of all taxes) ₹: 486.00 (Rs. 4.86/ml)",
+      "final": "MRP (Inclusive of all taxes) 486.00 (Rs. 4.86/ml)",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 1.0,
+        "2_nutrition": 1.0
+      },
+      "ocr_best_line": "MRP (Inclusive of all taxes)",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.67,
+      "ocr_best_line_confidence": 0.989,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "obf_cetaphil_moisturising_lotion_8906005274137",
+      "field": "net_quantity",
+      "gold": "Net Qty.: 100mL",
+      "final": "Net Qty. 100mL",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 1.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.33
+      },
+      "ocr_best_line": "Net Qty.",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.67,
+      "ocr_best_line_confidence": 0.879,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "obf_cetaphil_moisturising_lotion_8906005274137",
+      "field": "unit_sale_price",
+      "gold": "Rs. 4.86/ml",
+      "final": "4.86/ml",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 1.0,
+        "2_nutrition": 1.0
+      },
+      "ocr_best_line": "486.00 (Rs. 4.86/ml)",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.959,
+      "gold_is_labelled": false,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "obf_himalaya_lip_balm_8901138509231",
+      "field": "generic_name",
+      "gold": "Lip Balm",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 1.0,
+        "1_ingredients": 0.5,
+        "2_packaging": 0.0
+      },
+      "ocr_best_line": "Lip",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 1.0,
+      "gold_is_labelled": false,
+      "status": "missed",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "obf_himalaya_lip_balm_8901138509231",
+      "field": "net_quantity",
+      "gold": "Net Wt. 10 g",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 1.0,
+        "1_ingredients": 0.0,
+        "2_packaging": 0.0
+      },
+      "ocr_best_line": "Net",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 1.0,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "anchor",
+      "why": "100% of the gold words sit on one OCR line; nothing claimed it"
+    },
+    {
+      "case": "obf_muuchstac_ocean_muuchstac_face_wash_9102453113625",
+      "field": "best_before",
+      "gold": "Exp. Dt 04/2027",
+      "final": null,
+      "ocr_coverage_all_images": 0.5,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_packaging": 0.5
+      },
+      "ocr_best_line": "Exp.",
+      "ocr_best_line_image": "2_packaging",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.993,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (50%) but the best single line holds 50%"
+    },
+    {
+      "case": "obf_muuchstac_ocean_muuchstac_face_wash_9102453113625",
+      "field": "consumer_care",
+      "gold": "Customer Care Contact at: Address: Same as above Mob. No./: +91-9892599660 Email Id: customercare@muuchstac.com Website: www.muuchstac.com",
+      "final": null,
+      "ocr_coverage_all_images": 0.92,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_packaging": 0.92
+      },
+      "ocr_best_line": "Address:",
+      "ocr_best_line_image": "2_packaging",
+      "ocr_best_line_coverage": 0.08,
+      "ocr_best_line_confidence": 0.995,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (92%) but the best single line holds 8%"
+    },
+    {
+      "case": "obf_muuchstac_ocean_muuchstac_face_wash_9102453113625",
+      "field": "country_of_origin",
+      "gold": "MADE IN INDIA",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_packaging": 1.0
+      },
+      "ocr_best_line": "India",
+      "ocr_best_line_image": "2_packaging",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 1.0,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (100%) but the best single line holds 50%"
+    },
+    {
+      "case": "obf_muuchstac_ocean_muuchstac_face_wash_9102453113625",
+      "field": "generic_name",
+      "gold": "FACE WASH",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 1.0,
+        "1_ingredients": 1.0,
+        "2_packaging": 0.0
+      },
+      "ocr_best_line": "FACE",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 1.0,
+      "gold_is_labelled": false,
+      "status": "missed",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "obf_muuchstac_ocean_muuchstac_face_wash_9102453113625",
+      "field": "manufacturer",
+      "gold": "MARKETED BY: Triology Solutions Pvt. Ltd. CIN: U90009MH2017PTC294630 Address: D3 Kasturi Vandana Complex, Lane Opp Swagat Hotel, Goddev Phathak Road, Bhayandar (E), Maharashtra, India - 401105",
+      "final": null,
+      "ocr_coverage_all_images": 0.91,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.09,
+        "2_packaging": 0.91
+      },
+      "ocr_best_line": "Solutions",
+      "ocr_best_line_image": "2_packaging",
+      "ocr_best_line_coverage": 0.05,
+      "ocr_best_line_confidence": 0.999,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (91%) but the best single line holds 5%"
+    },
+    {
+      "case": "obf_muuchstac_ocean_muuchstac_face_wash_9102453113625",
+      "field": "mfg_date",
+      "gold": "Mfd. 05/2025",
+      "final": "Mfd. y | 22 June 202557003mF",
+      "ocr_coverage_all_images": 0.5,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_packaging": 0.5
+      },
+      "ocr_best_line": "MFD.",
+      "ocr_best_line_image": "2_packaging",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.999,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.45,
+      "category": "association",
+      "why": "anchor fired but the value came from another box (45% similar)"
+    },
+    {
+      "case": "obf_muuchstac_ocean_muuchstac_face_wash_9102453113625",
+      "field": "mrp",
+      "gold": "MRP ₹ (Incl. of all taxes) 299.00",
+      "final": "MRP 2027",
+      "ocr_coverage_all_images": 0.4,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.2,
+        "2_packaging": 0.4
+      },
+      "ocr_best_line": "ALL SKIN",
+      "ocr_best_line_image": "2_packaging",
+      "ocr_best_line_coverage": 0.2,
+      "ocr_best_line_confidence": 0.999,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "category": "ocr_missed",
+      "why": "only 40% of the gold words are anywhere in the OCR output"
+    },
+    {
+      "case": "obf_muuchstac_ocean_muuchstac_face_wash_9102453113625",
+      "field": "net_quantity",
+      "gold": "Net Vol. 100ml (3.38 FL.OZ) (when packed.)",
+      "final": "Net Vol. 100ml (3.38 FL.OZ)",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.43,
+        "1_ingredients": 0.0,
+        "2_packaging": 1.0
+      },
+      "ocr_best_line": "100ml (3.38 FL.OZ)",
+      "ocr_best_line_image": "2_packaging",
+      "ocr_best_line_coverage": 0.43,
+      "ocr_best_line_confidence": 0.987,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.79,
+      "category": "wrapped",
+      "why": "prediction is a prefix / part of gold: continuation lines were dropped"
+    },
+    {
+      "case": "obf_patanjali_saundarya_aloe_vera_gel_8904109400643",
+      "field": "generic_name",
+      "gold": "AYURVEDIC PROPRIETARY MEDICINE",
+      "final": null,
+      "ocr_coverage_all_images": 0.0,
+      "ocr_coverage_by_image": {},
+      "gold_is_labelled": false,
+      "status": "missed",
+      "category": "ocr_missed",
+      "why": "only 0% of the gold words are anywhere in the OCR output"
+    },
+    {
+      "case": "obf_patanjali_saundarya_aloe_vera_gel_8904109400643",
+      "field": "net_quantity",
+      "gold": "Net Volume: 150 ml",
+      "final": "Net Volume: 150 ml",
+      "ocr_coverage_all_images": 0.0,
+      "ocr_coverage_by_image": {},
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_amul_amul_masti_spiced_buttermilk_200ml_8901262200196",
+      "field": "generic_name",
+      "gold": "SPICED BUTTERMILK",
+      "final": "SPICED BUTTERMILK",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 1.0,
+        "1_ingredients": 1.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "SPICED BUTTERMILK",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.986,
+      "gold_is_labelled": false,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_amul_amul_masti_spiced_buttermilk_200ml_8901262200196",
+      "field": "manufacturer",
+      "gold": "Marketed by: Gujarat Co-operative Milk Marketing Federation Ltd., Amul Dairy Road, Anand, Gujarat - 388001, India.",
+      "final": "Marketed by: Gujarat Federation India, Website",
+      "ocr_coverage_all_images": 0.93,
+      "ocr_coverage_by_image": {
+        "0_front": 0.14,
+        "1_ingredients": 0.93,
+        "2_nutrition": 0.0,
+        "3_packaging": 0.14
+      },
+      "ocr_best_line": "Gujarat - 388001,",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.21,
+      "ocr_best_line_confidence": 0.94,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.49,
+      "category": "association",
+      "why": "anchor fired but the value came from another box (49% similar)"
+    },
+    {
+      "case": "off_amul_amul_masti_spiced_buttermilk_200ml_8901262200196",
+      "field": "net_quantity",
+      "gold": "Net Content: 200 mL",
+      "final": "Net Content: 200 mL",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 1.0,
+        "2_nutrition": 0.33,
+        "3_packaging": 0.33
+      },
+      "ocr_best_line": "Net Content:",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.67,
+      "ocr_best_line_confidence": 1.0,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_amul_amul_taaza_amul_taaza_milky_milk_8901262260121",
+      "field": "generic_name",
+      "gold": "PASTEURISED HOMOGENISED TONED MILK",
+      "final": "TONED MILK",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.75,
+        "1_ingredients": 1.0,
+        "2_nutrition": 1.0
+      },
+      "ocr_best_line": "TONED MILK",
+      "ocr_best_line_image": "2_nutrition",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.999,
+      "gold_is_labelled": false,
+      "status": "wrong",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "off_amul_amul_taaza_amul_taaza_milky_milk_8901262260121",
+      "field": "net_quantity",
+      "gold": "Net Content : 500 mL",
+      "final": "Net Content: 500 mL",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 1.0,
+        "2_nutrition": 1.0
+      },
+      "ocr_best_line": "Net Content:",
+      "ocr_best_line_image": "2_nutrition",
+      "ocr_best_line_coverage": 0.67,
+      "ocr_best_line_confidence": 0.967,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_balaji_balaji_wafers_chataka_pataka_8906010500764",
+      "field": "generic_name",
+      "gold": "PROPRIETARY FOOD NAMKEEN INDIAN SNACKS & SAVOURIES",
+      "final": "PROPRIETARY FOOD",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_ingredients": 1.0,
+        "1_nutrition": 0.83
+      },
+      "ocr_best_line": "INDIAN SNACKS & SAVOURIES",
+      "ocr_best_line_image": "0_ingredients",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 1.0,
+      "gold_is_labelled": false,
+      "status": "wrong",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "off_balaji_balaji_wafers_chataka_pataka_8906010500764",
+      "field": "mrp",
+      "gold": "MRP ₹ (#INCL. OF ALL TAXES) : 5.00",
+      "final": "MRP7",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_ingredients": 0.2,
+        "1_nutrition": 1.0
+      },
+      "ocr_best_line": "(INCL. OF ALL TAXES)",
+      "ocr_best_line_image": "1_nutrition",
+      "ocr_best_line_coverage": 0.6,
+      "ocr_best_line_confidence": 0.935,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.24,
+      "category": "association",
+      "why": "anchor fired but the value came from another box (24% similar)"
+    },
+    {
+      "case": "off_balaji_balaji_wafers_chataka_pataka_8906010500764",
+      "field": "net_quantity",
+      "gold": "NET WEIGHT : 25g",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_ingredients": 0.0,
+        "1_nutrition": 1.0
+      },
+      "ocr_best_line": "NET",
+      "ocr_best_line_image": "1_nutrition",
+      "ocr_best_line_coverage": 0.33,
+      "ocr_best_line_confidence": 0.999,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (100%) but the best single line holds 33%"
+    },
+    {
+      "case": "off_balaji_balaji_wafers_chataka_pataka_8906010500764",
+      "field": "unit_sale_price",
+      "gold": "UNIT SALE PRICE : ₹ 0.20 PER g",
+      "final": "UNIT SALE PRICE:  0.20 PER g",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_ingredients": 0.2,
+        "1_nutrition": 1.0
+      },
+      "ocr_best_line": "UNIT SALE PRICE:  0.20 PER g",
+      "ocr_best_line_image": "1_nutrition",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.928,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_balaji_balaji_wafers_panjabi_tadka_8906010502232",
+      "field": "consumer_care",
+      "gold": null,
+      "final": "CONSUMER CARE YECUTIVE +91-7069014141 ON ANY WORKING",
+      "status": "spurious",
+      "category": "spurious",
+      "why": "predicted a field gold does not have"
+    },
+    {
+      "case": "off_balaji_balaji_wafers_panjabi_tadka_8906010502232",
+      "field": "generic_name",
+      "gold": "PROPRIETARY FOOD NAMKEEN INDIAN SNACKS & SAVOURIES",
+      "final": "PROPRIETARY FOOD",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "INDIAN SNACKS & SAVOURIES",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.961,
+      "gold_is_labelled": false,
+      "status": "wrong",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "off_balaji_balaji_wafers_panjabi_tadka_8906010502232",
+      "field": "mfg_date",
+      "gold": "PKD. : 01JUL25 09:02:49",
+      "final": "PKD. : 01JUL25",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "PKD. :",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.33,
+      "ocr_best_line_confidence": 0.993,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.77,
+      "category": "wrapped",
+      "why": "prediction is a prefix / part of gold: continuation lines were dropped"
+    },
+    {
+      "case": "off_balaji_balaji_wafers_panjabi_tadka_8906010502232",
+      "field": "net_quantity",
+      "gold": "NET WEIGHT : 22g",
+      "final": "NET WEIGHT : 221",
+      "ocr_coverage_all_images": 0.67,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 0.67
+      },
+      "ocr_best_line": "NET WEIGHT :",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.67,
+      "ocr_best_line_confidence": 0.957,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.92,
+      "category": "recognition",
+      "why": "prediction is 92% similar to gold: characters OCR misread"
+    },
+    {
+      "case": "off_balaji_balaji_wafers_panjabi_tadka_8906010502232",
+      "field": "unit_sale_price",
+      "gold": "UNIT SALE PRICE : ₹ 0.23 PER g",
+      "final": "UNIT SALE PRICE: 0.23 PER",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.2,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "UNIT SALE PRICE: 0.23 PER",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.967,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.98,
+      "category": "recognition",
+      "why": "prediction is 98% similar to gold: characters OCR misread"
+    },
+    {
+      "case": "off_balaji_chataka_pataka_8906010502119",
+      "field": "generic_name",
+      "gold": "PROPRIETARY FOOD NAMKEEN INDIAN SNACKS & SAVOURIES",
+      "final": "DEHYDRATED VEGETABLE",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.17,
+        "1_ingredients": 0.83,
+        "2_nutrition": 1.0
+      },
+      "ocr_best_line": "PROPRIETARY FOOD",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.33,
+      "ocr_best_line_confidence": 0.996,
+      "gold_is_labelled": false,
+      "status": "wrong",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "off_balaji_chataka_pataka_8906010502119",
+      "field": "mrp",
+      "gold": "MRP ₹ (*INCL. OF ALL TAXES) : 5.00",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.2,
+        "2_nutrition": 1.0
+      },
+      "ocr_best_line": "(INCL OF LL TAXES)",
+      "ocr_best_line_image": "2_nutrition",
+      "ocr_best_line_coverage": 0.4,
+      "ocr_best_line_confidence": 0.876,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (100%) but the best single line holds 40%"
+    },
+    {
+      "case": "off_balaji_chataka_pataka_8906010502119",
+      "field": "net_quantity",
+      "gold": "NET WEIGHT : 25g",
+      "final": "NET WEIGHT: 25g",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 1.0
+      },
+      "ocr_best_line": "NET WEIGHT:",
+      "ocr_best_line_image": "2_nutrition",
+      "ocr_best_line_coverage": 0.67,
+      "ocr_best_line_confidence": 0.996,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_balaji_chataka_pataka_8906010502119",
+      "field": "unit_sale_price",
+      "gold": "UNIT SALE PRICE : ₹ 0.20 PER g",
+      "final": "UNIT SALE PRICE:3 020 DED",
+      "ocr_coverage_all_images": 0.8,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.2,
+        "2_nutrition": 0.8
+      },
+      "ocr_best_line": "UNIT SALE PRICE:3 020 DED",
+      "ocr_best_line_image": "2_nutrition",
+      "ocr_best_line_coverage": 0.6,
+      "ocr_best_line_confidence": 0.917,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.83,
+      "category": "association",
+      "why": "anchor fired but the value came from another box (83% similar)"
+    },
+    {
+      "case": "off_bisleri_bisleri_1ltr_made_in_india_8906017290040",
+      "field": "best_before",
+      "gold": "BEST BEFORE SIX MONTHS FROM MANUFACTURE",
+      "final": null,
+      "ocr_coverage_all_images": 0.83,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.83,
+        "3_packaging": 0.0
+      },
+      "ocr_best_line": "FROM",
+      "ocr_best_line_image": "2_nutrition",
+      "ocr_best_line_coverage": 0.17,
+      "ocr_best_line_confidence": 1.0,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (83%) but the best single line holds 17%"
+    },
+    {
+      "case": "off_bisleri_bisleri_1ltr_made_in_india_8906017290040",
+      "field": "consumer_care",
+      "gold": "CONTACT: CUSTOMER CARE EXECUTIVE 1800-121-1007 EMAIL: WECARE@BISLERI.CO.IN ADDRESS: SAME AS MKT BY ADDRESS",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 1.0,
+        "3_packaging": 0.0
+      },
+      "ocr_best_line": "ADDRESS:",
+      "ocr_best_line_image": "2_nutrition",
+      "ocr_best_line_coverage": 0.18,
+      "ocr_best_line_confidence": 0.978,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (100%) but the best single line holds 18%"
+    },
+    {
+      "case": "off_bisleri_bisleri_1ltr_made_in_india_8906017290040",
+      "field": "generic_name",
+      "gold": "PACKAGED DRINKING WATER OZONISED",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 1.0,
+        "2_nutrition": 1.0,
+        "3_packaging": 0.0
+      },
+      "ocr_best_line": "WATER",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.25,
+      "ocr_best_line_confidence": 1.0,
+      "gold_is_labelled": false,
+      "status": "missed",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "off_bisleri_bisleri_1ltr_made_in_india_8906017290040",
+      "field": "manufacturer",
+      "gold": "MKT BY: BISLERI INTERNATIONAL PVT. LTD., 5TH FLOOR, CTS NO. 525/1A1/A, WESTERN EXPRESS HIGHWAY, ANDHERI (EAST), MUMBAI - 400 099, MAHARASHTRA.",
+      "final": "MFD BY: PRISTINE PLOT NO. -15S, MIDC LOHARA, MAHARASHTRA-445001. UC NO. 10020022011032",
+      "ocr_coverage_all_images": 0.94,
+      "ocr_coverage_by_image": {
+        "0_front": 0.06,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.94,
+        "3_packaging": 0.0
+      },
+      "ocr_best_line": "MUMBAI - 400 099, MAHARASHTRA.",
+      "ocr_best_line_image": "2_nutrition",
+      "ocr_best_line_coverage": 0.22,
+      "ocr_best_line_confidence": 0.951,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.31,
+      "category": "association",
+      "why": "anchor fired but the value came from another box (31% similar)"
+    },
+    {
+      "case": "off_bisleri_bisleri_1ltr_made_in_india_8906017290040",
+      "field": "net_quantity",
+      "gold": null,
+      "final": "QUANTITY \"ADDED 100",
+      "status": "spurious",
+      "category": "spurious",
+      "why": "predicted a field gold does not have"
+    },
+    {
+      "case": "off_britannia_jimjam_57g_57_8901063029255",
+      "field": "generic_name",
+      "gold": "Flavoured Sandwich Biscuits",
+      "final": "Naughty Jam",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 1.0
+      },
+      "ocr_best_line": "Sandwich Biscuits",
+      "ocr_best_line_image": "2_nutrition",
+      "ocr_best_line_coverage": 0.67,
+      "ocr_best_line_confidence": 0.989,
+      "gold_is_labelled": false,
+      "status": "wrong",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "off_britannia_jimjam_57g_57_8901063029255",
+      "field": "net_quantity",
+      "gold": "BISCUITS NET WEIGHT 57 g",
+      "final": "BISCUITS NET WEIGHT 57g",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 1.0
+      },
+      "ocr_best_line": "BISCUITS NET WEIGHT",
+      "ocr_best_line_image": "2_nutrition",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.979,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_britannia_marie_gold_biscuit_8901063162914",
+      "field": "generic_name",
+      "gold": "BISCUIT",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 1.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 0.0
+      },
+      "ocr_best_line": "BISCUIT",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.999,
+      "gold_is_labelled": false,
+      "status": "missed",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "off_britannia_marie_gold_biscuit_8901063162914",
+      "field": "mrp",
+      "gold": "MRP. ₹10.00 (INCL. OF ALL TAXES)",
+      "final": null,
+      "ocr_coverage_all_images": 0.6,
+      "ocr_coverage_by_image": {
+        "0_front": 0.6,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 0.0
+      },
+      "ocr_best_line": "210",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.0,
+      "ocr_best_line_confidence": 0.522,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (60%) but the best single line holds 0%"
+    },
+    {
+      "case": "off_britannia_marie_gold_biscuit_8901063162914",
+      "field": "net_quantity",
+      "gold": "BISCUITS NET WEIGHT 64 g",
+      "final": "BISCUITS NET WEIGHT 64g",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 1.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 0.0
+      },
+      "ocr_best_line": "BISCUITS NET WEIGHT",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.989,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_britannia_marie_gold_biscuit_8901063162914",
+      "field": "unit_sale_price",
+      "gold": "Rs. 0.16 P.G.",
+      "final": null,
+      "ocr_coverage_all_images": 0.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 0.0
+      },
+      "ocr_best_line": "210",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.0,
+      "ocr_best_line_confidence": 0.522,
+      "gold_is_labelled": false,
+      "status": "missed",
+      "category": "ocr_missed",
+      "why": "only 0% of the gold words are anywhere in the OCR output"
+    },
+    {
+      "case": "off_bru_bru_instant_coffee_8901030535895",
+      "field": "best_before",
+      "gold": "USE BY 23/01/26",
+      "final": null,
+      "ocr_coverage_all_images": 0.5,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.5
+      },
+      "ocr_best_line": "RIGSAROMA",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.0,
+      "ocr_best_line_confidence": 0.944,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (50%) but the best single line holds 0%"
+    },
+    {
+      "case": "off_bru_bru_instant_coffee_8901030535895",
+      "field": "consumer_care",
+      "gold": "LEVERCARE-QUERY / FEEDBACK, TOLL FREE: 1800-10-22-221, PO BOX 14760, MUMBAI 400 099, LEVER.CARE@UNILEVER.COM",
+      "final": null,
+      "ocr_coverage_all_images": 0.73,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.73
+      },
+      "ocr_best_line": "PO B0X 14760, MUMBAI 400 099",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.36,
+      "ocr_best_line_confidence": 0.924,
+      "gold_is_labelled": false,
+      "status": "missed",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "off_bru_bru_instant_coffee_8901030535895",
+      "field": "generic_name",
+      "gold": "INSTANT COFFEE-CHICORY MIXTURE COFFEE 70% CHICORY 30%",
+      "final": "INSTANT COFFEE-CHICORY",
+      "ocr_coverage_all_images": 0.8,
+      "ocr_coverage_by_image": {
+        "0_front": 0.2,
+        "1_ingredients": 0.8
+      },
+      "ocr_best_line": "INSTANT COFFEE-CHICORY",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.8,
+      "ocr_best_line_confidence": 0.996,
+      "gold_is_labelled": false,
+      "status": "wrong",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "off_bru_bru_instant_coffee_8901030535895",
+      "field": "manufacturer",
+      "gold": "MKTD. BY: HINDUSTAN UNILEVER LTD. (HUL), UNILEVER HOUSE, CHAKALA, ANDHERI (E), MUMBAI-99.",
+      "final": "MKTD. BY: HINDUSTAN UNILEVER LTD. (HUL),UNILEVER HOUSE, CHAKALA ANDHERI (E), MUMBAI-99. FOR MFR. & MPG. READ IST CHARACTER OF BATCH AND SEB BELOW. MPG. BY: (A) ABISHEK (R) ROHINI PACKER, FSSAILIC.NO. 10012042000164.STORE INA",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 1.0
+      },
+      "ocr_best_line": "MKTD. BY: HINDUSTAN UNILEVER LTD.",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.982,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.57,
+      "category": "wrapped",
+      "why": "gold is inside the prediction: neighbouring lines were merged in"
+    },
+    {
+      "case": "off_bru_bru_instant_coffee_8901030535895",
+      "field": "mfg_date",
+      "gold": "PKD. 24/01/25",
+      "final": null,
+      "ocr_coverage_all_images": 0.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0
+      },
+      "ocr_best_line": "RIGSAROMA",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.0,
+      "ocr_best_line_confidence": 0.944,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "ocr_missed",
+      "why": "only 0% of the gold words are anywhere in the OCR output"
+    },
+    {
+      "case": "off_bru_bru_instant_coffee_8901030535895",
+      "field": "mrp",
+      "gold": "MRP ₹ 2.00 (INCL. OF ALL TAXES)",
+      "final": "MRP2.00 (INCL. OF ALL TAXES)",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 1.0
+      },
+      "ocr_best_line": "MRP? 2.00 (INCL. OF ALL TAXES)",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.953,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_bru_bru_instant_coffee_8901030535895",
+      "field": "net_quantity",
+      "gold": "NET WT.: 1.2 g",
+      "final": "NET WT.: 1.28",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 1.0
+      },
+      "ocr_best_line": "NET WT.:",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.936,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.89,
+      "category": "recognition",
+      "why": "prediction is 89% similar to gold: characters OCR misread"
+    },
+    {
+      "case": "off_ching_s_secret_schezwan_chutney_8901595862962",
+      "field": "consumer_care",
+      "gold": "FOR ANY COMPLAINT CONTACT CUSTOMER CARE EXECUTIVE AT MKT BY ADDRESS ABOVE. 18001084488 AND care@tataconsumer.com",
+      "final": null,
+      "ocr_coverage_all_images": 0.92,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.92,
+        "2_nutrition": 0.08
+      },
+      "ocr_best_line": "No and see above.",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.15,
+      "ocr_best_line_confidence": 0.951,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (92%) but the best single line holds 15%"
+    },
+    {
+      "case": "off_ching_s_secret_schezwan_chutney_8901595862962",
+      "field": "manufacturer",
+      "gold": "MKT BY: CAPITAL FOODS PVT. LTD., VILLA CAPITAL, SADHANA COMPOUND, NR. OSHIWARA BRIDGE, S. V. ROAD, JOGESHWARI (W), MUMBAI - 400 102.",
+      "final": "Mfg by: (A) Lic. (C) Lic No: (P) Lic. No",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 1.0,
+        "2_nutrition": 0.0
+      },
+      "ocr_best_line": "BY: CAPITAL",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.12,
+      "ocr_best_line_confidence": 0.993,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.12,
+      "category": "association",
+      "why": "anchor fired but the value came from another box (12% similar)"
+    },
+    {
+      "case": "off_ching_secret_dark_soy_sauce_8901595862818",
+      "field": "best_before",
+      "gold": "USE BY: 10/12/2025",
+      "final": "USE BY: 10/12/2025",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 1.0,
+        "3_packaging": 0.5
+      },
+      "ocr_best_line": "USE BY:",
+      "ocr_best_line_image": "2_nutrition",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.987,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_ching_secret_dark_soy_sauce_8901595862818",
+      "field": "consumer_care",
+      "gold": "FOR ANY COMPLAINT CONTACT CONSUMER MANAGER AT BRAND OWNED & MARKETED BY ADDRESS ABOVE. 022-67140100 AND CUSTOMERCARE@CAPITALFOODS.CO.IN",
+      "final": null,
+      "ocr_coverage_all_images": 0.5,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.14,
+        "2_nutrition": 0.21,
+        "3_packaging": 0.43
+      },
+      "ocr_best_line": "FOR ANY",
+      "ocr_best_line_image": "2_nutrition",
+      "ocr_best_line_coverage": 0.14,
+      "ocr_best_line_confidence": 0.905,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (50%) but the best single line holds 14%"
+    },
+    {
+      "case": "off_ching_secret_dark_soy_sauce_8901595862818",
+      "field": "generic_name",
+      "gold": "DARK SOY SAUCE (SOYABEAN SAUCE)",
+      "final": "Natural Colour",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 1.0,
+        "1_ingredients": 0.2,
+        "2_nutrition": 0.2,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "SAUCE",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.4,
+      "ocr_best_line_confidence": 1.0,
+      "gold_is_labelled": false,
+      "status": "wrong",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "off_ching_secret_dark_soy_sauce_8901595862818",
+      "field": "manufacturer",
+      "gold": "BRAND OWNED & MARKETED BY: CAPITAL FOODS PVT.LTD., VILLA CAPITAL, SADHANA COMPOUND, NR. OSHIWARA BRIDGE, S.V. ROAD, JOGESHWARI (W), MUMBAI - 400 102.",
+      "final": "Manufactured by: (A) Vrinda Aagro, () Pan Foods (Div. of Kayem Lic. No.10012064000055 (N) ANN Distt",
+      "ocr_coverage_all_images": 0.18,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 0.18
+      },
+      "ocr_best_line": "() Pan Foods (Div. of Kayem",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.06,
+      "ocr_best_line_confidence": 0.937,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "category": "ocr_missed",
+      "why": "only 18% of the gold words are anywhere in the OCR output"
+    },
+    {
+      "case": "off_ching_secret_dark_soy_sauce_8901595862818",
+      "field": "mfg_date",
+      "gold": "DATE OF MFG.: 10/12/2024 (15:16)",
+      "final": "DATE OF MFG.: (incl. of all taxes) 10/12/2024(15:16)",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 1.0,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "DATE OF MFG.:",
+      "ocr_best_line_image": "2_nutrition",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.966,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.77,
+      "category": "association",
+      "why": "anchor fired but the value came from another box (77% similar)"
+    },
+    {
+      "case": "off_ching_secret_dark_soy_sauce_8901595862818",
+      "field": "mrp",
+      "gold": "MRP ₹: (incl. of all taxes) 25 (Rs. 0.28/g)",
+      "final": "MRP3: 25(Rs.0.28/9)",
+      "ocr_coverage_all_images": 0.8,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.2,
+        "2_nutrition": 0.8,
+        "3_packaging": 0.8
+      },
+      "ocr_best_line": "(incl. of all taxes)",
+      "ocr_best_line_image": "2_nutrition",
+      "ocr_best_line_coverage": 0.6,
+      "ocr_best_line_confidence": 0.954,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.54,
+      "category": "association",
+      "why": "anchor fired but the value came from another box (54% similar)"
+    },
+    {
+      "case": "off_ching_secret_dark_soy_sauce_8901595862818",
+      "field": "unit_sale_price",
+      "gold": "Rs. 0.28/g",
+      "final": null,
+      "ocr_coverage_all_images": 0.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 0.0
+      },
+      "ocr_best_line": "@",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.0,
+      "ocr_best_line_confidence": 0.352,
+      "gold_is_labelled": false,
+      "status": "missed",
+      "category": "ocr_missed",
+      "why": "only 0% of the gold words are anywhere in the OCR output"
+    },
+    {
+      "case": "off_coca_cola_sprite_8901764032707",
+      "field": "country_of_origin",
+      "gold": "MADE IN INDIA",
+      "final": null,
+      "ocr_coverage_all_images": 0.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 0.0
+      },
+      "ocr_best_line": "Sprite",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.0,
+      "ocr_best_line_confidence": 0.993,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "ocr_missed",
+      "why": "only 0% of the gold words are anywhere in the OCR output"
+    },
+    {
+      "case": "off_coca_cola_sprite_8901764032707",
+      "field": "generic_name",
+      "gold": null,
+      "final": "MOOMATED WATER",
+      "status": "spurious",
+      "category": "spurious",
+      "why": "predicted a field gold does not have"
+    },
+    {
+      "case": "off_coca_cola_sprite_8901764032707",
+      "field": "net_quantity",
+      "gold": "NET QUANTITY: 600 ml",
+      "final": null,
+      "ocr_coverage_all_images": 0.33,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 0.33
+      },
+      "ocr_best_line": "600 ml",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.33,
+      "ocr_best_line_confidence": 0.977,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "ocr_missed",
+      "why": "only 33% of the gold words are anywhere in the OCR output"
+    },
+    {
+      "case": "off_coca_cola_sprite_sprite_8901764032905",
+      "field": "consumer_care",
+      "gold": "CONTACT CONSUMER RESPONSE COORDINATOR AT: 1800-208-2653 indiahelpline@coca-cola.com ADDRESS: SAME AS MFG/MKT BY ADDRESS",
+      "final": "CONTACT CONSUMER RESPONSE COORDINATOR AT: 1800-208-2653 indiahelpline@coca-cola.com ADDRESS: SAME AS MFG/MKT BY ADDRESS RECYCLE",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.3,
+        "2_packaging": 1.0
+      },
+      "ocr_best_line": "CONTACT CONSUMER RESPONSE COORDINATOR AT:",
+      "ocr_best_line_image": "2_packaging",
+      "ocr_best_line_coverage": 0.4,
+      "ocr_best_line_confidence": 0.996,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.97,
+      "category": "recognition",
+      "why": "prediction is 97% similar to gold: characters OCR misread"
+    },
+    {
+      "case": "off_coca_cola_sprite_sprite_8901764032905",
+      "field": "country_of_origin",
+      "gold": "MADE IN INDIA",
+      "final": "MADE IN INDIA",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_packaging": 1.0
+      },
+      "ocr_best_line": "MADE IN INDIA",
+      "ocr_best_line_image": "2_packaging",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.975,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_coca_cola_sprite_sprite_8901764032905",
+      "field": "net_quantity",
+      "gold": null,
+      "final": "NET QUANTITY: 2.20 L",
+      "status": "spurious",
+      "category": "spurious",
+      "why": "predicted a field gold does not have"
+    },
+    {
+      "case": "off_coca_cola_sprite_sprite_8901764032912",
+      "field": "best_before",
+      "gold": null,
+      "final": "OR BEST BEFORE, SEE TAXES): ENECK",
+      "status": "spurious",
+      "category": "spurious",
+      "why": "predicted a field gold does not have"
+    },
+    {
+      "case": "off_coca_cola_sprite_sprite_8901764032912",
+      "field": "consumer_care",
+      "gold": "CONTACT CONSUMER RESPONSE COORDINATOR AT: 1800-208-2653 indiahelpline@coca-cola.com ADDRESS : SAME AS MANUFACTURED BY ADDRESS",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.6,
+        "2_nutrition": 0.4,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "ADDRESS SAME AS MANUFACTURED BY ADDRESS",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.4,
+      "ocr_best_line_confidence": 0.954,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (100%) but the best single line holds 40%"
+    },
+    {
+      "case": "off_coca_cola_sprite_sprite_8901764032912",
+      "field": "country_of_origin",
+      "gold": "MADE IN INDIA",
+      "final": null,
+      "ocr_coverage_all_images": 0.5,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 0.5
+      },
+      "ocr_best_line": "Sprite",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.0,
+      "ocr_best_line_confidence": 0.911,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (50%) but the best single line holds 0%"
+    },
+    {
+      "case": "off_coca_cola_sprite_sprite_8901764032912",
+      "field": "manufacturer",
+      "gold": "MANUFACTURED BY BENGAL BEVERAGES PVT. LTD., (UNIT-II), DURGAPUR EXPRESSWAY, P.O. DANKUNI COAL COMPLEX, DIST: HOOGHLY - 712 310, WEST BENGAL",
+      "final": "MANUFACTURED BY 186LE (UNIT-M), DURGAPUR EPITER COMPLEX, DIST: HOOGHLY fssal MIOIOA ARDA",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.29,
+        "2_nutrition": 0.06,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "DIST: HOOGHLY - 712 310, WEST BENGAL",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.41,
+      "ocr_best_line_confidence": 0.965,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.58,
+      "category": "association",
+      "why": "anchor fired but the value came from another box (58% similar)"
+    },
+    {
+      "case": "off_coca_cola_sprite_sprite_8901764032912",
+      "field": "mrp",
+      "gold": null,
+      "final": "BATCH NO. & MRP 250",
+      "status": "spurious",
+      "category": "spurious",
+      "why": "predicted a field gold does not have"
+    },
+    {
+      "case": "off_coca_cola_sprite_sprite_8901764032912",
+      "field": "net_quantity",
+      "gold": "NET QUANTITY: 250 ml",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.33,
+        "2_nutrition": 0.0,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "NET QUANTITY:",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.67,
+      "ocr_best_line_confidence": 0.997,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (100%) but the best single line holds 67%"
+    },
+    {
+      "case": "off_coke_diet_coke_can_250ml_8901764061257",
+      "field": "best_before",
+      "gold": "BEST BEFORE THREE MONTHS FROM MANUFACTURE WHEN STORED IN A COOL AND DRY PLACE",
+      "final": "\"BEST BEFORE TRADEMARK",
+      "ocr_coverage_all_images": 0.75,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.08,
+        "2_nutrition": 0.0,
+        "3_packaging": 0.75
+      },
+      "ocr_best_line": "E THREE MONTHS FROM MANUFACTURE",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.33,
+      "ocr_best_line_confidence": 0.94,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.36,
+      "category": "association",
+      "why": "anchor fired but the value came from another box (36% similar)"
+    },
+    {
+      "case": "off_coke_diet_coke_can_250ml_8901764061257",
+      "field": "consumer_care",
+      "gold": null,
+      "final": "CONTACT CONSUMER RESPONSE COORDN C1800-208-2653 ADDRESS: SAME AS MANUFACTURED B",
+      "status": "spurious",
+      "category": "spurious",
+      "why": "predicted a field gold does not have"
+    },
+    {
+      "case": "off_coke_diet_coke_can_250ml_8901764061257",
+      "field": "generic_name",
+      "gold": "CARBONATED WATER",
+      "final": "CARBONATED WATER",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 1.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "CARBONATED WATER",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.996,
+      "gold_is_labelled": false,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_coke_diet_coke_can_250ml_8901764061257",
+      "field": "net_quantity",
+      "gold": "NET QUANTITY: 300 ml",
+      "final": "NET QUANTITY: 300",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "NET QUANTITY:",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.67,
+      "ocr_best_line_confidence": 0.998,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.93,
+      "category": "recognition",
+      "why": "prediction is 93% similar to gold: characters OCR misread"
+    },
+    {
+      "case": "off_haldiram_phalhari_chiwda_8904004402261",
+      "field": "best_before",
+      "gold": "USE BY: 23.11.25",
+      "final": null,
+      "ocr_coverage_all_images": 0.0,
+      "ocr_coverage_by_image": {},
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "ocr_missed",
+      "why": "only 0% of the gold words are anywhere in the OCR output"
+    },
+    {
+      "case": "off_haldiram_phalhari_chiwda_8904004402261",
+      "field": "mfg_date",
+      "gold": "MFG. DATE: 24.06.25",
+      "final": null,
+      "ocr_coverage_all_images": 0.0,
+      "ocr_coverage_by_image": {},
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "ocr_missed",
+      "why": "only 0% of the gold words are anywhere in the OCR output"
+    },
+    {
+      "case": "off_haldiram_phalhari_chiwda_8904004402261",
+      "field": "unit_sale_price",
+      "gold": null,
+      "final": "SP: { 0.25 per g FEEDBACK OR",
+      "status": "spurious",
+      "category": "spurious",
+      "why": "predicted a field gold does not have"
+    },
+    {
+      "case": "off_hindustan_coca_cola_beverages_pvt_ltd_ma_8901764092305",
+      "field": "country_of_origin",
+      "gold": "MADE IN INDIA",
+      "final": null,
+      "ocr_coverage_all_images": 0.5,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_packaging": 0.5
+      },
+      "ocr_best_line": "indiahelpline@coca-cola.com",
+      "ocr_best_line_image": "2_packaging",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.945,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (50%) but the best single line holds 50%"
+    },
+    {
+      "case": "off_hindustan_coca_cola_beverages_pvt_ltd_ma_8901764092305",
+      "field": "manufacturer",
+      "gold": null,
+      "final": "EUS MFG BY ADORES EXIBATCH INCL OF LL TXES: SE EK DR PA AWAY FROM DIRECT SUNLIGHT. NEA FOR SEAL IS BROKEN. IE.FROPENING. LEER SMALL DARK PARTICLES",
+      "status": "spurious",
+      "category": "spurious",
+      "why": "predicted a field gold does not have"
+    },
+    {
+      "case": "off_hindustan_coca_cola_beverages_pvt_ltd_ma_8901764092305",
+      "field": "net_quantity",
+      "gold": "NET QUANTITY: 1.2 L",
+      "final": "NET QUANTITY: 1.2L",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_packaging": 1.0
+      },
+      "ocr_best_line": "NET QUANTITY:",
+      "ocr_best_line_image": "2_packaging",
+      "ocr_best_line_coverage": 0.67,
+      "ocr_best_line_confidence": 0.991,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_kinley_kinley_mineral_water_1ltr_8901764082405",
+      "field": "best_before",
+      "gold": "BEST BEFORE TWELVE MONTHS FROM MANUFACTURE",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 1.0,
+        "3_packaging": 0.17
+      },
+      "ocr_best_line": "BEFORE TWELVE MONTHS",
+      "ocr_best_line_image": "2_nutrition",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.952,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (100%) but the best single line holds 50%"
+    },
+    {
+      "case": "off_kinley_kinley_mineral_water_1ltr_8901764082405",
+      "field": "consumer_care",
+      "gold": "CONTACT CONSUMER RESPONSE COORDINATOR AT: 1800-208-2653 indiahelpline@coca-cola.com ADDRESS : SAME AS MFG BY ADDRESS",
+      "final": null,
+      "ocr_coverage_all_images": 0.8,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.8,
+        "3_packaging": 0.0
+      },
+      "ocr_best_line": "CONTACT CONSUMER",
+      "ocr_best_line_image": "2_nutrition",
+      "ocr_best_line_coverage": 0.2,
+      "ocr_best_line_confidence": 0.983,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (80%) but the best single line holds 20%"
+    },
+    {
+      "case": "off_kinley_kinley_mineral_water_1ltr_8901764082405",
+      "field": "country_of_origin",
+      "gold": "MADE IN INDIA",
+      "final": null,
+      "ocr_coverage_all_images": 0.5,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.5,
+        "3_packaging": 0.0
+      },
+      "ocr_best_line": "nley",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.0,
+      "ocr_best_line_confidence": 0.897,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (50%) but the best single line holds 0%"
+    },
+    {
+      "case": "off_kinley_kinley_mineral_water_1ltr_8901764082405",
+      "field": "manufacturer",
+      "gold": "MFG BY SOUTH INDIA BOTTLING Co.PVT.LTD., B163-170, SIPCOT INDL. GROWTH CENTRE, NH7, GANGAIKONDAN VILLAGE, TIRUNELVELI DIST., TAMILNADU-627352.",
+      "final": null,
+      "ocr_coverage_all_images": 0.38,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.38,
+        "3_packaging": 0.0
+      },
+      "ocr_best_line": "OTH CENTRE, NH7, GANGAIKONDAN VILLAGE",
+      "ocr_best_line_image": "2_nutrition",
+      "ocr_best_line_coverage": 0.25,
+      "ocr_best_line_confidence": 0.933,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "ocr_missed",
+      "why": "only 38% of the gold words are anywhere in the OCR output"
+    },
+    {
+      "case": "off_kinley_kinley_mineral_water_1ltr_8901764082405",
+      "field": "net_quantity",
+      "gold": "NET QUANTITY: 1 L",
+      "final": "NET QUANTITY: 1L",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.5,
+        "2_nutrition": 1.0,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "NET QUANTITY:",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.98,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_kissan_mixed_fruit_jam_8901030922787",
+      "field": "best_before",
+      "gold": null,
+      "final": "PKD., USE BY & BATCH 1800-10-20",
+      "status": "spurious",
+      "category": "spurious",
+      "why": "predicted a field gold does not have"
+    },
+    {
+      "case": "off_kissan_mixed_fruit_jam_8901030922787",
+      "field": "manufacturer",
+      "gold": null,
+      "final": "MFG. BY: FARMS POST HARVEST CARE LIMITED (A)",
+      "status": "spurious",
+      "category": "spurious",
+      "why": "predicted a field gold does not have"
+    },
+    {
+      "case": "off_kissan_mixed_fruit_jam_8901030922787",
+      "field": "mrp",
+      "gold": null,
+      "final": "MRP & (INCL. OF ALL 57657229 LEVERCARE-QUERY 400",
+      "status": "spurious",
+      "category": "spurious",
+      "why": "predicted a field gold does not have"
+    },
+    {
+      "case": "off_kissan_mixed_fruit_jam_8901030922787",
+      "field": "net_quantity",
+      "gold": "NET WEIGHT: 90 g",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 1.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 0.0
+      },
+      "ocr_best_line": "NET",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 1.0,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (100%) but the best single line holds 50%"
+    },
+    {
+      "case": "off_kitkat_nestle_nutrition_kitkat_mini_choc_8901058005233",
+      "field": "consumer_care",
+      "gold": "NESTLÉ CONSUMER CARE, P.O. BAG 2, NEW DELHI-110001 WECARE@IN.NESTLE.COM 1800 103 1947",
+      "final": "NESTLECONSUMERCARE Nestle P.O.BAG2, NEW DELH-1001 WECARE@IN.NESTLECOM 1800 103 1947",
+      "ocr_coverage_all_images": 0.9,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.9,
+        "2_nutrition": 0.0
+      },
+      "ocr_best_line": "1800 103 1947",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.3,
+      "ocr_best_line_confidence": 0.948,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.94,
+      "category": "recognition",
+      "why": "prediction is 94% similar to gold: characters OCR misread"
+    },
+    {
+      "case": "off_kitkat_nestle_nutrition_kitkat_mini_choc_8901058005233",
+      "field": "generic_name",
+      "gold": "Coated Wafer",
+      "final": "Coated Wafer",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 1.0,
+        "2_nutrition": 0.0
+      },
+      "ocr_best_line": "Coated Wafer",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.998,
+      "gold_is_labelled": false,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_kitkat_nestle_nutrition_kitkat_mini_choc_8901058005233",
+      "field": "mfg_date",
+      "gold": "JUL/25 - FEB/26 - 5159045481",
+      "final": null,
+      "ocr_coverage_all_images": 0.33,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.33,
+        "2_nutrition": 0.0
+      },
+      "ocr_best_line": "25 -FEB726 -5159045481 1 2327",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.33,
+      "ocr_best_line_confidence": 0.923,
+      "gold_is_labelled": false,
+      "status": "missed",
+      "category": "ocr_missed",
+      "why": "only 33% of the gold words are anywhere in the OCR output"
+    },
+    {
+      "case": "off_kitkat_nestle_nutrition_kitkat_mini_choc_8901058005233",
+      "field": "mrp",
+      "gold": "₹ 10/-",
+      "final": null,
+      "ocr_coverage_all_images": 0.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0
+      },
+      "ocr_best_line": "10F",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.0,
+      "ocr_best_line_confidence": 0.802,
+      "gold_is_labelled": false,
+      "status": "missed",
+      "category": "ocr_missed",
+      "why": "only 0% of the gold words are anywhere in the OCR output"
+    },
+    {
+      "case": "off_kurkure_pepsico_kurkure_masala_munch_8901491361026",
+      "field": "best_before",
+      "gold": "USE BY: 26/06/22",
+      "final": "USE BY: 26/06/22",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "26/06/22",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.998,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_kurkure_pepsico_kurkure_masala_munch_8901491361026",
+      "field": "consumer_care",
+      "gold": "THE CONSUMER SERVICES MANAGER, PEPSICO INDIA HOLDINGS PVT. LTD., P.O. BOX-27, DLF QUTAB ENCLAVE, PHASE-1, GURUGRAM - 122002, HARYANA, INDIA. OR CALL US AT 1800 22 4020 OR EMAIL US AT CONSUMER.FEEDBACK@PEPSICO.COM",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "PepsiCo India Holdings Pvt. Ltd.",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.26,
+      "ocr_best_line_confidence": 0.992,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (100%) but the best single line holds 26%"
+    },
+    {
+      "case": "off_kurkure_pepsico_kurkure_masala_munch_8901491361026",
+      "field": "generic_name",
+      "gold": "PROPRIETARY FOOD - NAMKEEN (15.1)",
+      "final": "PROPRIETARY FOOD - NAMKEEN (15.1)",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.25,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "PROPRIETARY FOOD - NAMKEEN (15.1)",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 1.0,
+      "ocr_best_line_confidence": 0.973,
+      "gold_is_labelled": false,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_kurkure_pepsico_kurkure_masala_munch_8901491361026",
+      "field": "manufacturer",
+      "gold": "MARKETED BY: PepsiCo India Holdings Pvt. Ltd.",
+      "final": "MARKETED BY: PepsiCo India Holdings Pvt. Ltd",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "PepsiCo India Holdings Pvt. Ltd.",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.83,
+      "ocr_best_line_confidence": 0.992,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_kurkure_pepsico_kurkure_masala_munch_8901491361026",
+      "field": "mfg_date",
+      "gold": "MFD: 26/02/22",
+      "final": "MFD: 26/02/22",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "MFD:",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.999,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_kurkure_pepsico_kurkure_masala_munch_8901491361026",
+      "field": "mrp",
+      "gold": "MRP Rs. 10.00 (INCL. OF ALL TAXES)",
+      "final": "$MRP 10.00",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "(INCL. OF ALL TAXES)",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.6,
+      "ocr_best_line_confidence": 0.983,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.53,
+      "category": "wrapped",
+      "why": "prediction is a prefix / part of gold: continuation lines were dropped"
+    },
+    {
+      "case": "off_kurkure_pepsico_kurkure_masala_munch_8901491361026",
+      "field": "net_quantity",
+      "gold": "N. QTY: 44 g (29.3 g + 14.7 g Extra)",
+      "final": "N.QTY: 44 g (29.3 g + 14.7 g Extra)",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.25,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "44 g (29.3 g + 14.7 g Extra)",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.75,
+      "ocr_best_line_confidence": 0.942,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_mazza_the_coca_cola_company_maaza_8901764092206",
+      "field": "country_of_origin",
+      "gold": "MADE IN INDIA",
+      "final": null,
+      "ocr_coverage_all_images": 0.5,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 0.5
+      },
+      "ocr_best_line": "india",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.994,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (50%) but the best single line holds 50%"
+    },
+    {
+      "case": "off_mazza_the_coca_cola_company_maaza_8901764092206",
+      "field": "manufacturer",
+      "gold": "MFG BY: HINDUSTAN COCA-COLA BEVERAGES PVT LTD, 303&304, BAANI ADDRESS 1, GOLF CRSE, SEC 53, GURUGRAM-122011, HARYANA",
+      "final": null,
+      "ocr_coverage_all_images": 0.36,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 0.36
+      },
+      "ocr_best_line": "303&304, BAANI",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.14,
+      "ocr_best_line_confidence": 0.946,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "ocr_missed",
+      "why": "only 36% of the gold words are anywhere in the OCR output"
+    },
+    {
+      "case": "off_pepsi_cola_pepsi_8902080104581",
+      "field": "consumer_care",
+      "gold": "CONTACT CUSTOMER SERVICE MANAGER AT: P.O. BOX 27, DLF QUTAB ENCLAVE-1, GURUGRAM-122002, HARYANA CONSUMER.FEEDBACK@PEPSICO.COM 1800 22 4020",
+      "final": "CONTACT CUSTOMER SERVICE MANAGER AT: P.O. BOX 27, DLF QUTAB ENCLAVE-1, GURUGRAM-122002, HARYANA CONSUMER.FEEDBACK@PEPSICO.COM C1800 22 4020",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 1.0,
+        "2_nutrition": 0.0
+      },
+      "ocr_best_line": "CONTACT CUSTOMER SERVICE MANAGER",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.31,
+      "ocr_best_line_confidence": 0.987,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 1.0,
+      "category": "recognition",
+      "why": "prediction is 100% similar to gold: characters OCR misread"
+    },
+    {
+      "case": "off_pepsi_cola_pepsi_8902080104581",
+      "field": "manufacturer",
+      "gold": "MFD. BY: VARUN BEVERAGES LIMITED",
+      "final": "MKT. BY: PEPSICO INDIA HOLDINGS PVT. LTD",
+      "ocr_coverage_all_images": 0.75,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.75,
+        "2_nutrition": 0.0
+      },
+      "ocr_best_line": "MFD. BY: VARUN BEVERAGES UIMITED",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.75,
+      "ocr_best_line_confidence": 0.948,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.25,
+      "category": "association",
+      "why": "anchor fired but the value came from another box (25% similar)"
+    },
+    {
+      "case": "off_pepsi_cola_pepsi_8902080104581",
+      "field": "net_quantity",
+      "gold": "NET QUANTITY 400 ml (250 ml + 150 ml Free)",
+      "final": "NET QUANTITY (250 ml + 150 ml Free*)",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.17,
+        "1_ingredients": 1.0,
+        "2_nutrition": 0.0
+      },
+      "ocr_best_line": "(250 ml + 150 ml Free*)",
+      "ocr_best_line_image": "1_ingredients",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.926,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.91,
+      "category": "recognition",
+      "why": "prediction is 91% similar to gold: characters OCR misread"
+    },
+    {
+      "case": "off_pepsico_quaker_oats_8901491103794",
+      "field": "best_before",
+      "gold": "USE BY: 05 SEP 24",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "06 SEP 23",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.977,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (100%) but the best single line holds 50%"
+    },
+    {
+      "case": "off_pepsico_quaker_oats_8901491103794",
+      "field": "manufacturer",
+      "gold": null,
+      "final": "MKT. BY: PEPSICO",
+      "status": "spurious",
+      "category": "spurious",
+      "why": "predicted a field gold does not have"
+    },
+    {
+      "case": "off_pepsico_quaker_oats_8901491103794",
+      "field": "mfg_date",
+      "gold": "MFD: 06 SEP 23",
+      "final": "MFD: 06 SEP 23",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "06 SEP 23",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.977,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_pepsico_quaker_oats_8901491103794",
+      "field": "mrp",
+      "gold": "MRP ₹: (INCL. OF ALL TAXES) 79/-",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.2,
+        "2_nutrition": 0.0,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "79/-",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.2,
+      "ocr_best_line_confidence": 0.846,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (100%) but the best single line holds 20%"
+    },
+    {
+      "case": "off_pepsico_quaker_oats_8901491103794",
+      "field": "net_quantity",
+      "gold": "N.QTY: 400 g",
+      "final": "N.QTY: 400 g",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "N.QTY:",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.995,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "off_pepsico_quaker_oats_8901491103794",
+      "field": "unit_sale_price",
+      "gold": "USP ₹ 0.20/- per g",
+      "final": "(USP70.20/-perg) Regn. No.: RPCB/RO-Jodh/61",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.33,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.33,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "Per Serve (40 g)",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.33,
+      "ocr_best_line_confidence": 0.901,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.54,
+      "category": "association",
+      "why": "anchor fired but the value came from another box (54% similar)"
+    },
+    {
+      "case": "off_tata_tata_salt_8904043901015",
+      "field": "generic_name",
+      "gold": "Vacuum Evaporated Edible Common Salt",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 1.0,
+        "1_ingredients": 0.6,
+        "2_nutrition": 0.0,
+        "3_packaging": 0.0
+      },
+      "ocr_best_line": "Salt",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.2,
+      "ocr_best_line_confidence": 0.901,
+      "gold_is_labelled": false,
+      "status": "missed",
+      "category": "unlabeled",
+      "why": "gold carries none of the field's label words; nothing to anchor on"
+    },
+    {
+      "case": "off_tata_tata_salt_8904043901015",
+      "field": "net_quantity",
+      "gold": "NET QUANTITY: 1 kg",
+      "final": "QUANTITY: 1kg",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0,
+        "2_nutrition": 0.0,
+        "3_packaging": 1.0
+      },
+      "ocr_best_line": "NET",
+      "ocr_best_line_image": "3_packaging",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.999,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.88,
+      "category": "recognition",
+      "why": "prediction is 88% similar to gold: characters OCR misread"
+    },
+    {
+      "case": "off_thumsup_thums_up_3948764042911",
+      "field": "country_of_origin",
+      "gold": "MADE IN INDIA",
+      "final": null,
+      "ocr_coverage_all_images": 0.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0
+      },
+      "ocr_best_line": "c0m",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.0,
+      "ocr_best_line_confidence": 0.509,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "ocr_missed",
+      "why": "only 0% of the gold words are anywhere in the OCR output"
+    },
+    {
+      "case": "off_thumsup_thums_up_3948764042911",
+      "field": "net_quantity",
+      "gold": "NET QUANTITY: 250 ml",
+      "final": null,
+      "ocr_coverage_all_images": 0.0,
+      "ocr_coverage_by_image": {
+        "0_front": 0.0,
+        "1_ingredients": 0.0
+      },
+      "ocr_best_line": "c0m",
+      "ocr_best_line_image": "0_front",
+      "ocr_best_line_coverage": 0.0,
+      "ocr_best_line_confidence": 0.509,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "ocr_missed",
+      "why": "only 0% of the gold words are anywhere in the OCR output"
+    },
+    {
+      "case": "phone_reynolds_jetter_classic_ballpen",
+      "field": "consumer_care",
+      "gold": "Consumer Care Officer at the above address. Toll Free No.: 0008 0005 04348 E-mail: reynoldsindiaconsumercare@newellco.com",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_back": 1.0
+      },
+      "ocr_best_line": "Consumer",
+      "ocr_best_line_image": "0_back",
+      "ocr_best_line_coverage": 0.08,
+      "ocr_best_line_confidence": 1.0,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (100%) but the best single line holds 8%"
+    },
+    {
+      "case": "phone_reynolds_jetter_classic_ballpen",
+      "field": "generic_name",
+      "gold": "Generic Name Ball Pen",
+      "final": "Available Ink Colour",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_back": 1.0
+      },
+      "ocr_best_line": "Generic",
+      "ocr_best_line_image": "0_back",
+      "ocr_best_line_coverage": 0.25,
+      "ocr_best_line_confidence": 0.969,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.17,
+      "category": "association",
+      "why": "anchor fired but the value came from another box (17% similar)"
+    },
+    {
+      "case": "phone_reynolds_jetter_classic_ballpen",
+      "field": "manufacturer",
+      "gold": "Manufactured, Marketed and Brand Owned by Reynolds Pens India Private Limited, Plot No. C-21, SIPCOT Industrial Park, Irungattukottai, Sriperumbudur, Kanchipuram District, Tamil Nadu - 602 117",
+      "final": null,
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_back": 1.0
+      },
+      "ocr_best_line": "Marketed and",
+      "ocr_best_line_image": "0_back",
+      "ocr_best_line_coverage": 0.09,
+      "ocr_best_line_confidence": 0.974,
+      "gold_is_labelled": true,
+      "status": "missed",
+      "category": "layout",
+      "why": "gold words are in the OCR output (100%) but the best single line holds 9%"
+    },
+    {
+      "case": "phone_reynolds_jetter_classic_ballpen",
+      "field": "mfg_date",
+      "gold": "Month & Year of Manufacture 02/2026",
+      "final": "Month & Year of Manufacture 02/2026",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_back": 1.0
+      },
+      "ocr_best_line": "Month & Year",
+      "ocr_best_line_image": "0_back",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 0.994,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "phone_reynolds_jetter_classic_ballpen",
+      "field": "mrp",
+      "gold": "MRP (incl.of all taxes) ₹25.00",
+      "final": "MRP (incl.of all taxes) 25.00",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_back": 1.0
+      },
+      "ocr_best_line": "(incl.of all taxes)",
+      "ocr_best_line_image": "0_back",
+      "ocr_best_line_coverage": 0.6,
+      "ocr_best_line_confidence": 0.984,
+      "gold_is_labelled": true,
+      "status": "correct",
+      "category": null
+    },
+    {
+      "case": "phone_reynolds_jetter_classic_ballpen",
+      "field": "net_quantity",
+      "gold": "Net Quantity 1 N",
+      "final": "Quantity Net 1N",
+      "ocr_coverage_all_images": 1.0,
+      "ocr_coverage_by_image": {
+        "0_back": 1.0
+      },
+      "ocr_best_line": "Net",
+      "ocr_best_line_image": "0_back",
+      "ocr_best_line_coverage": 0.5,
+      "ocr_best_line_confidence": 1.0,
+      "gold_is_labelled": true,
+      "status": "wrong",
+      "similarity": 0.77,
+      "category": "association",
+      "why": "anchor fired but the value came from another box (77% similar)"
+    }
+  ]
+}

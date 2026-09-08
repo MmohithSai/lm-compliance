@@ -1,0 +1,51 @@
+{
+ "baseline-ppocrv4": {
+  "label": "baseline-ppocrv4",
+  "fingerprint": "46a75e933f4a",
+  "images": 152,
+  "first_image_seconds_incl_model_load": 7.45,
+  "mean_seconds_per_image": 1.29,
+  "mean_seconds_per_real_image": 1.35,
+  "max_seconds_per_image": 6.58,
+  "total_seconds": 201.6,
+  "lines_total": 4529,
+  "lines_real": 4385,
+  "lines_synthetic": 144,
+  "chars_real": 66115,
+  "tall_boxes_real": 70,
+  "peak_working_set_mb": 7708.2
+ },
+ "ppocrv5-default": {
+  "label": "ppocrv5-default",
+  "fingerprint": "46a75e933f4a",
+  "images": 152,
+  "first_image_seconds_incl_model_load": 14.59,
+  "mean_seconds_per_image": 4.29,
+  "mean_seconds_per_real_image": 4.58,
+  "max_seconds_per_image": 11.506,
+  "total_seconds": 661.8,
+  "lines_total": 6868,
+  "lines_real": 6722,
+  "lines_synthetic": 146,
+  "chars_real": 82844,
+  "tall_boxes_real": 100,
+  "peak_working_set_mb": 2954.4
+ },
+ "ppocrv5-det960": {
+  "label": "ppocrv5-det960",
+  "fingerprint": "549830fae138",
+  "images": 152,
+  "first_image_seconds_incl_model_load": 12.68,
+  "mean_seconds_per_image": 2.5,
+  "mean_seconds_per_real_image": 2.62,
+  "max_seconds_per_image": 8.491,
+  "total_seconds": 390.0,
+  "lines_total": 5725,
+  "lines_real": 5581,
+  "lines_synthetic": 144,
+  "chars_real": 77651,
+  "tall_boxes_real": 100,
+  "peak_working_set_mb": 2028.0
+ },
+ "_note": "Measured 2026-09-08 on the PP-OCRv5 experiment (docs/EVAL.md): every eval image OCR'd once in one process per stack, AMD Ryzen 7 5800H, CPU only, no other OCR running; seconds are the OCR call alone after preprocess; peak_working_set_mb is the process's Windows peak working set."
+}

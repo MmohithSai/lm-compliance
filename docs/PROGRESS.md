@@ -185,6 +185,7 @@ prints the two apart because one number hid which half moved.
 | 10 | The audit round | done | nine labelled changes, real **30.5% -> 44.0%**, 26 fields better / 1 worse, spurious 13 -> 6, violation precision 0.74 -> 0.77 with recall 0.99 unchanged. Runs, per-field table and what is left: `docs/EVAL.md`, `docs/AUDIT.md` |
 | 11 | The second round | done | the unlabelled generic name by its head noun (reworked three times, each measured), sideways boxes transposed, four OCR-side experiments; real **44.0% -> 50.4%**, violation precision 0.77 -> 0.83, exact-set 53.6% -> 64.3%. Table below and in `docs/EVAL.md` |
 | 12 | 70% on real photographs | **not met** | 50.4%; the 70 misses are 33 OCR (23 never detected, 10 misread), 15 not grouped, 12 unlabelled generic names the head noun cannot reach, 10 wrong neighbour or over-merged |
+| 13 | PP-OCRv5 / PaddleOCR 3.x experiment | done, **rejected** | branch `exp/pp-ocrv5`, separate venv, only `ocr.py` changed. Real **50.4% → 33.3%**, synthetic 98.4% → 77.0%, 1 of 33 OCR misses recovered, 19 false violations; ₹ read as a digit, large print boxed word by word. 2.95 GB peak, 4.3 s/image. Table, trace and the ADOPT path in `docs/EVAL.md`; gold review in `docs/AUDIT.md` |
 
 ### Reading a printed declarations table
 
@@ -762,6 +763,22 @@ Not started. See `docs/PLAN.md` for the item list and the "done when" line.
 ---
 
 ## Log
+
+- **2026-09-08** — **PP-OCRv5 measured and rejected.** The owner approved one controlled
+  experiment with PaddleOCR 3.x / PP-OCRv5 against the 50.4% baseline. Branch `exp/pp-ocrv5`, a
+  separate virtual environment (`paddleocr 3.7.0`, PaddleX 3.7.2, `paddlepaddle 3.0.0`), the
+  same cases, gold, harness, extractor and rules; only `ocr.py` changed. `PP-OCRv5_server_det`
+  + `en_PP-OCRv5_mobile_rec` read 53% more lines on the photographs and score real **33.3%**,
+  synthetic 77.0%, violation precision 0.77, exact-set 48.2%: the recogniser writes a digit
+  where ₹ is printed ("MRP 220.00" — 29 of 42 wrong price fields are that one character, the
+  whole of the synthetic collapse), and the detector boxes large print word by word, which the
+  extractor cannot use (55 fields lost, 19 false violations, 1 of the 33 baseline OCR misses
+  recovered, 18 more now readable but not grouped). Detection at the baseline's 960 px changes
+  little. 2.95 GB peak against the 2.x process's 7.7 GB (a P9 finding in itself), 4.3 s per
+  image against 1.3 s. Sideways handling still works on its boxes. The eight disputed gold files
+  were re-read against the photographs and given a recommendation each (`docs/AUDIT.md`); none
+  was edited. `make test` 579 + 2 skipped, ruff and mypy clean on the branch. The 2.x wrapper is
+  untouched on `main`; P9 not started.
 
 - **2026-09-08** — **Second round on the real-photo number: 44.0% → 50.4%, and four OCR-side
   experiments answered.** The audit had written the unlabelled generic name off as a VLM's job.

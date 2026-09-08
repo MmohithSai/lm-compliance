@@ -67,8 +67,11 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
   lines (flat). Before this round: `det_limit_side_len=1600` (54.5%), merging continuation
   lines for short fields (51.4%), listing-table anchors alone (flat), a second OCR pass at 90°
   (real 28.9% → 28.1%) were all measured and rejected; CLAHE was measured and kept. The
-  remaining lever for (1) and (4) is a better recogniser than PaddleOCR 2.x ships for English,
-  which is not a setting; for (3) the Stretch item, now for a bucket of 12 rather than 20.
+  remaining lever for (1) and (4) was thought to be a better recogniser than PaddleOCR 2.x ships
+  for English. **PP-OCRv5 was then measured (2026-09-08, branch `exp/pp-ocrv5`) and rejected:
+  real 33.3%, synthetic 77.0% — it reads more of the print and writes a digit for ₹ and word
+  boxes for large print; see the Decisions log and `docs/EVAL.md`.** For (3) the Stretch item,
+  now for a bucket of 12 rather than 20.
 
 ## P3 — rule engine + scan detail page
 - [x] fill `CHECKS` in `rules_engine.py`; delete the `xfail` line in `tests/test_rules.py`
@@ -199,6 +202,22 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - Total monthly cost: ₹0.
 
 ## Decisions log
+- 2026-09-08 — **PP-OCRv5 under PaddleOCR 3.7.0 measured as the OCR stack and REJECTED.** One
+  controlled experiment on branch `exp/pp-ocrv5`, approved by the owner as the one dependency
+  change worth testing for the OCR bottleneck: the same 56 cases, gold, harness, extractor and
+  rules; only `ocr.py` changed, in a separate virtual environment. Two configurations, the
+  library's defaults and detection at the baseline's 960 px. Real-photo field accuracy
+  **50.4% → 33.3%** on the defaults, synthetic 98.4% → 77.0%, violation precision 0.83 → 0.77,
+  exact-set 64.3% → 48.2%; 1 of the 33 baseline OCR misses recovered, 55 fields lost, 19 false
+  violations gained. Two causes, both the model's: `en_PP-OCRv5_mobile_rec` writes a digit for
+  ₹ ("MRP 220.00"; 29 of 42 wrong price fields are that one character), and
+  `PP-OCRv5_server_det` boxes single words on large print, which the extractor's "one box is one
+  printed line" design cannot use — the 2026-09-07 `det_limit_side_len=1600` rejection as the
+  detector's own behaviour. It does read more (53% more lines; the Bru and Bisleri address
+  blocks come back whole) at 3.3× the time per image and 2.95 GB peak against the 2.x process's
+  7.7 GB. Full table, the 33-miss trace and what an ADOPT path would need are in `docs/EVAL.md`.
+  The extractor was not touched to help it, by the experiment's own rule. The 2.x wrapper stays;
+  the branch keeps the experiment's `ocr.py`. P9 is still not started.
 - 2026-09-08 — Second round. **An unlabelled generic name is found by its head noun.** Rule
   6(1)(b)'s common name is printed bare on Indian packs — "SPICED BUTTERMILK", "Coated Wafer",
   "FACE WASH" — and the audit had written that bucket off as unreachable without a VLM. What the

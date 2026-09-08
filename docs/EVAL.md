@@ -372,6 +372,112 @@ b = json.load(open("eval/results/2026-09-08_p5-reports.json"))
 [k for k in a if k not in ("label", "date") and a[k] != b[k]]   # []
 ```
 
+### The PP-OCRv5 experiment, 2026-09-08 — REJECTED
+
+One controlled experiment, approved by the owner, to see whether the newer OCR stack moves the
+OCR bottleneck (23 lines never detected, 10 misread). Everything else was held fixed: the same
+56 cases and gold, the same harness, the same extractor and rules (commit `b1e05d8`), the same
+`preprocess`. Only `worker/pipeline/ocr.py` changed, on branch `exp/pp-ocrv5`, in a separate
+virtual environment so the committed 2.x worker and its `.venv` were never touched.
+
+**Stack.** `paddleocr==3.7.0` (PaddleX 3.7.2) on `paddlepaddle==3.0.0`, Python 3.12, CPU.
+`PaddleOCR(lang="en", ocr_version="PP-OCRv5", use_textline_orientation=True)`, which selects
+`PP-OCRv5_server_det` + `en_PP-OCRv5_mobile_rec`; `lang="hi"` selects the same detector with
+`devanagari_PP-OCRv5_mobile_rec`. Two configurations: the library's own defaults (detection at
+full size — `limit_side_len 64 / min`), and detection shrunk to 960 px on the long side as the
+2.x baseline does, so that only the models differ. Install:
+`uv venv --python 3.12 <dir> && uv pip install -e worker paddlepaddle==3.0.0 paddleocr==3.7.0 setuptools`.
+
+| Metric | Baseline (PaddleOCR 2.10, PP-OCRv4) | PP-OCRv5, defaults | PP-OCRv5, 960 px |
+|---|---:|---:|---:|
+| Real-photo field accuracy | **50.4%** (71/141) | **33.3%** (47/141) | **34.8%** (49/141) |
+| Synthetic field accuracy | 98.4% (124/126) | 77.0% (97/126) | 77.0% (97/126) |
+| Violation precision | 0.83 | 0.77 | 0.77 |
+| Violation recall | 0.99 | 0.97 | 0.94 |
+| Exact-set accuracy | 64.3% | 48.2% | 53.6% |
+| Peak working set (152 images, one process) | 7.7 GB | 2.95 GB | 2.03 GB |
+| OCR time per image, mean (real photographs) | 1.29 s (1.35 s) | 4.29 s (4.58 s) | 2.50 s (2.62 s) |
+| First image incl. model load | 7.5 s | 14.6 s | 12.7 s |
+| Lines detected, real photographs | 4,385 | 6,722 | 5,581 |
+| Boxes taller than wide (sideways print), real | 70 | 100 | 100 |
+| Baseline OCR misses recovered | — | 1 of 33 | 3 of 33 |
+| Fields correct before, wrong after / newly correct | — | 55 / 4 | 54 / 5 |
+| New false violations / true violations lost | — | 19 / 3 | 19 / 6 |
+
+The 960 px configuration trades a little of each: fewer lines and less time, two more misses
+recovered, six true violations lost, and two false physical violations (F2, P2) on the rendered
+marker cases, whose measured glyph widths and contrast now come off different boxes. Neither
+configuration is close to the baseline.
+
+Result files: `2026-09-08_p2-ocr-pp-ocrv5-default.json`, `2026-09-08_p2-ocr-pp-ocrv5-det960.json`,
+their `_errors.md`, and `2026-09-08_ocr-timing.json` (per-image seconds, lines, peak memory).
+
+**Per field, baseline → PP-OCRv5 defaults (precision / recall):** best_before 1.00/0.79 →
+0.84/0.72 · consumer_care 0.74/0.59 → 0.77/0.59 · country_of_origin 1.00/0.73 → 1.00/0.36 ·
+generic_name 0.77/0.68 → 0.71/0.60 · importer 0.67/0.67 → 1.00/1.00 · manufacturer 0.58/0.52 →
+0.57/0.55 · mfg_date 0.83/0.76 unchanged · **mrp 0.85/0.77 → 0.14/0.13** · net_quantity
+0.91/0.85 → 0.79/0.72 · **unit_sale_price 0.96/0.88 → 0.12/0.12**.
+
+**What PP-OCRv5 does read.** More: 53% more lines and 25% more characters on the real
+photographs. The Bru sachet's marketer block and care block come back as whole lines
+("MKTD. BY: HINDUSTAN UNILEVER LTD.", "PO BOX 14760, MUMBAI 400 099"), the Bisleri "MKT BY"
+block is found, "Net Wt. 10 g" is read right. Of the 33 baseline OCR misses, 1 scores as
+recovered (the Figaro manufacturer, "N-IV" for "N-1V"); for 18 more the words are now in the
+OCR output but the extractor does not convert them (the error category moves from *never
+detected* to *read but not grouped* 9, *wrong neighbour* 5, *unlabelled* 3, *wrapped* 1); 11
+are still never detected (KitKat's "₹ 10/-", the Sprite and Thums Up quantities, the Kinley and
+Maaza addresses, the soy sauce unit price) and 2 still misread.
+
+**Why it scores worse.** Two things, and they are the model's, not the harness's.
+
+1. **The rupee sign.** `en_PP-OCRv5_mobile_rec`'s dictionary contains ₹ (460 characters,
+   checked in its `inference.yml`) and the model does not emit it: "MRP ₹20.00" reads
+   "MRP 220.00", "₹11.25 /100 g" reads "211.25/100 g", "₹649" reads "7649", elsewhere "$", "&",
+   "{". A digit glued to the amount is not a deletion the extractor can make safely, and it is
+   not one this experiment was allowed to make. 42 price fields are wrong; 29 of them (25
+   rendered labels, 4 photographs) would match gold with that one character removed. This is
+   the whole of the synthetic collapse and almost none of the real-photo one.
+2. **Boxes.** `PP-OCRv5_server_det` boxes single words wherever the print is large or widely
+   spaced — "OZONISED | WATER | DRINKING", "Net | Wt. | 10 | 9" at full size; still "WATER |
+   OZONISED | DRINKING" at 960 px — and merges label rows on tables differently. The extractor
+   was built, and measured nine times, on "one box is one printed line"; 55 fields that were
+   right under the 2.x boxes are wrong under these, and 19 false violations appear (D3 ×6,
+   D2 ×4, D1 ×3, D5 ×3, D6 ×3) on 20 cases, against 3 true violations lost. That is the
+   `det_limit_side_len=1600` rejection of 2026-09-07 again, now as the detector's own behaviour.
+
+**Sideways print.** The transposed-geometry rule still works on PP-OCRv5's boxes: the soy
+sauce use-by date is found under both stacks, and PP-OCRv5 returns more tall boxes (100 vs
+70). Its date-of-manufacture on that pack absorbs "(incl. of all taxes)" as a label line, and
+the Kinley best-before is lost to a split. **Bilingual packs:** `devanagari_PP-OCRv5_mobile_rec`
+ran without error on both Devanagari cases; neither gained a field.
+
+**Memory and time.** PP-OCRv5's process peaked at 2.95 GB over 152 images, inside the 3 GB
+worker budget but with no headroom; the 2.x baseline process peaked at **7.7 GB** on the same
+run — the 2.x predictor grows with every new image size it sees, which the worker will also do
+over its lifetime and which P9 should measure. PP-OCRv5 is 3.3× slower per image on this CPU
+(4.3 s against 1.3 s), so a four-photograph scan is about 18 s of OCR against 5 s.
+
+**Compatibility, documented rather than fixed.** `paddleocr` 3.x is a different API: `ocr()`
+is gone, `predict()` returns result objects (`rec_polys`, `rec_texts`, `rec_scores`);
+`det_model_dir`, `det_limit_side_len`, `use_angle_cls` are renamed; models live under
+`~/.paddlex/official_models`, not `~/.paddleocr` (P9's baking would move); a model-source
+connectivity check runs at start unless `PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK` is set;
+PaddleOCR 3.7 defaults to **PP-OCRv6** when no version is given, so the version has to be
+pinned; PaddleX pins `opencv-contrib-python`, which collides with the worker's `opencv-python`
+until one is uninstalled (a broken `cv2` import until then); `paddlepaddle==3.0.0` worked, so
+the 3.3 oneDNN failure that pinned it is not in the way. None of it is hard; all of it is a
+migration, not a swap.
+
+**Decision: REJECTED.** As shipped, PP-OCRv5 reads more of the print and scores 17 points
+lower on the photographs and 21 on the rendered labels, because its recogniser writes a digit
+for ₹ and its detector returns boxes the extractor was not built on. What an ADOPT path would
+need, none of it done here: a rupee stand-in rule for a digit before an amount (a guess, not a
+deletion — it needs measuring on its own), a box-to-line assembly step before the extractor
+(the row merge that the 2.x server detector also needed), then the extractor re-measured
+against the new boxes with its "one box, one line" assumptions revisited. That is the P2 work
+again on a new footing, for a detector that does reach the small print. The 2.x implementation
+stays as committed.
+
 ### The rejected hypotheses
 
 Worth more than the accepted ones, because each closes off a plausible idea. Two more joined the
