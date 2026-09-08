@@ -13,7 +13,10 @@ import { uuid } from "@/lib/uuid";
 import { createClient } from "@/lib/supabase/client";
 
 const KINDS: ImageKind[] = ["front", "back", "other"];
-const SLOTS = ["Front panel", "Back panel", "With the reference card"];
+const SLOTS = {
+  package: ["Front panel", "Back panel", "With the reference card"],
+  ecommerce: ["Listing, part 1", "Listing, part 2", "Listing, part 3"],
+};
 
 export default function UploadPage() {
   const router = useRouter();
@@ -102,7 +105,11 @@ export default function UploadPage() {
           </div>
 
           <div className="space-y-1">
-            <Label>Photos (front, back, and one with the reference card)</Label>
+            <Label>
+              {source === "ecommerce"
+                ? "Screenshots of the listing (include the product details table)"
+                : "Photos (front, back, and one with the reference card)"}
+            </Label>
             <div className="flex gap-2">
               <Button
                 type="button"
@@ -136,7 +143,7 @@ export default function UploadPage() {
               <ul className="space-y-1 pt-1">
                 {files.map((f, i) => (
                   <li key={`${f.name}-${f.lastModified}-${i}`} className="flex items-center gap-2 text-sm">
-                    <span className="w-40 shrink-0 text-muted-foreground">{SLOTS[i]}</span>
+                    <span className="w-40 shrink-0 text-muted-foreground">{SLOTS[source][i]}</span>
                     <span className="truncate">{f.name}</span>
                     <Button
                       type="button"

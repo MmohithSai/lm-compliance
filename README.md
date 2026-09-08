@@ -25,6 +25,30 @@ need nothing; the Docker image installs the libraries with `apt`.
 
 Demo users: `cd worker && uv run --env-file ../.env python ../supabase/seed_users.py` (admin / inspector / viewer, see the script for passwords).
 
+## The two kinds of scan, and the one answer that is neither
+
+Pick **Package photo** or **E-commerce screenshot** on the upload form; it sets `scans.source` and
+that decides which law applies. A screenshot is not the package, so a listing is judged by **Rule
+6(10)** — what the listing must declare — and nothing else. Print size, character width, contrast
+and placement are not applied to it at all, because none of them is in the frame, and a reference
+card or panel width would be measuring the screen.
+
+A photograph or screenshot the OCR cannot read gets **no verdict**. The scan ends `failed`, with
+no score, no declarations, no violations and no report file, and the scan page says so:
+
+> **This scan could not be assessed.**
+> Only 36 characters of text could be read from this screenshot, so this listing was not checked
+> against the Rules. The screenshot may be blurry, cropped, or too low-resolution. Upload a
+> clearer, full-size screenshot of the listing that includes the product details table.
+>
+> No verdict was reached. This is not a pass and not a failure.
+
+The gate is the amount of text PP-OCR returned (`MIN_READABLE_CHARS` in
+`worker/pipeline/__init__.py`), and the numbers behind the threshold are in the comment beside it.
+It exists because an empty result scores 100 out of 100 by construction: without it a blurred
+listing is reported as a compliant pack, or worse, accused of a Rule 6(10) breach it was never
+read well enough to have.
+
 ## Checking the roles against the real database
 
 `make test` proves what the app *draws* for each role. It cannot prove what Postgres *allows*, and

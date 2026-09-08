@@ -95,6 +95,15 @@ NOT_A_RUPEE = re.compile(r"[<>?]\s*(?=\d)")
 NEEDS_A_NUMBER = {"mrp", "net_quantity", "unit_sale_price", "mfg_date"}
 DIGIT = re.compile(r"\d")
 
+# The same idea for the one field that is not a number: a consumer-care declaration is a way to
+# reach the seller, so the block has to carry one — an e-mail address, or a run of digits long
+# enough to be a telephone number. Without it, "Customer Service New Releases" (the Amazon
+# navigation bar, printed above every listing) was claimed as the consumer care declaration on
+# five of the six e-commerce cases, Rule 6(10) found the field present, and three real listings
+# that gold marks E1 scored 100 out of 100. Skipping the box rather than claiming it also lets a
+# real care line further down the page still win the field.
+CONTACT = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+|\d[\d\s().+-]{6,}\d")
+
 # Indian packs cross-refer rather than repeat: "MRP (INCL OF ALL TAXES): SEE BOTTLE",
 # "ADDRESS: SAME AS MKT BY ADDRESS", "For Mkt. address, scan barcode". The line names the
 # declaration but does not carry it, and claiming it hides the real one printed further down.
@@ -338,6 +347,8 @@ class RegexLayoutExtractor:
             value = join_lines(block)
             ids = [w.id for w in block]
             if not value:
+                continue
+            if field == "consumer_care" and not CONTACT.search(value):
                 continue
             found[field] = Declaration(
                 field=field,

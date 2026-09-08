@@ -301,3 +301,41 @@ def test_a_screenshot_does_not_wrap_an_address_into_the_next_row() -> None:
     ]
     decls = EXTRACT.extract(words, ScanContext(source=Source.ecommerce))
     assert [d.value for d in decls] == ["Manufacturer : Parle Biscuits Pvt Ltd"]
+
+
+# ---------------------------------------------------------------- P8: page furniture is not a
+# declaration
+
+
+def listing(words: list[Word]) -> dict[str, str]:
+    decls = EXTRACT.extract(words, ScanContext(source=Source.ecommerce))
+    return {d.field: d.value for d in decls}
+
+
+def test_the_amazon_navigation_bar_is_not_a_consumer_care_declaration() -> None:
+    """ "Customer Service New Releases" sits above every Amazon listing. Claimed as the consumer
+    care declaration it made Rule 6(10) find the field present, and three real listings that
+    gold marks E1 scored 100 out of 100."""
+    assert "consumer_care" not in listing([line("Customer Service New Releases", 20, wid=0)])
+
+
+def test_a_real_care_line_further_down_the_page_still_wins_the_field() -> None:
+    """Skipping the box, rather than claiming it and stopping, is what makes this safe."""
+    got = listing(
+        [
+            line("Customer Service New Releases", 20, wid=0),
+            line("Customer care: Brite Foods, Pune, 1800-123-4567", 900, wid=1),
+        ]
+    )
+    assert got["consumer_care"] == "Customer care: Brite Foods, Pune, 1800-123-4567"
+
+
+def test_a_care_line_with_only_an_email_is_still_a_declaration() -> None:
+    """A telephone number or an e-mail address — either is a way to reach the seller, and a pack
+    that prints one and loses the other to OCR must not lose the whole declaration."""
+    got = fields([line("Consumer care: Brite Foods, Pune; care@britefoods.in", 160, wid=1)])
+    assert got["consumer_care"] == "Consumer care: Brite Foods, Pune; care@britefoods.in"
+
+
+def test_a_care_heading_with_no_contact_under_it_claims_nothing() -> None:
+    assert "consumer_care" not in fields([line("Consumer complaints", 160, wid=1)])

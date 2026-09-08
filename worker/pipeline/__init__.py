@@ -15,7 +15,15 @@ from supabase import Client
 
 from .extractors.regex_layout import RegexLayoutExtractor
 from .measure import measure_declarations, pdp_area_cm2, resolve_scale
-from .models import PipelineResult, ReportImage, ScaleSource, ScanContext, ScanRow, Word
+from .models import (
+    PipelineResult,
+    ReportImage,
+    ScaleSource,
+    ScanContext,
+    ScanRow,
+    Source,
+    Word,
+)
 from .ocr import ocr_words
 from .preprocess import preprocess
 from .product import link_product
@@ -23,6 +31,52 @@ from .report import annotate_panels, build_report, render_docx, render_html, ren
 from .rules_engine import run_rules, score
 
 log = logging.getLogger("worker")
+
+
+class UnreadableScan(ValueError):
+    """The photographs hold too little text to judge. Its message is written for the inspector
+    and the loop stores it on the scan word for word, without the exception's class name."""
+
+
+# ---------------------------------------------------------------- is there anything to judge?
+# A scan is judged on the text PP-OCR returned, and below this much text there is nothing to
+# judge. Measured over the 57 eval cases in `eval/.ocr_cache`: the least legible of them returns
+# 134 characters (a one line sachet), the least legible photograph 139, and a listing screenshot
+# 5,300 to 10,100. Blurring, shrinking and motion blurring one real Amazon tile until it is
+# unreadable takes it from 218 characters to 44-59.
+#
+# The count is the signal and the confidence is not: PP-OCR answers a blurred panel by not
+# *detecting* the small print, and reports the few headline words it still finds at 0.94-0.97 —
+# through a 31 px Gaussian blur, a 8x downscale and an 82% darkening alike. Only motion blur
+# drags confidence down, and that case is already well under the floor on count. A second
+# threshold on a number that does not move would refuse legible packs and catch nothing.
+# Raise this if a legible pack is ever refused; the evidence for it is in docs/ARCHITECTURE.md.
+MIN_READABLE_CHARS = 80
+
+# What the inspector reads on the scan, and the only text stored in `scans.error` for this case.
+CANNOT_ASSESS = {
+    Source.package: (
+        "{read} could be read from these photographs, so this pack was not checked against the "
+        "Rules. The photographs may be blurry, shot from too far away, cropped, or lost to "
+        "glare. Photograph the declaration panel again, filling the frame with it and holding "
+        "the phone steady."
+    ),
+    Source.ecommerce: (
+        "{read} could be read from this screenshot, so this listing was not checked against the "
+        "Rules. The screenshot may be blurry, cropped, or too low-resolution. Upload a clearer, "
+        "full-size screenshot of the listing that includes the product details table."
+    ),
+}
+
+
+def unreadable(result: PipelineResult, source: Source) -> str | None:
+    """Why this scan cannot be assessed, in the inspector's words, or None if it can be."""
+    chars = sum(len(w.text) for w in result.words)
+    if chars >= MIN_READABLE_CHARS:
+        return None
+    read = "No text at all" if not chars else f"Only {chars} characters of text"
+    return CANNOT_ASSESS[source].format(read=read)
+
 
 # (preprocessed image, image_id, languages) -> line boxes. Only the eval passes anything but
 # `ocr_words`: it wraps it in a disk cache so a rerun measures a changed extractor, not PaddleOCR
@@ -115,15 +169,13 @@ def run_scan(sb: Client, scan: ScanRow) -> PipelineResult:
             paths[str(img["id"])] = path
         result = run_local(list(paths.values()), ctx)
 
-        # A scan the OCR read nothing from is a failed read, not a compliant pack. score([]) is
+        # A scan the OCR could not read is a failed read, not a compliant pack. score([]) is
         # 100 by construction, and letting that reach `done` puts "100 / 100" on the report for
         # a photograph nobody could read — the one wrong answer this project must never give.
-        # The loop turns the exception into `failed` plus this message on the scan.
-        if not result.words:
-            raise ValueError(
-                "no text was read from these photos. Fill the frame with the declaration panel, "
-                "hold steady, and avoid glare."
-            )
+        # Raised before `store`, so no declarations, no violations and no report file exist for
+        # a scan that was never assessed. The loop turns it into `failed` plus this sentence.
+        if (why := unreadable(result, ctx.source)) is not None:
+            raise UnreadableScan(why)
 
         store(sb, scan.id, result)
         # Inside the temp directory: the report embeds the photographs it cites, and once this

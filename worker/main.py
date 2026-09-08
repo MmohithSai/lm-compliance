@@ -13,7 +13,7 @@ from typing import Any, cast
 
 from supabase import Client, create_client
 
-from pipeline import run_scan
+from pipeline import UnreadableScan, run_scan
 from pipeline.models import ScanRow
 from pipeline.rules_engine import load_rules
 
@@ -76,7 +76,11 @@ def process_one(sb: Client) -> bool:
         )
     except Exception as e:  # noqa: BLE001 - a failed scan must never kill the loop
         log.exception("scan %s failed", scan.id)
-        finish(sb, scan.id, status="failed", error=f"{type(e).__name__}: {e}"[:500])
+        # An unreadable photograph is an answer for the inspector, not a crash, so its message
+        # is stored as the sentence they should read. Anything else keeps its class name, which
+        # is for whoever reads the log.
+        why = str(e) if isinstance(e, UnreadableScan) else f"{type(e).__name__}: {e}"
+        finish(sb, scan.id, status="failed", error=why[:500])
     return True
 
 

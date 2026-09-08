@@ -161,8 +161,11 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 ## P8 — e-commerce screenshot mode
 - [x] source = ecommerce → E1/E2 rules, no font checks — landed in P3 (`_applies` in
       `rules_engine.py`): a screenshot is not the package, so only Rule 6(10) can be judged
-- [ ] error handling: blurry photo / OCR empty → clear message on the scan
-- Done when: a listing screenshot gives a Rule 6(10) report.
+- [x] error handling: blurry photo / OCR empty → clear message on the scan. One gate in
+      `run_scan` (`unreadable`), one sentence per source in `scans.error`, one alert on the
+      scan page. No new column, no second error model.
+- [x] all six real listing screenshots give the Rule 6(10) verdict gold asks for
+- Done when: a listing screenshot gives a Rule 6(10) report. **This is true today.**
 
 ## P9 — deploy worker + docs
 - [ ] Dockerfile builds on amd64 + arm64; HF Space (add a stdlib HTTP health thread on port 7860) or Oracle ARM
@@ -182,6 +185,45 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - Total monthly cost: ₹0.
 
 ## Decisions log
+- 2026-09-08 — P8. **A photograph nobody can read gets a sentence, not a verdict.** The gate is
+  the number of characters PP-OCR returned, and it is measured rather than guessed. Across the 56
+  eval cases (`eval/.ocr_cache`, so this cost no OCR time) the least legible reads 134 characters,
+  the least legible photograph 139, and a listing screenshot 5,300–10,100; one real Amazon tile
+  blurred 31 px, shrunk 8× or motion blurred until unreadable falls from 218 to 44–59.
+  `MIN_READABLE_CHARS = 80` sits between them, nearer the unreadable side.
+  **Confidence is deliberately not part of the test.** It was the obvious signal and the data
+  refused it: PP-OCR answers a blurred panel by not *detecting* the small print, and reports the
+  few headline words it still finds at 0.94–0.97 — through a 31 px Gaussian blur, an 8× downscale
+  and an 82% darkening alike. Only motion blur drags it down, and that case is already far under
+  the floor on count. A second threshold on a number that does not move would refuse legible packs
+  and catch nothing. Cheapest proof it earns its place: the same listing blurred 31 px extracts one
+  declaration, and the engine reports **E1, score 75** — a Rule 6(10) accusation invented out of an
+  unreadable image. The gate is in `run_scan`, before `store`, so a refused scan has no words, no
+  declarations, no violations, no product and no report file behind it; `run_local` is untouched,
+  so the eval still scores every case it always did.
+- 2026-09-08 — P8. **The message is written for the inspector, and the exception class stays in
+  the log.** `scans.error` already existed and needed no migration; what changed is what goes in
+  it. `UnreadableScan` is the one exception whose text `process_one` stores verbatim — everything
+  else keeps its `KeyError: …` prefix, which is for whoever reads the log. Two messages, one per
+  source, because "hold the phone steady" is nonsense to someone who uploaded a screenshot and
+  "upload a full-size screenshot" is nonsense to someone holding a packet. Both say what could not
+  be done, why it may have happened, and what to do next, and neither contains the word
+  "compliant". The scan page prints them under **This scan could not be assessed**, followed by
+  "No verdict was reached. This is not a pass and not a failure."
+- 2026-09-08 — P8. **"Customer Service New Releases" is Amazon's navigation bar, not a consumer
+  care declaration.** Opening the six real listings end to end found the extractor claiming that
+  heading as `consumer_care` on five of them. Rule 6(10) then found the field present, and three
+  listings whose gold verdict is E1 scored **100 out of 100** — the false "compliant" this phase
+  exists to prevent, arrived at from a perfectly readable screenshot. Fixed with the idiom already
+  in the extractor for `NEEDS_A_NUMBER`: a consumer-care block has to carry a way to reach the
+  seller, an e-mail address or a run of digits long enough to be a telephone number, and a box
+  that does not is skipped rather than claimed — so a real care line further down the page can
+  still win the field. One labelled run
+  (`2026-09-08_p8-consumer-care-needs-a-contact.json` against `2026-09-08_p8-baseline.json`):
+  consumer_care precision **0.65 → 0.81**, five false positives gone and **no true positive
+  lost**; violation recall 0.966 → 0.986, exact-set accuracy **46.4% → 51.8%**; field extraction
+  accuracy unchanged at 62.5% / real 30.5% / synthetic 98.4%. All six listings now produce
+  exactly the E1 gold asks for.
 - 2026-09-08 — P7. **Compliant means the stored score is 100, and that is the only definition.**
   The `dashboard_summary` view written in P1 said "no critical or major violation", which lets a
   minor one through and disagrees with both the score on the scan page and the score in the PDF.

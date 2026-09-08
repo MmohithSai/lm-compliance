@@ -262,6 +262,56 @@ def test_an_ecommerce_scan_is_judged_only_by_rule_6_10() -> None:
     assert report.scan.source == Source.ecommerce
 
 
+# The declarations eval/dataset/ecom_amazon_tata_salt_1kg/gold.json holds, read off the real
+# Amazon listing by hand. Its gold verdict is ["E1"]: the listing declares no consumer care.
+TATA_SALT_LISTING = [
+    decl("generic_name", "Generic Name : Salt"),
+    decl("manufacturer", "Manufacturer : Tata Chemicals Limited, P. 0. Mithapur-361 345"),
+    decl("net_quantity", "Net Quantity : 1000.0 Grams"),
+    decl("mrp", "M.R.P.: Rs 32.00"),
+    decl("unit_sale_price", "Rs 2.90 /100 g"),
+]
+
+
+def test_a_real_listing_gives_a_rule_6_10_report_in_all_three_formats() -> None:
+    """P8's definition of done, at the report layer: the screenshot of an Amazon page that
+    declares no consumer care produces one critical Rule 6(10) finding, and the PDF, the DOCX
+    and the JSON all say so."""
+    context = ctx(source=Source.ecommerce)
+    listing = ScanRow(id=SCAN.id, inspector_id="u1", source=Source.ecommerce)
+    report = build_report(listing, result_for(TATA_SALT_LISTING, context), context, IMAGES, now=NOW)
+
+    (finding,) = report.violations
+    assert (finding.rule_id, finding.rule_ref) == ("E1", "Rule 6(10)")
+    assert finding.severity is Severity.critical
+    assert "consumer_care" in finding.message
+    assert report.score.value == 75 and report.score.status == "non_compliant"
+
+    html, docx = render_html(report), " ".join(read_docx(render_docx(report)))
+    data = cast(dict[str, Any], __import__("json").loads(render_json(report)))
+    assert data["violations"][0]["rule_ref"] == "Rule 6(10)"
+    assert data["score"] == {**data["score"], "value": 75, "critical": 1}
+    for text in (html, docx):
+        assert "Rule 6(10)" in text
+        assert "75" in text
+    assert pdf_or_skip(html)[:4] == b"%PDF"
+
+
+def test_a_listing_report_carries_no_print_size_or_placement_finding() -> None:
+    """A screenshot is not the pack, so F1/F2/P1..P3 are not applied — and so must not appear
+    as passed checks or as "not verifiable" either, which would read as "we tried"."""
+    context = ctx(source=Source.ecommerce)
+    listing = ScanRow(id=SCAN.id, inspector_id="u1", source=Source.ecommerce)
+    report = build_report(listing, result_for(TATA_SALT_LISTING, context), context, IMAGES, now=NOW)
+    everywhere = {f.rule_id for f in report.violations + report.notes + report.unverifiable} | {
+        c.rule_id for c in report.passed
+    }
+    assert everywhere & {"F1", "F2", "F3", "P1", "P2", "P3"} == set()
+    assert report.unverifiable == []
+    html = render_html(report)
+    assert not [code for code in ("F1", "F2", "F3", "P1", "P2", "P3") if code in html]
+
+
 def test_an_ecommerce_report_explains_why_the_package_rules_were_not_applied() -> None:
     context = ctx(source=Source.ecommerce)
     listing = ScanRow(id=SCAN.id, inspector_id="u1", source=Source.ecommerce)
@@ -312,12 +362,16 @@ def test_html_escapes_what_was_printed_on_the_pack() -> None:
     assert "&lt;script&gt;" in render_html(report)
 
 
-def test_pdf_renders() -> None:
+def pdf_or_skip(html: str) -> bytes:
+    """WeasyPrint binds to Pango and Cairo at render time, and Windows does not ship them."""
     try:
-        import weasyprint  # noqa: F401,PLC0415
+        return render_pdf(html)
     except Exception as e:  # pragma: no cover - depends on the machine, not on the code
         pytest.skip(f"WeasyPrint's system libraries (Pango, Cairo) are not installed here: {e}")
-    pdf = render_pdf(render_html(report_for(without(good(), "mrp"))))
+
+
+def test_pdf_renders() -> None:
+    pdf = pdf_or_skip(render_html(report_for(without(good(), "mrp"))))
     assert pdf.startswith(b"%PDF-")
     assert len(pdf) > 5000
 

@@ -24,7 +24,7 @@ Last updated: 2026-09-08.
 | P5 reports | **done** | — |
 | P6 repository + search + history | **done** | — |
 | P7 dashboard + roles + audit | **done** | — |
-| P8 e-commerce mode | todo | — |
+| P8 e-commerce mode | **done** | — |
 | P9 deploy + docs | todo | — |
 
 ---
@@ -649,14 +649,97 @@ returning.
   An audit log that gets tidied is not one, and the entries are exactly what the admin panel is
   there to show.
 
-## P8–P9
+## P8 — e-commerce screenshot mode
 
-Not started. See `docs/PLAN.md` for the item list and the "done when" line of each phase.
-P8's first item is already done — it landed in P3.
+**Done when:** a listing screenshot gives a Rule 6(10) report. **This is true today** — scan
+`eedd5753` on the hosted project, six real Amazon tiles in, `E1 / Rule 6(10) / critical /
+"Listing is missing: consumer_care."`, score 75, PDF + DOCX + JSON in Storage.
+
+| # | Item | Status | Where / evidence |
+|---|---|---|---|
+| 1 | `source = ecommerce` → only E1/E2, no font or placement checks | done | `_applies` in [rules_engine.py](worker/pipeline/rules_engine.py), landed in P3; pinned by `test_no_physical_check_is_ever_applied_to_a_listing` and its opposite |
+| 2 | OCR-empty / unusable scan is refused before anything is written | done | `unreadable()` + `UnreadableScan` in [pipeline/__init__.py](worker/pipeline/__init__.py); 15 checks in [test_unreadable.py](worker/tests/test_unreadable.py) |
+| 3 | The threshold is measured, not guessed | done | `MIN_READABLE_CHARS = 80`; the comment beside it holds the numbers, taken off `eval/.ocr_cache` and off blurred/shrunk/motion-blurred copies of one real tile |
+| 4 | The inspector reads a sentence, not an exception class | done | `process_one` stores `str(e)` for `UnreadableScan` only; hosted scan `916562a7` |
+| 5 | Error state on the scan page, 375 / 768 / 1280 | done | [scans/[id]/page.tsx](frontend/app/scans/[id]/page.tsx); browser checked, no overflow, no console error, no hydration warning |
+| 6 | A failed scan has no report and cannot look compliant | done | no `reports` row, no Storage file, no score; `ScanReports` says so |
+| 7 | All six real listings give the Rule 6(10) verdict gold asks for | done | `2026-09-08_p8-consumer-care-needs-a-contact.json` |
+
+**What the inspector is told.** Two sentences, one per source, both stored in `scans.error` and
+printed under **This scan could not be assessed** followed by "No verdict was reached. This is not
+a pass and not a failure — the pack or listing was never checked against the Rules."
+
+- package: "*{No text at all | Only N characters of text} could be read from these photographs, so
+  this pack was not checked against the Rules. The photographs may be blurry, shot from too far
+  away, cropped, or lost to glare. Photograph the declaration panel again, filling the frame with
+  it and holding the phone steady.*"
+- ecommerce: "*… could be read from this screenshot, so this listing was not checked against the
+  Rules. The screenshot may be blurry, cropped, or too low-resolution. Upload a clearer, full-size
+  screenshot of the listing that includes the product details table.*"
+
+**Measured.** `2026-09-08_p8-baseline.json` → `2026-09-08_p8-consumer-care-needs-a-contact.json`:
+
+| | baseline | after | |
+|---|---|---|---|
+| consumer_care precision | 0.65 (9 fp) | **0.81** (4 fp) | five false positives gone |
+| consumer_care recall | 0.59 | 0.59 | no true positive lost |
+| violation recall | 0.966 | **0.986** | |
+| violation exact-set accuracy | 46.4% | **51.8%** | |
+| field extraction accuracy | 62.5% | 62.5% | real 30.5%, synthetic 98.4%, both unchanged |
+
+**Not fixed here, and written down instead.** Two things the hosted run showed that belong to
+P2 and to P1, not to P8:
+
+- `run_scan` reads `scan_images` with no `order by`, so the order the photographs are handed to
+  `run_local` is whatever Postgres returns. "First box in reading order wins" is then decided
+  across images by that order: the same six tiles read `M.R.P.32.00` locally and `M.R.P: 260.00`
+  on the hosted run. The E1 verdict was identical both times, but the declaration quoted on the
+  report is not stable. One `order("storage_path")` fixes it; it is a P1 wiring bug and wants its
+  own measured change.
+- Real-photo field extraction is still 30.5%, unchanged by this phase and still the largest
+  error in the system. P2's business.
+
+---
+
+## P9
+
+Not started. See `docs/PLAN.md` for the item list and the "done when" line.
 
 ---
 
 ## Log
+
+- **2026-09-08** — **P8 finished: a listing gives Rule 6(10), an unreadable image gives a
+  sentence.** The first half of the phase was already there — `_applies` has judged an e-commerce
+  scan by Rule 6(10) alone since P3 — so the work was the other half, and the useful part of it
+  was refusing to build anything new. `scans.error` and `status = 'failed'` date from `0001`; the
+  gate is six lines in `run_scan`, before `store`, and one `UnreadableScan` whose message the loop
+  stores verbatim instead of prefixing with a class name. No migration, no second error model, no
+  new column, no image-quality subsystem.
+  **The threshold is the one decision worth defending, and the data changed it.** Confidence was
+  the obvious signal and the eval's OCR cache refused it: PP-OCR answers a blurred panel by not
+  detecting the small print and still reports the headline words it finds at 0.94–0.97, through a
+  31 px blur, an 8× downscale and an 82% darkening alike. What collapses is how much text comes
+  back — 218 characters to 44–59 on one real Amazon tile — against 134 for the least legible of
+  56 eval cases. So the gate counts characters, `MIN_READABLE_CHARS = 80`, and there is no second
+  knob on a number that does not move.
+  **Opening the six real listings end to end found the bug the 543 tests could not.** Amazon
+  prints "Customer Service New Releases" above every listing, the extractor claimed it as the
+  consumer care declaration on five of six, Rule 6(10) found the field present, and three
+  listings whose gold verdict is E1 scored **100 out of 100** — a false "compliant" reached from
+  a perfectly readable screenshot, which is the same disease as the unreadable one. Fixed with
+  the extractor's own `NEEDS_A_NUMBER` idiom: a care block has to carry an e-mail or a telephone
+  number, and a box that does not is skipped rather than claimed, so a real care line further
+  down the page still wins. One labelled run: consumer_care precision 0.65 → 0.81 with **no true
+  positive lost**, violation exact-set accuracy 46.4% → 51.8%, extraction accuracy flat. All six
+  listings now match gold.
+  Proved on the hosted project rather than asserted: `eedd5753`, six real tiles, `done`, score 75,
+  one `E1 / Rule 6(10)` violation, `mm_per_px` null and no F/P finding anywhere in the report,
+  three files in Storage; `916562a7`, the same tiles blurred 31 px, `failed`, score null, **zero**
+  rows in `ocr_words`, `declarations`, `violations` and `reports`, and the sentence in `error`.
+  Both pages read at 375, 768 and 1280 px: no horizontal overflow, no console error, no hydration
+  warning. `make test` 547 passed / 2 skipped · `make lint` clean · `make check-rls` all passed
+  (no schema or RLS change was made) · `tsc --noEmit`, `pnpm lint`, `pnpm build` clean.
 
 - **2026-09-08** — **P7 finished: dashboard, roles, audit.** Built on what was already there: the
   `audit_log` table, the three roles and the RLS policies all date from `0001`, and `0005` adds the

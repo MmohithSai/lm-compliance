@@ -9,7 +9,7 @@ from typing import Any, cast
 import pytest
 from supabase import Client
 
-from pipeline import run_scan, store
+from pipeline import UnreadableScan, run_scan, store
 from pipeline.models import (
     Declaration,
     Evidence,
@@ -105,7 +105,16 @@ IMAGES = [
 ]
 
 
-WORDS = [Word(id=i, image_id="img-a", text="x", x=0, y=0, w=1, h=1, confidence=0.9) for i in (1, 2)]
+# Real lines, not "x": `run_scan` refuses a scan whose OCR read less than
+# `MIN_READABLE_CHARS`, so a fixture standing in for a readable pack has to be readable.
+LINES = [
+    "Mfd by: Brite Foods Pvt Ltd, Plot 12, MIDC, Pune 411019",
+    "MRP Rs 20.00 (incl. of all taxes)",
+]
+WORDS = [
+    Word(id=i, image_id="img-a", text=t, x=0, y=40 * i, w=10 * len(t), h=30, confidence=0.9)
+    for i, t in enumerate(LINES, start=1)
+]
 RESULT = PipelineResult(
     words=WORDS,
     declarations=[Declaration(field="mrp", value="MRP 20", word_ids=[2])],
@@ -183,11 +192,11 @@ def test_store_writes_nothing_when_the_result_is_empty() -> None:
 def test_run_scan_fails_when_the_ocr_read_nothing(monkeypatch: pytest.MonkeyPatch) -> None:
     """score([]) is 100 by construction, so an unreadable photo would otherwise finish `done`
     with a perfect score. Scan 5e0811b8 did exactly that and showed "100 / 100" for a pack the
-    pipeline never read."""
+    pipeline never read. What the inspector is told instead is pinned in test_unreadable.py."""
     empty = RESULT.model_copy(update={"words": [], "declarations": [], "violations": []})
     db = fake()
     monkeypatch.setattr("pipeline.run_local", lambda images, ctx: empty)
-    with pytest.raises(ValueError, match="no text was read"):
+    with pytest.raises(UnreadableScan, match="No text at all could be read"):
         run_scan(cast(Client, db), SCAN)
     assert db.written == {}
 

@@ -1,3 +1,4 @@
+import { CircleAlert } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -121,19 +122,25 @@ export default async function ScanPage({ params }: { params: Promise<{ id: strin
         <Badge>{scan.status}</Badge> · {scan.source} · {new Date(scan.created_at).toLocaleString()}
       </p>
       {/* Which pack this is, matched on the maker and the generic name the OCR read off it.
-          Unmatched is the honest answer when the pack declared no maker — which is D1. */}
-      <p className="text-sm">
-        {scan.products ? (
-          <>
-            <Link href={`/products/${scan.products.id}`} className="underline">
-              {scan.products.name}
-            </Link>
-            {scan.products.manufacturer && ` · ${scan.products.manufacturer}`}
-          </>
-        ) : (
-          <span className="text-muted-foreground">Product not identified from this pack.</span>
-        )}
-      </p>
+          Unmatched is the honest answer when the pack declared no maker — which is D1. A failed
+          scan says nothing at all here: "not identified" would claim we looked, and nothing was
+          ever read to look with. */}
+      {scan.status !== "failed" && (
+        <p className="text-sm">
+          {scan.products ? (
+            <>
+              <Link href={`/products/${scan.products.id}`} className="underline">
+                {scan.products.name}
+              </Link>
+              {scan.products.manufacturer && ` · ${scan.products.manufacturer}`}
+            </>
+          ) : (
+            <span className="text-muted-foreground">
+              Product not identified from this {scan.source === "ecommerce" ? "listing" : "pack"}.
+            </span>
+          )}
+        </p>
+      )}
       {scan.compliance_score !== null && (
         <div>
           <p className="text-3xl font-bold">{scan.compliance_score} / 100</p>
@@ -144,13 +151,35 @@ export default async function ScanPage({ params }: { params: Promise<{ id: strin
           </p>
         </div>
       )}
-      {scan.error && <p className="text-sm text-red-600">{scan.error}</p>}
+      {/* A failed scan reached no verdict, and the page must not read like one. The heading
+          says so, the worker's own sentence says why and what to do next, and neither the
+          score block above nor the report block below can show anything: `compliance_score`
+          was never written and no report file was rendered. */}
+      {scan.status === "failed" && (
+        <div className="space-y-1 rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm">
+          <p className="flex items-center gap-2 font-semibold text-destructive">
+            <CircleAlert className="size-4 shrink-0" />
+            This scan could not be assessed.
+          </p>
+          {scan.error && <p className="text-pretty">{scan.error}</p>}
+          <p className="text-muted-foreground">
+            No verdict was reached. This is not a pass and not a failure &mdash; the pack or listing was
+            never checked against the Rules.
+          </p>
+        </div>
+      )}
       {WAITING[scan.status] && <p className="text-sm text-muted-foreground">{WAITING[scan.status]}</p>}
+      {/* On a listing there is no pack in the frame, so a scale would measure the screen. The
+          print size and placement rules are not applied at all, which is not the same thing as
+          being unverifiable — see `_applies` in the rule engine. */}
       <p className="text-xs text-muted-foreground">
-        Reference card: {scan.has_reference_card ? "yes" : "no"}.{" "}
-        {scan.mm_per_px
-          ? `Scale: 1 pixel = ${Number(scan.mm_per_px).toFixed(3)} mm, so print size is measured.`
-          : "No scale in the photo, so print size and contrast are not verifiable."}
+        {scan.source === "ecommerce"
+          ? "A screenshot is not the package, so only Rule 6(10) — what the listing must declare — is checked. Print size, contrast and placement are not judged from a listing."
+          : `Reference card: ${scan.has_reference_card ? "yes" : "no"}. ${
+              scan.mm_per_px
+                ? `Scale: 1 pixel = ${Number(scan.mm_per_px).toFixed(3)} mm, so print size is measured.`
+                : "No scale in the photo, so print size and contrast are not verifiable."
+            }`}
       </p>
 
       <div className="space-y-2">
@@ -203,7 +232,11 @@ export default async function ScanPage({ params }: { params: Promise<{ id: strin
           ))}
           {(declarations ?? []).length === 0 && (
             <TableRow>
-              <TableCell colSpan={4}>Nothing read from the photos yet.</TableCell>
+              <TableCell colSpan={4}>
+                {scan.status === "failed"
+                  ? "Nothing could be read from these photos."
+                  : "Nothing read from the photos yet."}
+              </TableCell>
             </TableRow>
           )}
         </TableBody>

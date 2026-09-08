@@ -33,7 +33,17 @@ Python worker — laptop / HF Space / Oracle VM, service-role key, talks *out* o
                     + DOCX (python-docx) -> Storage scans/<id>/report.*             [P5, built]
                     A format that will not render is stored as a null path; it never fails
                     the scan and never takes the other two with it.
+    g'. can this be judged?  before anything is written: the text PP-OCR returned, in characters.
+                    Under 80 the scan stops here as `failed`, with a sentence for the inspector
+                    in `scans.error` and no words, declarations, violations or report file
+                    behind it. `score([])` is 100 by construction, so an unreadable photograph
+                    that reaches `done` shows 100 / 100 for a pack nobody read.       [P8, built]
     h. write back   ocr_words, declarations, violations, reports, scans.status = done | failed
+
+  An e-commerce scan (`source = ecommerce`) is judged by Rule 6(10) and nothing else: steps d
+  and e are pointless on a screenshot — a scale measured there measures the screen — and the
+  rule engine's `_applies` never applies F1, F2, F3, P1, P2 or P3 to one. Not "unverifiable":
+  never applied, because a screenshot is not the package.
 
   Grouping (P1) has no failure side and will not get one here: a
   scale says how big a pixel is, not whether two photographs show one panel or two.
@@ -84,6 +94,13 @@ photographs. Nothing else passes anything but the default.
 - Nothing is estimated: no scale reference in that frame → the font *and contrast* checks say
   "not verifiable" and cost no points. A scale is never borrowed from another photograph, and a
   card-shaped rectangle is only a card when the inspector said one is in the shot.
+- A photograph nobody can read gets no verdict at all. The gate is the number of characters
+  PP-OCR returned (`MIN_READABLE_CHARS = 80` in `worker/pipeline/__init__.py`), and it is
+  measured, not guessed: across the 56 eval cases the least legible reads 134 characters and a
+  listing screenshot 5,300–10,100, while one real Amazon tile blurred, shrunk 8× or motion
+  blurred until it is unreadable falls from 218 to 44–59. Confidence is deliberately *not* part
+  of the test — PP-OCR answers a blurred panel by not detecting the small print and still
+  reports the few headline words at 0.94–0.97, so it does not move where the count collapses.
 - Every part is open source and self-hostable. Rules live in a YAML file DoCA can edit without code.
 - Every claim about accuracy has a committed result file behind it, including every change that
   was measured and then thrown away — nine so far, and they are the most useful entries in the
