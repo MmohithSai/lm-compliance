@@ -148,11 +148,18 @@ def context_for(scan: ScanRow) -> ScanContext:
 
 def run_scan(sb: Client, scan: ScanRow) -> PipelineResult:
     """Download the scan's images, run_local, write words/declarations/violations back."""
+    # In upload order. The frontend names the files `<scan>/0.jpg`, `1.jpg`, `2.jpg` in the
+    # order the inspector added them, and without an `order` Postgres hands the rows back in
+    # whatever order it likes — the same six listing tiles read `M.R.P.32.00` locally and
+    # `M.R.P: 260.00` on the hosted run, because "first box in reading order wins" was being
+    # decided across images by row order. The extractor keeps the images in the order given
+    # here, so the answer is now the same on every run and the same as the eval's.
     images = cast(
         list[dict[str, Any]],
         sb.table("scan_images")
         .select("id, storage_path, kind")
         .eq("scan_id", scan.id)
+        .order("storage_path")
         .execute()
         .data,
     )

@@ -57,6 +57,17 @@ def test_the_first_box_in_reading_order_wins_a_repeated_anchor() -> None:
     assert got == {"mrp": "MRP 99.00"}
 
 
+def test_reading_order_across_photographs_is_the_order_they_were_handed_in() -> None:
+    """On a real scan `image_id` is a uuid. Sorting on it put the photographs in a random order
+    and decided which of two prices the report quoted; the eval never saw it because there the
+    id is a file name that happens to sort like the upload. The first photograph given is the
+    first read, whatever its id says."""
+    first = line("MRP 20.00", 100, wid=0).model_copy(update={"image_id": "zzz-second-by-name"})
+    second = line("MRP 99.00", 100, wid=1).model_copy(update={"image_id": "aaa-first-by-name"})
+    assert fields([first, second]) == {"mrp": "MRP 20.00"}
+    assert fields([second, first]) == {"mrp": "MRP 99.00"}
+
+
 def test_a_wrapped_address_is_one_declaration_not_three() -> None:
     """Real packs wrap the manufacturer over several printed lines. One declaration."""
     got = fields(

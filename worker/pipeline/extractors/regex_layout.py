@@ -323,7 +323,12 @@ class RegexLayoutExtractor:
         self, words: list[Word], found: dict[str, Declaration], table: bool, wrap: bool
     ) -> dict[str, Declaration]:
         found = dict(found)
-        for word in sorted(words, key=lambda w: (w.image_id, w.y, w.x)):
+        # Reading order is the order the photographs were handed in, then top to bottom. Not
+        # the image id: in the eval that is a file name and sorts like the upload, but on a
+        # real scan it is a uuid, and sorting on it put the tiles in a random order that
+        # decided which of two prices was quoted on the report.
+        frame = {image: i for i, image in enumerate(dict.fromkeys(w.image_id for w in words))}
+        for word in sorted(words, key=lambda w: (frame[w.image_id], w.y, w.x)):
             hit = claim(word.text)
             if hit is None:
                 continue

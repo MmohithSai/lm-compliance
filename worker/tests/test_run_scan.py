@@ -27,11 +27,16 @@ from pipeline.product import link_product
 class FakeTable:
     def __init__(self, name: str, db: FakeClient) -> None:
         self.name, self.db, self.rows = name, db, cast(list[dict[str, Any]], [])
+        self.ordered: str | None = None
 
     def select(self, _cols: str) -> FakeTable:
         return self
 
     def eq(self, _col: str, _val: str) -> FakeTable:
+        return self
+
+    def order(self, column: str, desc: bool = False) -> FakeTable:
+        self.ordered = column
         return self
 
     def insert(self, rows: list[dict[str, Any]]) -> FakeTable:
@@ -55,7 +60,11 @@ class FakeTable:
 
     @property
     def data(self) -> list[dict[str, Any]]:
-        return self.db.written.get(self.name, self.db.seed.get(self.name, []))
+        rows = self.db.written.get(self.name, self.db.seed.get(self.name, []))
+        # Seed rows are handed back as seeded — deliberately not in upload order — unless the
+        # query asked for an order, the way Postgres does.
+        column = self.ordered
+        return sorted(rows, key=lambda r: str(r[column])) if column else rows
 
 
 class FakeBucket:
@@ -99,9 +108,11 @@ SCAN = ScanRow(
     pdp_height_mm=40,
     created_at=datetime(2026, 9, 8, 10, 30, tzinfo=UTC),
 )
+# Seeded back to front on purpose: Postgres returns rows in no particular order, and
+# `run_scan` has to ask for upload order rather than take what it is given.
 IMAGES = [
-    {"id": "img-a", "storage_path": "s1/0.jpg", "kind": "front"},
     {"id": "img-b", "storage_path": "s1/1.jpg", "kind": "back"},
+    {"id": "img-a", "storage_path": "s1/0.jpg", "kind": "front"},
 ]
 
 
@@ -151,6 +162,9 @@ def test_run_scan_downloads_every_image_and_stores_what_the_pipeline_returned(
     db = fake()
     monkeypatch.setattr("pipeline.run_local", fake_pipeline)
     result = run_scan(cast(Client, db), SCAN)
+    # Upload order — 0.jpg before 1.jpg — even though the rows were seeded the other way round.
+    # Without it "first box in reading order wins" is decided by whatever order Postgres
+    # returned the rows in, and the same photographs give a different declaration per run.
     assert db.downloaded == ["s1/0.jpg", "s1/1.jpg"]
     assert seen == [["img-a", "img-b"]]
     assert result.compliance_score == 75
