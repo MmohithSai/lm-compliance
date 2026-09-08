@@ -453,6 +453,78 @@ def test_the_next_row_of_a_table_is_not_part_of_the_label_cell() -> None:
     assert got["mrp"] == "MRP 25.00"
 
 
+def test_the_licence_number_under_an_address_is_not_part_of_it() -> None:
+    """The Kurkure pack, as PP-OCR read it: the FSSAI logo comes back as "fssat", the licence
+    number follows, and neither is the maker's address."""
+    got = fields(
+        [
+            line("MARKETED BY:", 563, x=1038, w=186, h=39, wid=1),
+            line("PepsiCo India Holdings Pvt.Ltd", 595, x=1040, w=360, h=47, wid=2),
+            line("fssat", 634, x=1110, w=170, h=91, wid=3),
+            line("Lic.No.10014064000435", 716, x=1055, w=257, h=43, wid=4),
+        ]
+    )
+    assert got["manufacturer"] == "MARKETED BY: PepsiCo India Holdings Pvt.Ltd"
+
+
+def test_a_storage_instruction_under_a_care_block_is_not_part_of_it() -> None:
+    got = fields(
+        [
+            line("CONTACT CUSTOMER SERVICE MANAGER", 743, x=685, w=484, h=56, wid=1),
+            line("AT:P.O.BOX 27DLF QUTAB ENCLAVE-1,", 793, x=691, w=473, h=52, wid=2),
+            line("CONSUMER.FEEDBACK@PEPSICO.COM", 883, x=673, w=507, h=57, wid=3),
+            line(
+                "KEEP IN COOL AND DRY PLACE AWAY FROM DIRECT SUNLIGHT",
+                988,
+                x=672,
+                w=423,
+                h=34,
+                wid=4,
+            ),
+        ]
+    )
+    assert got["consumer_care"] == (
+        "CONTACT CUSTOMER SERVICE MANAGER AT:P.O.BOX 27DLF QUTAB ENCLAVE-1, "
+        "CONSUMER.FEEDBACK@PEPSICO.COM"
+    )
+
+
+def test_a_care_block_keeps_its_address_by_reference() -> None:
+    """The Bisleri bottle. Rule 6(2) wants an address, and "same as the marketer's" is one, even
+    though the line holds a maker's anchor and a pointer. On the Reynolds pen the same line
+    comes second of four ("at the above address.") and the phone and e-mail follow it."""
+    got = fields(
+        [
+            line("CONTACT: CUSTOMER CARE EXECUTIVE 1800-121-1007", 873, x=48, w=1271, h=121, wid=1),
+            line("EMAIL: WECARE@BISLERI.CO.IN", 988, x=57, w=715, h=67, wid=2),
+            line("ADDRESS: SAME AS MKT BY ADDRESS", 1065, x=56, w=746, h=87, wid=3),
+        ]
+    )
+    assert got["consumer_care"] == (
+        "CONTACT: CUSTOMER CARE EXECUTIVE 1800-121-1007 EMAIL: WECARE@BISLERI.CO.IN "
+        "ADDRESS: SAME AS MKT BY ADDRESS"
+    )
+    got = fields(
+        [
+            line("Consumer Care Officer", 100, wid=1),
+            line("at the above address.", 134, wid=2),
+            line("Toll Free No.: 0008 0005 04348", 168, wid=3),
+            line("E-mail: care@example.com", 202, wid=4),
+        ]
+    )
+    assert got["consumer_care"].endswith("0008 0005 04348 E-mail: care@example.com")
+
+
+def test_a_maker_s_block_still_stops_before_an_address_by_reference() -> None:
+    got = fields(
+        [
+            line("MKT BY: Brite Foods Pvt Ltd, Pune 411019", 100, wid=1),
+            line("ADDRESS: SAME AS ABOVE", 134, wid=2),
+        ]
+    )
+    assert got["manufacturer"] == "MKT BY: Brite Foods Pvt Ltd, Pune 411019"
+
+
 # ------------------------------------------------- P6: a listing labels it "Manufacturer"
 
 

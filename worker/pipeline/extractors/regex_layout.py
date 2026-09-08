@@ -269,8 +269,23 @@ MAX_LINES = 7
 MAX_LABEL_LINES = 2
 
 
-def continuations(block: list[Word], words: list[Word]) -> list[Word]:
-    """The printed lines that continue `block`, in reading order. Layout only, no wording."""
+# Lines that stand where an address block would continue and are not part of it: the food
+# licence number and the FSSAI logo that every Indian food pack prints right under the maker's
+# address (PP-OCR reads the logo as "fssat"), and the storage instruction that often follows.
+# "STORED" in "when stored in a cool and dry place" is not "store": that is a clause of a
+# best-before sentence, not an instruction.
+NOT_AN_ADDRESS_LINE = re.compile(
+    r"\bfssa[it]\b|\blic(?:ence|ense)?\.?\s*no\b|^\W*(?:store|keep)\b", re.IGNORECASE
+)
+# A consumer care block gives its address by reference as often as not — "ADDRESS: SAME AS MKT
+# BY ADDRESS", "at the above address" — and Rule 6(2) counts that as the address. So for that
+# one field a pointer line is kept, and it is the end of the block. For a maker's address the
+# same words still mean what they always did: the address is not here.
+ADDRESS_BY_REFERENCE = re.compile(r"\bsame\s*as\b|\babove\b", re.IGNORECASE)
+
+
+def continuations(block: list[Word], words: list[Word], field: str = "") -> list[Word]:
+    """The printed lines that continue `block`, in reading order. Layout, then a few words."""
     same_image = sorted(
         (w for w in words if w.image_id == block[0].image_id and w not in block),
         key=lambda w: (w.y, w.x),
@@ -280,7 +295,7 @@ def continuations(block: list[Word], words: list[Word]) -> list[Word]:
     while len(block) + len(out) < MAX_LINES:
         gap = last.h  # one blank line's worth: past that it is a different part of the panel
         margin = last.h  # a wrapped line starts under the one above, not in the next column
-        below = [
+        window = [
             w
             for w in same_image
             if w not in out
@@ -290,8 +305,22 @@ def continuations(block: list[Word], words: list[Word]) -> list[Word]:
                 # or the block is centred, which is how packs set an address under a heading
                 or abs((w.x + w.w / 2) - (block[0].x + block[0].w / 2)) <= margin
             )
-            and claim(w.text) is None
-            and not POINTS_ELSEWHERE.search(w.text)
+        ]
+        # Lines that are another declaration, a pointer or a licence / storage line are passed
+        # over rather than absorbed. The window does not move past them: the block continues
+        # only if one of its own lines is still within a line of the last one, which is how a
+        # licence number printed inside an address block is skipped while one printed after it
+        # ends the block. A consumer care block's "address: same as ..." / "at the above
+        # address" line is its own — it holds a maker's anchor and a pointer, and is kept.
+        below = [
+            w
+            for w in window
+            if (field == "consumer_care" and ADDRESS_BY_REFERENCE.search(w.text))
+            or (
+                claim(w.text) is None
+                and not POINTS_ELSEWHERE.search(w.text)
+                and not NOT_AN_ADDRESS_LINE.search(w.text)
+            )
         ]
         if not below:
             return out
@@ -546,7 +575,7 @@ class RegexLayoutExtractor:
             elif needs_value:
                 continue  # nothing on this panel carries the figure
             if wrap and field in WRAPS:
-                block += continuations(block, free)
+                block += continuations(block, free, field)
             if bare_anchor and len(block) == 1 and anchor not in SUFFIX_ANCHORS:
                 # "Made in", "MKT. BY", "A QUALITY PRODUCT OF" with nothing beside or under
                 # them: the label names the declaration and does not carry one. A suffix is
