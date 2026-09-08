@@ -124,6 +124,33 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - Total monthly cost: ₹0.
 
 ## Decisions log
+- 2026-09-08 — The extractor can read a printed declarations table. A pack that sets its
+  declarations in a bordered table centres the value against the whole label cell, so a two line
+  label ("MRP" over "(incl. of all taxes)") puts its value half a line below the anchor's own
+  centre and the row test misses by two pixels. Three parts, each measured on its own:
+  `nearest` gets a last resort that reaches into the cell, taking the **best aligned** box rather
+  than the nearest — the two earlier attempts failed because they loosened the row test itself
+  and then still took the leftmost box, which on one pack was the barcode; the reach runs as a
+  **second pass** over the panel, so a weak cell match can never shut out a strong match printed
+  further down (it did, and cost a date that was right beside its anchor); and `wrapped_label`
+  merges the label cell's second line, followed one line at a time and stopping when the chain
+  leaves the value's row. Net on the whole set: field accuracy 59.0% → 59.8%, real 28.4% → 29.8%,
+  **7 fewer false accusations and no new misses**, 3 fields better and 1 worse.
+- 2026-09-08 — A continuation line may be centred under its heading, not only left aligned.
+  Packs set an address as a centred block under "Consumer Care Officer", and the left-edge test
+  dropped it at the first line whose indent moved — losing the phone and the e-mail, which is
+  exactly what D6 asks for. Two false D6s gone, no field moved either way.
+- 2026-09-08 — `MAX_LINES` 6 → 7 and a "manufactured, marketed" anchor. Indian packs write
+  "Manufactured, Marketed and Brand Owned by" over two lines before the address even starts, so
+  six lines stops short of the PIN code and no anchor claimed the heading at all. The anchor
+  costs 0.02 of manufacturer precision — the block it now reads is right but carries two OCR
+  character errors, so it can never match gold word for word — and buys a correct verdict on a
+  pack that prints a full address and was being told it had none. Violation precision 0.71 → 0.74.
+- 2026-09-08 — `eval/dataset/phone_reynolds_jetter_classic_ballpen`: the first pack in the set
+  whose declarations are a printed table, added from a real scan before anything was changed to
+  read it. The web set is almost all paragraph labels, so the table path had never been measured.
+  Gold was written from the photograph, and the case immediately showed the extractor reading
+  none of the table's values. It is the reason a `phone_` prefix exists.
 - 2026-09-08 — A scan the OCR read nothing from is `failed`, not `done`. `score([])` is 100 by
   construction, so an unreadable photograph finished with a perfect score: scan `5e0811b8` sat at
   **100 / 100** for a pen box the pipeline had never read a word of, which is the one wrong

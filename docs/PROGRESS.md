@@ -18,7 +18,7 @@ Last updated: 2026-09-08.
 |---|---|---|
 | P0 dataset + eval harness | **done** | photos with a reference card still need a person (F1/F2) |
 | P1 schema + auth + upload + worker loop | **done** | — |
-| P2 OCR + extractor baseline | measured, below target | 94.5% synthetic, **28.9% real**; target 70% |
+| P2 OCR + extractor baseline | measured, below target | 98.2% synthetic, **29.8% real**; target 70% |
 | P3 rule engine + detail page | **done** | seeing the detail page on screen needs a login |
 | P4 scale + font / contrast / grouping | todo | — |
 | P5 reports | todo | — |
@@ -162,7 +162,7 @@ phase reaches for them.
 ## P2 — OCR + regex/layout extractor (baseline)
 
 **Done when:** `make eval LABEL=baseline-v1` >= 70% field extraction on clean photos.
-**98.2% on the 16 synthetic labels. 28.9% on the 37 real cases.** Met on clean labels, not met on
+**98.2% on the 16 synthetic labels. 29.8% on the 38 real cases.** Met on clean labels, not met on
 photographs. The harness prints the two apart because one number hid which half moved.
 
 | # | Item | Status | Where / evidence |
@@ -174,6 +174,45 @@ photographs. The harness prints the two apart because one number hid which half 
 | 5 | Measured on rendered labels | done | 94.5%, `eval/results/2026-09-07_p2-baseline.json` |
 | 6 | Measured on real photographs | done | 28.9%, `eval/results/2026-09-07_p2-real-final.json` |
 | 7 | 70% on real photographs | **not met** | see the three causes below |
+| 8 | Printed declaration tables | done | 2026-09-08, six labelled runs: real 28.4% -> 29.8%, **7 fewer false accusations, no new misses** |
+
+### Reading a printed declarations table
+
+A real scan of a Reynolds pen box turned up a layout the whole web set is blind to: the
+declarations set in a **bordered two-column table**, label cell left, value cell right, two of the
+labels wrapping onto a second line. The extractor read none of its values, and the report told the
+inspector the pack had no MRP, no date and no manufacturer, all of which it prints plainly. The
+pack is now `eval/dataset/phone_reynolds_jetter_classic_ballpen`, added **before** anything was
+changed to read it.
+
+Three parts, one labelled run each, plus three that were measured and thrown away:
+
+| Run | Change | Real | Verdict |
+|---|---|---|---|
+| `p4base-with-table-pack` | baseline, the new case added | 28.4% | — |
+| `p4-same-row-is-vertical-overlap` | row test = overlap half a line | 27.4% | reverted |
+| `p4-same-row-anchor-middle` | row test = anchor's middle inside the value | 27.4% | reverted |
+| `p4-table-cell-last-resort` | reach into the cell only after the strict row and the line below both fail, best aligned box | 28.4% | kept |
+| `p4-wrapped-label-cell` | merge the label cell's second line | 29.1% | kept |
+| `p4-label-cell-same-table-row` | merge rule = begins before the value ends | 28.4% | reverted |
+| `p4-table-cell-second-pass` | the cell reach is a second pass over the panel | 29.8% | kept |
+| `p4-label-cell-is-a-chain` | follow the label cell one line at a time | 29.8% | kept, 2 fewer false violations |
+| `p4-centred-address-block` | a continuation may be centred, not only left aligned | 29.8% | kept, 2 fewer false D6 |
+| `p4-address-block-seven-lines` | `MAX_LINES` 7 + a "manufactured, marketed" anchor | 29.8% | kept, violation precision 0.71 -> 0.74 |
+
+Two of those deserve their own line, because both were mistakes I made and the eval caught:
+
+- **Loosening the row test does not work.** Twice, two different ways, 1.5 points each time. The
+  reason is not the test but the tiebreak: the leftmost box of a loosened set is often the wrong
+  one, and on `off_bru` it was the **barcode**, read as a net weight. The fix that works keeps the
+  strict test first and only falls back to the cell, taking the best aligned box, never the nearest.
+- **A weak match must not claim a field.** The first version let a loosely aligned cell box win,
+  which shut out a box printed further down that had its date right beside it. Running the cell
+  reach as a second pass over the whole panel fixed it and was worth 0.7 points on its own.
+
+The pen box scan went **100 (nothing read) -> 17 -> 52 -> 87**. What is left on it is one
+false D2, because PP-OCR read `Ceneric Name Ball Pen` — a single wrong character, the same class
+of miss as `Bjscuits`, and not something an extractor can reach.
 
 ### Every labelled run, in order
 
@@ -311,6 +350,16 @@ that line is how the phase gets marked done. P8's first item is already done —
 ---
 
 ## Log
+
+- **2026-09-08** — **The extractor can read a printed declarations table.** A real scan showed
+  a pack whose declarations are a bordered two-column table, a layout no case in the web set has,
+  and the extractor read none of its values. The pack went into `eval/dataset` first, then six
+  labelled runs: reach into the table cell as a last resort and as a second pass, merge the label
+  cell's wrapped second line, allow a centred continuation block, and one more anchor. Real
+  accuracy 28.4% -> 29.8%, violation precision 0.71 -> 0.74, **7 fewer false accusations and no
+  new misses** across 54 cases. Three further attempts were measured and thrown away, including
+  two ways of loosening the row test that each cost 1.5 points — the second of which read a
+  barcode as a net weight.
 
 - **2026-09-08** — **First look at the detail page, three fixes.** The worst was a scan showing
   **100 / 100** for a pen box the pipeline had never read a word of — `score([])` is 100 by

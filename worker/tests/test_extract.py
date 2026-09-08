@@ -236,3 +236,35 @@ def test_a_wrapped_address_stops_at_a_line_that_points_somewhere_else() -> None:
         ]
     )
     assert got["manufacturer"] == "MARKETED BY: PepsiCo India Holdings Pvt. Ltd"
+
+
+def test_a_table_cell_value_is_found_even_when_it_sits_off_the_labels_row() -> None:
+    """The pixels are the Reynolds pen box in eval/dataset, rounded: a bordered table whose
+    label cell wraps onto a second line, so the value is centred against both lines and misses
+    the anchor's own row by two pixels. Widening the row test was measured twice and cost real
+    accuracy both times, so the reach into the cell runs only after everything else has failed.
+    """
+    got = fields(
+        [
+            line("MRP", 502, x=395, w=55, h=31, wid=0),
+            line("25.00", 514, x=563, w=84, h=42, wid=1),
+            line("(incl.of all taxes", 530, x=396, w=149, h=34, wid=2),
+            line("Month&Year", 572, x=395, w=145, h=28, wid=3),
+            line("02/2026", 583, x=571, w=105, h=29, wid=4),
+            line("of Manufacture", 598, x=395, w=163, h=29, wid=5),
+        ]
+    )
+    assert got["mrp"] == "MRP (incl.of all taxes 25.00", "the tax wording is part of the label cell"
+    assert got["mfg_date"] == "Month&Year of Manufacture 02/2026"
+
+
+def test_the_next_row_of_a_table_is_not_part_of_the_label_cell() -> None:
+    """The guard on the test above: without it "MRP" swallows the row printed under it."""
+    got = fields(
+        [
+            line("MRP", 502, x=395, w=55, h=31, wid=0),
+            line("25.00", 514, x=563, w=84, h=42, wid=1),
+            line("Batch", 560, x=396, w=149, h=34, wid=2),
+        ]
+    )
+    assert got["mrp"] == "MRP 25.00"

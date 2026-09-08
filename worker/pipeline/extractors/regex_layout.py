@@ -28,7 +28,19 @@ ANCHORS: dict[str, list[str]] = {
         "net volume",
         "net content",
     ],
-    "mfg_date": ["mfd", "mfg", "manufactured", "packed", "pkd", "imported on", "date of import"],
+    "mfg_date": [
+        "mfd",
+        "mfg",
+        "manufactured",
+        "packed",
+        "pkd",
+        "imported on",
+        "date of import",
+        # The wording Rule 6(1)(d) itself uses, and what a pack that sets its declarations in a
+        # table prints in the label cell: "Month & Year | of Manufacture" beside "02/2026".
+        "month & year",
+        "month and year",
+    ],
     "importer": ["imported by", "importer"],
     "manufacturer": [
         "mfd by",
@@ -39,6 +51,10 @@ ANCHORS: dict[str, list[str]] = {
         "manufactured for",
         "packed by",
         "marketed by",
+        # "Manufactured, Marketed and Brand Owned by", "Manufactured & Marketed by" — one
+        # anchor covers the family, and it has to beat the bare "manufactured" that anchors
+        # the date, which it does by being longer.
+        "manufactured, marketed",
     ],
     "consumer_care": [
         "customer care",
@@ -129,7 +145,10 @@ def claim(text: str) -> tuple[str, bool] | None:
 # are one line by construction, and letting them absorb the next line cost 4.5 points of field
 # accuracy on the real set (2026-09-07_p2-real-continuations).
 WRAPS = {"manufacturer", "importer", "consumer_care"}
-MAX_LINES = 6
+MAX_LINES = 7
+# A label cell is a label, not an address: "MRP" over "(incl. of all taxes)" is the shape,
+# and two lines is as far as one goes on the packs in eval/dataset.
+MAX_LABEL_LINES = 2
 
 
 def continuations(block: list[Word], words: list[Word]) -> list[Word]:
@@ -148,7 +167,11 @@ def continuations(block: list[Word], words: list[Word]) -> list[Word]:
             for w in same_image
             if w not in out
             and last.y < w.y <= last.y + last.h + gap
-            and abs(w.x - block[0].x) <= margin
+            and (
+                abs(w.x - block[0].x) <= margin
+                # or the block is centred, which is how packs set an address under a heading
+                or abs((w.x + w.w / 2) - (block[0].x + block[0].w / 2)) <= margin
+            )
             and claim(w.text) is None
             and not POINTS_ELSEWHERE.search(w.text)
         ]
@@ -159,19 +182,72 @@ def continuations(block: list[Word], words: list[Word]) -> list[Word]:
     return out
 
 
-def nearest(anchor: Word, words: list[Word], needs_number: bool = False) -> Word | None:
-    """The value box for a bare anchor: same row to the right, else the line directly below.
+def level(anchor: Word, w: Word) -> float:
+    """How far off `anchor`'s row `w` sits, in lines. 0 is dead level."""
+    return abs((w.y + w.h / 2) - (anchor.y + anchor.h / 2)) / min(anchor.h, w.h)
+
+
+def overlaps_row(anchor: Word, w: Word) -> bool:
+    """The two boxes share at least half a line of height."""
+    return min(anchor.y + anchor.h, w.y + w.h) - max(anchor.y, w.y) >= min(anchor.h, w.h) / 2
+
+
+def wrapped_label(anchor: Word, value: Word, words: list[Word]) -> list[Word]:
+    """The rest of a label cell that wrapped onto a second line, in reading order.
+
+    A bordered table centres the value against the whole label cell, so a two line label
+    ("MRP" over "(incl. of all taxes)") has its value straddling both. A continuation line is
+    therefore the *next printed line* under the anchor, at the same left margin, carrying no
+    anchor of its own, and still sharing a row with the value. Following it line by line is what
+    stops the merge: the row below a table row starts past the value's bottom, so the chain ends
+    by itself, and off a table nothing shares the value's row and nothing is merged at all.
+
+    Without it a pack that prints "MRP (incl. of all taxes) | Rs 25.00" reads as "MRP 25.00" and
+    D5 fails it for not saying "inclusive of all taxes", which it does say.
+    """
+    out: list[Word] = []
+    last = anchor
+    while len(out) < MAX_LABEL_LINES:
+        below = [
+            w
+            for w in words
+            if w.image_id == anchor.image_id
+            and w.id not in (anchor.id, value.id)
+            and w not in out
+            and last.y < w.y <= last.y + last.h
+            and abs(w.x - anchor.x) <= anchor.h
+            and claim(w.text) is None
+            and not POINTS_ELSEWHERE.search(w.text)
+            and min(value.y + value.h, w.y + w.h) > max(value.y, w.y)
+        ]
+        if not below:
+            break
+        last = min(below, key=lambda w: (w.y, w.x))
+        out.append(last)
+    return out
+
+
+def nearest(
+    anchor: Word, words: list[Word], needs_number: bool = False, table: bool = False
+) -> Word | None:
+    """The value box for a bare anchor: same row to the right, else below, else the table cell.
 
     Three guards, each one a mistake seen on the real packs:
     * same *row*, not "within a line height" — PP-OCR boxes are tall enough on a 1600 px photo
-      that "MRP" claimed the net weight printed on the line above it. Centre to centre, and
-      tight: a table cell whose value is set larger than its label can miss by a pixel or two
-      (a real pen box prints "MRP" 31 px tall beside "25.00" at 42), but both looser tests were
-      measured and both cost 1.5 points of real accuracy — see the Decisions log;
+      that "MRP" claimed the net weight printed on the line above it;
     * nothing further away than a few lines — a bare "MRP" took a storage instruction from the
       far side of the panel;
     * never a box that is a declaration itself — the line under a bare "MRP" is often the next
       declaration, and swallowing it loses both.
+
+    The last resort is the printed table, and it is last on purpose. A pack that sets its
+    declarations in a bordered table centres the value against the whole label cell, and a label
+    cell of two lines ("MRP" over "(incl. of all taxes)") puts the value half a line below the
+    anchor's own centre: a real pen box misses the row test by two pixels and reads as having no
+    MRP at all. Relaxing the row test itself was measured twice and cost 1.5 points both times,
+    because the leftmost box of a loosened set is often the wrong one — on one pack it was the
+    barcode. So the relaxed test only runs where the strict one and the line below have both
+    found nothing, and it takes the *best aligned* box rather than the nearest one.
     """
     # A label and its value can sit far apart across a printed table, so the sideways reach is
     # generous (about thirty characters); downwards it is a line or two. Both are line-height
@@ -185,14 +261,10 @@ def nearest(anchor: Word, words: list[Word], needs_number: bool = False) -> Word
         and claim(w.text) is None
         and (not needs_number or DIGIT.search(w.text))
     ]
-    right = [
-        w
-        for w in candidates
-        if 0 <= w.x - (anchor.x + anchor.w) <= reach_x
-        and abs((w.y + w.h / 2) - (anchor.y + anchor.h / 2)) < min(anchor.h, w.h) / 2
-    ]
-    if right:
-        return min(right, key=lambda w: w.x)
+    beside = [w for w in candidates if 0 <= w.x - (anchor.x + anchor.w) <= reach_x]
+    same_row = [w for w in beside if level(anchor, w) < 0.5]
+    if same_row:
+        return min(same_row, key=lambda w: w.x)
     below = [
         w
         for w in candidates
@@ -200,7 +272,12 @@ def nearest(anchor: Word, words: list[Word], needs_number: bool = False) -> Word
         and w.x < anchor.x + anchor.w
         and w.x + w.w > anchor.x
     ]
-    return min(below, key=lambda w: w.y) if below else None
+    if below:
+        return min(below, key=lambda w: w.y)
+    if not table:
+        return None
+    cell = [w for w in beside if overlaps_row(anchor, w)]
+    return min(cell, key=lambda w: (level(anchor, w), w.x)) if cell else None
 
 
 class RegexLayoutExtractor:
@@ -208,6 +285,18 @@ class RegexLayoutExtractor:
 
     def extract(self, words: list[Word], ctx: ScanContext) -> list[Declaration]:
         found: dict[str, Declaration] = {}
+        # Two passes over the panel. The first takes only values that sit squarely beside or
+        # under their anchor; the second lets what is left reach into a table cell. A pack that
+        # prints "Mfg." twice would otherwise have the first one claim a loosely aligned box and
+        # shut out the second, which had the date printed right beside it.
+        for table in (False, True):
+            found.update(self._pass(words, found, table=table))
+        return list(found.values())
+
+    def _pass(
+        self, words: list[Word], found: dict[str, Declaration], table: bool
+    ) -> dict[str, Declaration]:
+        found = dict(found)
         for word in sorted(words, key=lambda w: (w.image_id, w.y, w.x)):
             hit = claim(word.text)
             if hit is None:
@@ -220,8 +309,10 @@ class RegexLayoutExtractor:
             # A label with no figure in it is a label: go looking for the figure.
             needs_number = field in NEEDS_A_NUMBER and not DIGIT.search(word.text)
             block = [word]
-            value_box = nearest(word, words, needs_number) if bare_anchor or needs_number else None
+            look = bare_anchor or needs_number
+            value_box = nearest(word, words, needs_number, table) if look else None
             if value_box is not None:
+                block += wrapped_label(word, value_box, words)
                 block.append(value_box)
             elif needs_number:
                 continue  # nothing on this panel carries the figure
@@ -239,4 +330,4 @@ class RegexLayoutExtractor:
                 image_id=word.image_id,
                 extractor=self.name,
             )
-        return list(found.values())
+        return found

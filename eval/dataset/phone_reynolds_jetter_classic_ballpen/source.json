@@ -1,0 +1,7 @@
+{
+  "source": "ours",
+  "how": "Phone photo taken for this project, uploaded through the app on 2026-09-07 (scan 5e0811b8) and kept as a fixture. 1205x1600, the size the frontend uploads.",
+  "product": "Reynolds Jetter Classic ball pen, Reynolds Pens India Private Limited",
+  "licence": "ours",
+  "why_it_is_here": "The first real pack in the set whose declarations are a printed two-column table: label cell on the left, value cell on the right, and two of the labels wrap onto a second line. Open Food Facts has plenty of paragraph labels and no table like this one, and the extractor read none of the table's values."
+}

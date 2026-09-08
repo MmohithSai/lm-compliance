@@ -77,10 +77,18 @@ Read off the declarations above plus the context, by the rules in `rules/pc_rule
 | `off_` | [Open Food Facts](https://world.openfoodfacts.org), Indian products | photos CC-BY-SA 3.0, data ODbL |
 | `obf_` | [Open Beauty Facts](https://world.openbeautyfacts.org) | same |
 | `ecom_` | public product listings on amazon.in / flipkart.com, rendered by headless Chrome | screenshots of public pages, kept as fixtures |
+| `phone_` | shot for this project and uploaded through the app | ours |
 | `synthetic_` | `eval/make_synthetic.py` (clean print, one panel) | ours |
 
 Rebuild with `eval/fetch_openfoodfacts.py` and `eval/fetch_ecommerce.py`; each case's
 `source.json` carries the product URL, the capture date and the licence.
+
+`phone_` cases are ours: a photograph taken with the app, kept as a fixture because it covers a
+layout the web set does not. `phone_reynolds_jetter_classic_ballpen` is the first pack in the set
+whose declarations are a **bordered two-column table** — label cell left, value cell right, and
+two of the labels wrapping onto a second line. Open Food Facts is almost all paragraph labels, so
+until this case arrived nothing measured the table path at all and the extractor read none of its
+values. Add a `phone_` case whenever a real scan turns up a layout the set is blind to.
 
 These are real phone photographs taken by other people, so they are uneven on purpose: thumbs in
 frame, glare, packs held sideways, panels half out of the crop. That is the point — a rendered

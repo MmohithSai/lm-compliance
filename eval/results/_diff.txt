@@ -1,0 +1,22 @@
+neutral obf_cetaphil_moisturising_lotion_8906005   mfg_date
+    was  'Mfg. 04/23'
+    now  'Mfg. B3CU35'
+    gold 'Mfg. Date: 04/23'
+neutral off_amul_amul_taaza_amul_taaza_milky_mil   net_quantity
+    was  'Net Content: 500mL'
+    now  'Net Content: 500 mL'
+    gold 'Net Content : 500 mL'
+neutral off_ching_secret_dark_soy_sauce_89015958   mfg_date
+    was  'DATE OF MFG: 25Rs.0.28/9)'
+    now  'DATE OF MFG: AA4L10002502) 10/12/2025 400102. 25Rs.0.28/9)'
+    gold 'DATE OF MFG.: 10/12/2024 (15:16)'
+neutral off_ching_secret_dark_soy_sauce_89015958   mrp
+    was  'MRP: AA4L10002502)'
+    now  'MRP: 25Rs.0.28/9) AA4L10002502)'
+    gold 'MRP ₹: (incl. of all taxes) 25 (Rs. 0.28/g)'
+BETTER  phone_reynolds_jetter_classic_ballpen      mrp
+    was  None
+    now  'MRP (incl.of all taxes 25.00'
+    gold 'MRP (incl.of all taxes) ₹25.00'
+
+better 1   worse 0   changed but still wrong 4

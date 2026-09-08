@@ -1,0 +1,12 @@
+{
+  "context": { "source": "package" },
+  "declarations": {
+    "generic_name": "Generic Name Ball Pen",
+    "net_quantity": "Net Quantity 1 N",
+    "mrp": "MRP (incl.of all taxes) ₹25.00",
+    "mfg_date": "Month & Year of Manufacture 02/2026",
+    "manufacturer": "Manufactured, Marketed and Brand Owned by Reynolds Pens India Private Limited, Plot No. C-21, SIPCOT Industrial Park, Irungattukottai, Sriperumbudur, Kanchipuram District, Tamil Nadu - 602 117",
+    "consumer_care": "Consumer Care Officer at the above address. Toll Free No.: 0008 0005 04348 E-mail: reynoldsindiaconsumercare@newellco.com"
+  },
+  "violations": ["D8"]
+}
