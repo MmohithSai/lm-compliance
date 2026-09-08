@@ -479,6 +479,25 @@ def _with_what_the_declarations_say(decls: list[Declaration], ctx: ScanContext) 
     return ctx.model_copy(update=updates) if updates else ctx
 
 
+def applicable_rules(
+    decls: list[Declaration], ctx: ScanContext, rules: list[Rule] | None = None
+) -> list[Rule]:
+    """The rules this scan was actually judged against, in order.
+
+    The report needs this to say which checks *passed*: `run_rules` only returns what went
+    wrong, and a rule that raised nothing is indistinguishable from a rule Rule 26 or Rule 6(10)
+    never applied. Deriving that twice — once here, once in the report — is how the law drifts.
+    """
+    rules = rules if rules is not None else load_rules()
+    ctx = _with_what_the_declarations_say(decls, ctx)
+    return [
+        rule
+        for rule in rules
+        if _applies(rule, ctx)
+        and not ({x for x in rule.exemptions if EXEMPT_WHEN[x](ctx)} & SKIPS_THE_RULE)
+    ]
+
+
 def run_rules(
     decls: list[Declaration], ctx: ScanContext, rules: list[Rule] | None = None
 ) -> list[Violation]:
@@ -486,12 +505,8 @@ def run_rules(
     rules = rules if rules is not None else load_rules()
     ctx = _with_what_the_declarations_say(decls, ctx)
     out: list[Violation] = []
-    for rule in rules:
-        if not _applies(rule, ctx):
-            continue
+    for rule in applicable_rules(decls, ctx, rules):
         active = {x for x in rule.exemptions if EXEMPT_WHEN[x](ctx)}
-        if active & SKIPS_THE_RULE:
-            continue
         found = CHECKS[rule.check](decls, ctx, rule)
         if active:  # X1: still reported, so the inspector sees it, but it costs no points
             found = [v.model_copy(update={"severity": Severity.info}) for v in found]

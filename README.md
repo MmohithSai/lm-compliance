@@ -13,8 +13,15 @@ cp .env.example .env && cp .env.example frontend/.env.local   # then fill in the
 supabase link --project-ref <your-ref> && supabase db push     # schema + RLS + bucket + views
 cd frontend && pnpm install && pnpm dev                        # http://localhost:3000
 cd worker && uv sync && uv run --env-file ../.env python main.py
-cd worker && uv run pytest -q
+cd worker && uv run --extra pdf pytest -q
 ```
+
+**Windows, for the PDF report only:** WeasyPrint binds to GTK's native libraries, which Windows
+does not ship. Install the
+[GTK3 runtime](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer) and set
+`WEASYPRINT_DLL_DIRECTORIES` to the folder holding `libgobject-2.0-0.dll` (see `.env.example`).
+Without it the PDF test skips, and a scan still gets its JSON and DOCX reports. Linux and macOS
+need nothing; the Docker image installs the libraries with `apt`.
 
 Demo users: `cd worker && uv run --env-file ../.env python ../supabase/seed_users.py` (admin / inspector / viewer, see the script for passwords).
 
@@ -46,7 +53,14 @@ licence line.
 |---|---|---|---|
 | `off_`, `obf_` | 31 cases, 102 photographs of Indian packaging | [Open Food Facts](https://world.openfoodfacts.org), [Open Beauty Facts](https://world.openbeautyfacts.org) | photographs **CC-BY-SA 3.0**, data ODbL. Redistributing them — which this repo does — carries the attribution and share-alike obligations that go with it. |
 | `ecom_` | 6 product-listing screenshots | amazon.in, flipkart.com | **Not openly licensed.** Screenshots of public pages, kept as fixed test images. Fine for testing a compliance checker; if this repo is ever published or redistributed, look at these first — they are the ones with no licence behind them. |
-| `synthetic_` | 16 rendered labels | `eval/make_synthetic.py` | ours |
+| `synthetic_` | 18 rendered labels | `eval/make_synthetic.py` | ours |
+| `phone_` | packs shot on a phone | ours | ours |
+
+The report's own assets — the typeface and the five icons in the PDF — are a separate matter and
+are listed with their licences in
+[`worker/pipeline/templates/assets/README.md`](worker/pipeline/templates/assets/README.md). Both
+are permissive (SIL OFL 1.1 and ISC), both are vendored so the report never fetches anything while
+it renders, and `assets/fetch.sh` re-downloads them.
 
 Nothing here is legal advice. The point is that the provenance is recorded per file rather than
 assumed, so the decision is available to whoever has to make it. `eval/fetch_openfoodfacts.py`

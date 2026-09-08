@@ -29,10 +29,13 @@ Python worker — laptop / HF Space / Oracle VM, service-role key, talks *out* o
                     all three stay None and F1/F2/P2 report "not verifiable".        [P4, built]
     f. rules        rules/pc_rules_2011.yaml -> violations [rule_id, rule_ref, severity, message,
                     evidence]                                                            [P3]
-    g. score+report 100 - penalties; HTML -> PDF + DOCX + JSON -> Storage scans/<id>/report.*  [P5]
+    g. score+report 100 - penalties; one Report model -> JSON + report.html -> PDF (WeasyPrint)
+                    + DOCX (python-docx) -> Storage scans/<id>/report.*             [P5, built]
+                    A format that will not render is stored as a null path; it never fails
+                    the scan and never takes the other two with it.
     h. write back   ocr_words, declarations, violations, reports, scans.status = done | failed
 
-  Step g is not built yet (P5). Grouping (P1) has no failure side and will not get one here: a
+  Grouping (P1) has no failure side and will not get one here: a
   scale says how big a pixel is, not whether two photographs show one panel or two.
   One `Word` is one PP-OCR line box, never a split of one — the split coordinates would be
   invented, and this project does not invent measurements.

@@ -71,15 +71,13 @@ export function ScanEvidence({
                   src={panel.url}
                   alt={`${panel.kind} panel`}
                   className="block w-full"
-                  onLoad={(e) =>
-                    setSize((prev) => ({
-                      ...prev,
-                      [panel.id]: {
-                        w: e.currentTarget.naturalWidth,
-                        h: e.currentTarget.naturalHeight,
-                      },
-                    }))
-                  }
+                  // Read off the element before setState, not inside the updater: React clears
+                  // `currentTarget` when the handler returns, and the updater runs after that.
+                  // Reading it there threw on every load and took the whole page down with it.
+                  onLoad={(e) => {
+                    const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
+                    setSize((prev) => ({ ...prev, [panel.id]: { w, h } }));
+                  }}
                 />
                 {boxes.map((w) => {
                   const on = highlighted.has(w.id);

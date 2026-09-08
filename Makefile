@@ -8,7 +8,7 @@ worker:
 	cd worker && uv run --extra ocr --env-file ../.env python main.py
 
 test:
-	cd worker && uv run pytest -q
+	cd worker && uv run --extra pdf pytest -q
 
 eval:
 	cd worker && uv run --extra ocr python ../eval/run_eval.py --label $(LABEL)

@@ -19,9 +19,9 @@ Last updated: 2026-09-08.
 | P0 dataset + eval harness | **done** | photos with a reference card still need a person (F1/F2) |
 | P1 schema + auth + upload + worker loop | **done** | — |
 | P2 OCR + extractor baseline | measured, below target | 98.2% synthetic, **29.8% real**; target 70% |
-| P3 rule engine + detail page | **done** | seeing the detail page on screen needs a login |
+| P3 rule engine + detail page | **done** | — (the page was finally opened in a browser during P5; it crashed, see the log) |
 | P4 scale + font / contrast / grouping | **done**, half of it measured | 5 real photos with a card still need a person (same blocker as P0 item 10) |
-| P5 reports | todo | — |
+| P5 reports | **done** | — |
 | P6 repository + search + history | todo | — |
 | P7 dashboard + roles + audit | todo | — |
 | P8 e-commerce mode | todo | — |
@@ -422,7 +422,32 @@ in `measure.py`, which the rule engine imports along with the ⅓ ratio and the 
 - Rule 8's cylinder and irregular shapes stay out of scope: `pdp_area_cm2` is the inspector's
   width × height, and without it F1 says the panel area is unknown.
 
-## P5–P9
+## P5 — reports
+
+**Done when:** the PDF opens on a phone and looks clean. **This is true today.**
+
+| # | Item | Status | Where / evidence |
+|---|---|---|---|
+| 1 | One report model behind all three files | done | `Report` and friends in [models.py](worker/pipeline/models.py); built by `build_report` in [report.py](worker/pipeline/report.py). Schema `1.0`. |
+| 2 | JSON report | done | `render_json`. Nine top-level keys, four disjoint finding lists, evidence as boxes not word ids. 8 tests in [test_report.py](worker/tests/test_report.py) |
+| 3 | `report.html` → PDF (WeasyPrint) | done | [templates/report.html](worker/pipeline/templates/report.html); A4, 11.5 pt, one column, fonts embedded, running foot with page numbers. Verified by rendering `phone_reynolds_jetter_classic_ballpen`: **4 pages, 149 KB, PDF 1.7**, opened and read page by page |
+| 4 | DOCX (python-docx) | done | `render_docx`; same hierarchy as the PDF. Tests open the bytes back with `python-docx` and assert the headings, the verdict line, each severity and the declarations |
+| 5 | Evidence photographs in the report | done | `annotate` / `annotate_panels`: boxes burned in with OpenCV (blue = declaration read, red = evidence cited), downscaled to 900 px, embedded as a data URI |
+| 6 | Uploaded to `scans/<id>/report.*` | done | `publish_report` in [pipeline/__init__.py](worker/pipeline/__init__.py), inside the same temp dir as the photographs. Upserts one `reports` row per scan |
+| 7 | One report row per scan | done | [0002_reports_one_per_scan.sql](supabase/migrations/0002_reports_one_per_scan.sql), pushed to the hosted project; `reports_scan_key` confirmed present |
+| 8 | A format that will not render loses no other format | done | per-format try/except; `reports.pdf_path` is null and the page says so. Pinned by a test that makes `render_pdf` raise |
+| 9 | Download buttons on the detail page | done | [scan-reports.tsx](frontend/components/scan-reports.tsx) + [scans/[id]/page.tsx](frontend/app/scans/[id]/page.tsx). Signed URLs with a download filename; states for queued/processing, failed, no report, and partial |
+| 10 | Assets vendored with licences recorded | done | [templates/assets/README.md](worker/pipeline/templates/assets/README.md) + `fetch.sh`. IBM Plex Sans (SIL OFL 1.1), 5 Lucide icons (ISC) |
+| 11 | Rules refactor measured, not asserted | done | `eval/results/2026-09-08_p5-reports.json` is identical on every key to `2026-09-08_p4-marker-cases.json` |
+| 12 | One real scan end to end against the hosted project | done | scan `3f5b8e1e`, 2026-09-08: queued → claimed → `done`, score 87; `scans/3f5b8e1e…/report.{pdf,docx,json}` at 149515 / 161171 / 11697 bytes with the right MIME types; one `reports` row with all three paths |
+| 13 | The buttons seen and used in a browser | done | logged in as `inspector@example.com` at 375 px; all three signed URLs fetched **200** with the right content types; the pre-P5 scan `7f7eb986` shows "No report was written for this scan" |
+
+Not covered by code, and worth saying: **who may download a report is exactly who may open the
+scan.** The bucket is private, the page only mints a signed URL for a session that already read
+the scan row through RLS, and `middleware.ts` sends anyone without a session to `/login`. There
+is no new authorisation surface in P5, which is the reason there is no new policy in `0002`.
+
+## P6–P9
 
 Not started. See `docs/PLAN.md` for the item list and the "done when" line of each phase.
 P8's first item is already done — it landed in P3.
@@ -430,6 +455,36 @@ P8's first item is already done — it landed in P3.
 ---
 
 ## Log
+
+- **2026-09-08** — **P5: the report is one model rendered three ways.** `build_report` turns a
+  finished scan into a `Report`, and the JSON, the PDF and the DOCX are three renderings of it —
+  so the three files cannot disagree about the same pack, which is the only thing a compliance
+  document must never do. The score is read, never recomputed, and a test pins that by handing the
+  builder a result whose score has been overwritten. Every applied rule lands in exactly one of
+  four lists: **violation** (cost points), **note** (`info` — food law, a medical-device flag, a
+  Rule 26 exemption), **not verifiable** (says why, costs nothing), **passed**. That last one
+  needed `applicable_rules` in the engine, because a rule that raised nothing is otherwise
+  indistinguishable from one Rule 6(10) never applied; the eval run proves the refactor moved
+  nothing — `2026-09-08_p5-reports.json` is identical on every key to `p4-marker-cases`.
+  **Rendering it and looking at it found three bugs no test had:** Jinja's autoescape was turning
+  the inlined Lucide icons into paragraphs of angle brackets, the running footer was clipped
+  mid-word because a margin box only gets half the page, and a portrait phone photograph is taller
+  than a page can hold under its own heading — five pages became four. The fonts and icons are
+  vendored (IBM Plex Sans, SIL OFL 1.1; Lucide, ISC) so nothing is fetched while a report renders,
+  and IBM Plex carries ₹, which the penalty footer needs. No emblem or crest — the masthead is a
+  balance scale. `make test` 501 passed, `make lint` clean, `tsc --noEmit` and `pnpm build` clean.
+  WeasyPrint needs GTK, which Windows does not ship; the runtime is installed on the dev machine
+  and `WEASYPRINT_DLL_DIRECTORIES` is documented, and where it is missing the PDF is stored as
+  null while the JSON and DOCX still go up.
+
+  One real scan went through the hosted project end to end — scan `3f5b8e1e`, queued → `done`,
+  score 87, three files in Storage at the right paths and MIME types — and then the detail page
+  was opened in a browser for the first time in this project's life and **crashed**:
+  `scan-evidence.tsx` read `e.currentTarget.naturalWidth` inside a `setState` updater, which React
+  runs after it has cleared `currentTarget`. It typechecked, it built, and 500 tests said nothing.
+  Fixed, and then all three signed download URLs were fetched from the page: 200, right content
+  types, right byte counts. The pre-P5 scan `7f7eb986` correctly shows "No report was written for
+  this scan."
 
 - **2026-09-08** — **P4: print size and contrast are measured, or honestly refused.** A scale per
   photograph (ArUco → card → the inspector's panel width → none), the print measured inside each

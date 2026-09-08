@@ -2,8 +2,9 @@ import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { ScanEvidence, type Panel, type Violation } from "@/components/scan-evidence";
 import { ScanRealtime } from "@/components/scan-realtime";
+import { ScanReports, type ReportFile } from "@/components/scan-reports";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { Severity } from "@/lib/db";
+import type { ScanStatus, Severity } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 
 const WAITING: Record<string, string> = {
@@ -19,15 +20,37 @@ export default async function ScanPage({ params }: { params: Promise<{ id: strin
   const { data: scan } = await supabase.from("scans").select("*").eq("id", id).single();
   if (!scan) notFound();
 
-  const [{ data: images }, { data: words }, { data: declarations }, { data: violations }] = await Promise.all([
-    supabase.from("scan_images").select("id, kind, storage_path").eq("scan_id", id).order("kind"),
-    supabase.from("ocr_words").select("id, image_id, x, y, w, h").eq("scan_id", id),
-    supabase
-      .from("declarations")
-      .select("id, field, value, confidence, word_ids, image_id, height_mm, width_height_ratio")
-      .eq("scan_id", id),
-    supabase.from("violations").select("id, rule_id, rule_ref, severity, message, evidence").eq("scan_id", id),
-  ]);
+  const [{ data: images }, { data: words }, { data: declarations }, { data: violations }, { data: report }] =
+    await Promise.all([
+      supabase.from("scan_images").select("id, kind, storage_path").eq("scan_id", id).order("kind"),
+      supabase.from("ocr_words").select("id, image_id, x, y, w, h").eq("scan_id", id),
+      supabase
+        .from("declarations")
+        .select("id, field, value, confidence, word_ids, image_id, height_mm, width_height_ratio")
+        .eq("scan_id", id),
+      supabase.from("violations").select("id, rule_id, rule_ref, severity, message, evidence").eq("scan_id", id),
+      supabase.from("reports").select("pdf_path, docx_path, json_path").eq("scan_id", id).maybeSingle(),
+    ]);
+
+  // One signed URL per report file. `download` puts a sensible filename on the saved file
+  // instead of the bucket path, and the URL is only issued to a session that could read the
+  // scan row above — the bucket itself is private.
+  const wanted = [
+    { format: "pdf", path: report?.pdf_path },
+    { format: "docx", path: report?.docx_path },
+    { format: "json", path: report?.json_path },
+  ] as const;
+  const files: ReportFile[] = (
+    await Promise.all(
+      wanted.map(async ({ format, path }) => {
+        if (!path) return null;
+        const { data } = await supabase.storage
+          .from("scans")
+          .createSignedUrl(path, 3600, { download: `lm-report-${id.slice(0, 8)}.${format}` });
+        return data ? { format, href: data.signedUrl } : null;
+      }),
+    )
+  ).filter((f) => f !== null);
 
   // The bucket is private, so every photo needs a short-lived signed URL.
   const paths = (images ?? []).map((i) => i.storage_path);
@@ -81,6 +104,11 @@ export default async function ScanPage({ params }: { params: Promise<{ id: strin
           ? `Scale: 1 pixel = ${Number(scan.mm_per_px).toFixed(3)} mm, so print size is measured.`
           : "No scale in the photo, so print size and contrast are not verifiable."}
       </p>
+
+      <div className="space-y-2">
+        <h2 className="font-semibold">Report</h2>
+        <ScanReports status={scan.status as ScanStatus} files={files} />
+      </div>
 
       <ScanEvidence
         panels={panels}

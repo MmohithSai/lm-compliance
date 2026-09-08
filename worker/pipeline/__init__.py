@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -14,10 +15,13 @@ from supabase import Client
 
 from .extractors.regex_layout import RegexLayoutExtractor
 from .measure import measure_declarations, pdp_area_cm2, resolve_scale
-from .models import PipelineResult, ScaleSource, ScanContext, ScanRow, Word
+from .models import PipelineResult, ReportImage, ScaleSource, ScanContext, ScanRow, Word
 from .ocr import ocr_words
 from .preprocess import preprocess
+from .report import annotate_panels, build_report, render_docx, render_html, render_json, render_pdf
 from .rules_engine import run_rules, score
+
+log = logging.getLogger("worker")
 
 # (preprocessed image, image_id, languages) -> line boxes. Only the eval passes anything but
 # `ocr_words`: it wraps it in a disk cache so a rerun measures a changed extractor, not PaddleOCR
@@ -91,32 +95,106 @@ def run_scan(sb: Client, scan: ScanRow) -> PipelineResult:
     """Download the scan's images, run_local, write words/declarations/violations back."""
     images = cast(
         list[dict[str, Any]],
-        sb.table("scan_images").select("id, storage_path").eq("scan_id", scan.id).execute().data,
+        sb.table("scan_images")
+        .select("id, storage_path, kind")
+        .eq("scan_id", scan.id)
+        .execute()
+        .data,
     )
     if not images:
         raise ValueError("scan has no images")
 
+    ctx = context_for(scan)
     with TemporaryDirectory() as tmp:
         # Named by scan_images.id so Word.image_id maps straight back to a row.
-        paths = []
+        paths = {}
         for img in images:
             path = Path(tmp) / f"{img['id']}.jpg"
             path.write_bytes(sb.storage.from_("scans").download(img["storage_path"]))
-            paths.append(path)
-        result = run_local(paths, context_for(scan))
+            paths[str(img["id"])] = path
+        result = run_local(list(paths.values()), ctx)
 
-    # A scan the OCR read nothing from is a failed read, not a compliant pack. score([]) is 100
-    # by construction, and letting that reach `done` puts "100 / 100" on the report for a
-    # photograph nobody could read — the one wrong answer this project must never give. The
-    # loop turns the exception into `failed` plus this message on the scan.
-    if not result.words:
-        raise ValueError(
-            "no text was read from these photos. Fill the frame with the declaration panel, "
-            "hold steady, and avoid glare."
+        # A scan the OCR read nothing from is a failed read, not a compliant pack. score([]) is
+        # 100 by construction, and letting that reach `done` puts "100 / 100" on the report for
+        # a photograph nobody could read — the one wrong answer this project must never give.
+        # The loop turns the exception into `failed` plus this message on the scan.
+        if not result.words:
+            raise ValueError(
+                "no text was read from these photos. Fill the frame with the declaration panel, "
+                "hold steady, and avoid glare."
+            )
+
+        store(sb, scan.id, result)
+        # Inside the temp directory: the report embeds the photographs it cites, and once this
+        # block exits they are gone.
+        publish_report(
+            sb,
+            scan,
+            result,
+            ctx,
+            [
+                ReportImage(id=str(i["id"]), kind=str(i["kind"]), storage_path=i["storage_path"])
+                for i in images
+            ],
+            paths,
         )
-
-    store(sb, scan.id, result)
     return result
+
+
+REPORT_MIME = {
+    "pdf": "application/pdf",
+    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "json": "application/json",
+}
+
+
+def publish_report(
+    sb: Client,
+    scan: ScanRow,
+    result: PipelineResult,
+    ctx: ScanContext,
+    images: list[ReportImage],
+    paths: dict[str, Path],
+) -> dict[str, str | None]:
+    """Render the three report files and upload them to `scans/<scan id>/report.*`.
+
+    A format that fails to render is logged and stored as a null path rather than failing the
+    scan: the analysis is the result, the files are a rendering of it, and WeasyPrint needs
+    system libraries (Pango, Cairo) that a machine can be missing. The detail page reads the
+    paths and offers only what exists.
+    """
+    report = build_report(scan, result, ctx, images)
+    panels = annotate_panels(paths, report)
+    render: dict[str, Callable[[], bytes]] = {
+        "json": lambda: render_json(report).encode("utf-8"),
+        "pdf": lambda: render_pdf(render_html(report, panels)),
+        "docx": lambda: render_docx(report, panels),
+    }
+
+    stored: dict[str, str | None] = {}
+    for ext, make in render.items():
+        path = f"{scan.id}/report.{ext}"
+        try:
+            data = make()
+            sb.storage.from_("scans").upload(
+                path, data, {"content-type": REPORT_MIME[ext], "upsert": "true"}
+            )
+        except Exception:  # noqa: BLE001 - one missing format must not lose the other two
+            log.exception("could not write report.%s for scan %s", ext, scan.id)
+            stored[ext] = None
+        else:
+            stored[ext] = path
+
+    sb.table("reports").upsert(
+        {
+            "scan_id": scan.id,
+            "pdf_path": stored["pdf"],
+            "docx_path": stored["docx"],
+            "json_path": stored["json"],
+        },
+        on_conflict="scan_id",
+    ).execute()
+    return stored
 
 
 def store(sb: Client, scan_id: str, result: PipelineResult) -> None:

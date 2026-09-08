@@ -220,6 +220,26 @@ are not comparable to each other. Within a group, one variable changed per run.
 | `p2-real-sideways-pass` | a second OCR pass at 90° when the boxes look like a sideways page | 59.6% (real 28.9% → 28.1%) — **reverted** |
 | `p2-final` | the pipeline as it stands | **60.0%** — synthetic 98.2%, real 28.9% |
 
+P4 and P5 ran on a 56-case set (the two marker cases joined it), so they are a third group.
+
+| Run | Change | Result |
+|---|---|---|
+| `p4-marker-cases` | the two rendered marker cases join the set; nothing in the code changed | 62.2% (real 29.8%) |
+| `p5-reports` | `run_rules` reworked to go through the new `applicable_rules`, which the report needs to list what passed | **62.2% (real 29.8%) — identical on every key** |
+
+`p5-reports` is the only run in this file that was expected to change nothing, and that is what
+it is for. The report has to say which checks *passed*, and a rule that raised nothing is
+indistinguishable from a rule Rule 26 or Rule 6(10) never applied — so the applicability test had
+to become a function the report could call. Deriving it a second time inside the report would put
+two copies of Rule 6(10) in the repo. The run proves the extraction, the violations and the
+per-case verdicts all came out byte for byte the same:
+
+```python
+a = json.load(open("eval/results/2026-09-08_p4-marker-cases.json"))
+b = json.load(open("eval/results/2026-09-08_p5-reports.json"))
+[k for k in a if k not in ("label", "date") and a[k] != b[k]]   # []
+```
+
 ### The four rejected hypotheses
 
 Worth more than the accepted ones, because each closes off a plausible idea:

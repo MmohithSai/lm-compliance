@@ -29,3 +29,6 @@ supabase/.branches/
 
 # eval OCR cache: derived from the images, rebuilt on demand (see eval/run_eval.py)
 eval/.ocr_cache/
+
+# report previews: a rendering of a case that is already in git (see eval/preview_report.py)
+eval/.preview/

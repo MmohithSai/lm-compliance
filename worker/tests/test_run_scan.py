@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
 
@@ -36,6 +37,10 @@ class FakeTable:
         self.rows = rows
         return self
 
+    def upsert(self, row: dict[str, Any], on_conflict: str = "") -> FakeTable:
+        self.db.upserted.setdefault(self.name, []).append((row, on_conflict))
+        return self
+
     def execute(self) -> FakeTable:
         if self.rows:
             # Postgres assigns ocr_words ids; deliberately not 1..n, so a bad remap shows up.
@@ -55,6 +60,9 @@ class FakeBucket:
         self.db.downloaded.append(path)
         return b"jpeg-bytes"
 
+    def upload(self, path: str, data: bytes, options: dict[str, str]) -> None:
+        self.db.uploaded[path] = (data, options)
+
 
 class FakeStorage:
     def __init__(self, db: FakeClient) -> None:
@@ -68,17 +76,25 @@ class FakeClient:
     def __init__(self, seed: dict[str, list[dict[str, Any]]]) -> None:
         self.seed = seed
         self.written: dict[str, list[dict[str, Any]]] = {}
+        self.upserted: dict[str, list[tuple[dict[str, Any], str]]] = {}
         self.downloaded: list[str] = []
+        self.uploaded: dict[str, tuple[bytes, dict[str, str]]] = {}
         self.storage = FakeStorage(self)
 
     def table(self, name: str) -> FakeTable:
         return FakeTable(name, self)
 
 
-SCAN = ScanRow(id="s1", inspector_id="u1", pdp_width_mm=60, pdp_height_mm=40)
+SCAN = ScanRow(
+    id="s1",
+    inspector_id="u1",
+    pdp_width_mm=60,
+    pdp_height_mm=40,
+    created_at=datetime(2026, 9, 8, 10, 30, tzinfo=UTC),
+)
 IMAGES = [
-    {"id": "img-a", "storage_path": "s1/0.jpg"},
-    {"id": "img-b", "storage_path": "s1/1.jpg"},
+    {"id": "img-a", "storage_path": "s1/0.jpg", "kind": "front"},
+    {"id": "img-b", "storage_path": "s1/1.jpg", "kind": "back"},
 ]
 
 

@@ -101,9 +101,11 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
   focus and perspective on a real pack, which is exactly what the shot list is for.
 
 ## P5 — reports
-- [ ] `report.html` → PDF (WeasyPrint), DOCX (python-docx), JSON; uploaded to `scans/<id>/report.*`
-- [ ] download buttons on the detail page
-- Done when: the PDF opens on a phone and looks clean.
+- [x] `report.html` → PDF (WeasyPrint), DOCX (python-docx), JSON; uploaded to `scans/<id>/report.*`
+- [x] download buttons on the detail page
+- Done when: the PDF opens on a phone and looks clean. **True since 2026-09-08** — four A4 pages
+      from `eval/dataset/phone_reynolds_jetter_classic_ballpen`, single column, 11.5 pt, fonts
+      embedded, nothing fetched at render time.
 
 ## P6 — repository + search + history + evidence
 - [ ] product match by name + manufacturer on scan completion
@@ -141,6 +143,78 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - Total monthly cost: ₹0.
 
 ## Decisions log
+- 2026-09-08 — P5. **The scan detail page had never been loaded, and it crashed on the first
+  try.** `scan-evidence.tsx` read `e.currentTarget.naturalWidth` *inside* the `setSize` updater;
+  React clears `currentTarget` when the handler returns and the updater runs after that, so every
+  image load threw and took the whole page down with a client-side exception. It typechecked, it
+  built, and 500 tests said nothing — P3 and P4 both shipped with the note "seeing it on screen
+  needs a login". Same lesson as the P1 phone run: the bugs that survive a green suite are the
+  ones only a browser can find. The download buttons could not have been checked without fixing
+  it, so it is fixed here.
+- 2026-09-08 — P5. **One `Report` model, three files.** The PDF, the DOCX and the JSON are three
+  renderings of the same `pipeline.models.Report`, built once by `build_report`. Three renderers
+  each reaching into `PipelineResult` themselves is three chances for the PDF to say 87 and the
+  JSON to say 100 about the same pack, and a compliance document that contradicts itself is worse
+  than one that does not exist. `report.schema_version` ("1.0") is what an API consumer pins.
+- 2026-09-08 — P5. **The report never recomputes the score.** It reads `compliance_score` off the
+  result the pipeline stored, and a test pins that: hand it a result whose score has been
+  overwritten with 42 and the report says 42. `score()` is one function in `rules_engine`; a
+  second implementation living in the report is how the PDF and the dashboard start disagreeing.
+- 2026-09-08 — P5. **Every rule appears in exactly one of four lists.** `violations` (a failure
+  that cost points), `notes` (`info` severity — D9 best-before is food law, X1..X4 are Rule 26
+  exemption notes, F3 flags a medical device), `unverifiable` (status `unverifiable`, costs
+  nothing, says why), and `passed`. That last one needed `rules_engine.applicable_rules`: a rule
+  that raised nothing is indistinguishable from a rule Rule 26 or Rule 6(10) never applied, and
+  deriving applicability a second time inside the report is how the law drifts between two files.
+  Measured: `eval/results/2026-09-08_p5-reports.json` is byte-identical to
+  `2026-09-08_p4-marker-cases.json` on every key, which is what a behaviour-neutral refactor of
+  `run_rules` should look like.
+- 2026-09-08 — P5. **An `info` rule can never be "passed".** The first render put
+  "F3 · Medical Devices Rules, 2017 — Medical device pack, font rules of the Medical Devices Rules
+  apply" under *Checks that passed*, which is a sentence with no meaning in it. A rule whose
+  severity is `info` says something when it fires and nothing when it does not, so it is a note or
+  it is absent — never a pass.
+- 2026-09-08 — P5. **Evidence in the report is a box, not a word id.** `violations.evidence`
+  stores `word_ids`, which are Postgres identity values and mean nothing outside this database.
+  The report carries `{image_id, x, y, w, h, text}` instead, so a JSON report handed to another
+  system still points at the print. A word id the result no longer carries drops its box rather
+  than raising in the middle of a report — pinned by a test.
+- 2026-09-08 — P5. **Evidence boxes are burned into the photograph, not overlaid.** The scan page
+  positions `<span>`s over an `<img>`; a Word document cannot do that, and the same JPEG has to
+  serve the PDF and the DOCX. So `annotate()` draws them with OpenCV — blue for a declaration the
+  checker read, red for evidence a violation cites — and downscales to 900 px first. A report an
+  inspector opens on a phone should not carry three 1600 px photographs.
+- 2026-09-08 — P5. **A format that will not render is stored as null; it does not fail the scan.**
+  WeasyPrint binds to Pango and Cairo at import, which the Windows dev machine did not have. The
+  analysis is the result and the files are a rendering of it, so `publish_report` catches per
+  format, logs, and writes `reports.pdf_path = null`. The detail page then offers the two that
+  exist and says in one line which one is missing. `render_pdf` imports WeasyPrint inside the
+  function for the same reason.
+- 2026-09-08 — P5. **A4, one column, 11.5 pt — not a phone-shaped page.** "Opens on a phone and
+  looks clean" is a legibility problem, not a page-size problem: an inspection report gets printed
+  and filed, and a 105 mm page is wrong on both counts. What makes it readable on a phone is a
+  single column with no wide tables, type at 11.5 pt with 1.55 line height, and every finding in
+  its own card so scrolling never loses the thread.
+- 2026-09-08 — P5. **Looking at the real PDF found three things the tests could not.** The Lucide
+  icons were being HTML-escaped by Jinja's autoescape and rendered as paragraphs of angle brackets
+  (now `Markup`, and a test pins `<svg` present and `&lt;svg` absent); the running footer was
+  longer than its margin box gets — half the page width — and was clipped mid-word; and a portrait
+  phone photograph at 180 mm wide is 240 mm tall, so it could not share a page with its own
+  heading and threw away most of a page each time (`max-height: 175mm`, five pages down to four).
+- 2026-09-08 — P5. **The report's fonts and icons are vendored, not linked.** IBM Plex Sans
+  (SIL OFL 1.1) and five Lucide icons (ISC), in `worker/pipeline/templates/assets/`, with their
+  licence files, a `fetch.sh` that re-downloads them and a README saying why each was chosen. A
+  report generated on a worker with no network must still look like the report; and IBM Plex
+  carries ₹ (U+20B9), which the Section 36 penalty footer needs. No emblem, seal or crest: the
+  State Emblem of India is protected by the 2005 Act, and a report that looks like a government
+  issue when it is not is worse than one with no mark. The masthead is a balance scale.
+- 2026-09-08 — P5. `reports` gets a unique index on `scan_id` (`0002_reports_one_per_scan.sql`,
+  pushed) and the worker upserts on it. Without it a re-run stacks a second row beside the first
+  and the detail page has to guess which is current; the files at `scans/<id>/report.*` are
+  overwritten in place anyway.
+- 2026-09-08 — P5. `make test` now runs `--extra pdf`. WeasyPrint is a handful of pure-Python
+  packages, and without the extra a plain `uv run pytest` syncs it back out of the venv and the
+  PDF test skips forever on every machine, including the ones that could run it.
 - 2026-09-08 — P4. **Table I's last row was wrong in the code, and the test written in P0 caught
   it.** `rules_engine.TABLE_I` had `(inf, 6.0, 6.0)`: above 2500 cm² an embossed numeral was held
   to 6 mm where Rule 7 and `docs/RULES.md` both say 8. There is now one table, in `measure.py`,
