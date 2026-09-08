@@ -22,7 +22,7 @@ Last updated: 2026-09-08.
 | P3 rule engine + detail page | **done** | — (the page was finally opened in a browser during P5; it crashed, see the log) |
 | P4 scale + font / contrast / grouping | **done**, half of it measured | 5 real photos with a card still need a person (same blocker as P0 item 10) |
 | P5 reports | **done** | — |
-| P6 repository + search + history | **partial** | evidence photos + notes on a scan |
+| P6 repository + search + history | **done** | — |
 | P7 dashboard + roles + audit | todo | — |
 | P8 e-commerce mode | todo | — |
 | P9 deploy + docs | todo | — |
@@ -447,16 +447,16 @@ scan.** The bucket is private, the page only mints a signed URL for a session th
 the scan row through RLS, and `middleware.ts` sends anyone without a session to `/login`. There
 is no new authorisation surface in P5, which is the reason there is no new policy in `0002`.
 
-## P6 — repository + search + history
+## P6 — repository + search + history + evidence
 
-**Done when:** search "Parle" returns its scans and history. **True for any pack whose maker the
-OCR read** — verified on the hosted project, see the evidence column.
+**Done when:** search "Parle" returns its scans and history. **True**, and still true after the
+evidence work — verified on the hosted project, see the evidence column.
 
 | # | Item | Status | Where / evidence |
 |---|---|---|---|
 | 1 | Product match on scan completion | done | [product.py](worker/pipeline/product.py), [test_product.py](worker/tests/test_product.py) (12 checks) + 5 wiring checks in [test_run_scan.py](worker/tests/test_run_scan.py). Live: scans `5e0811b8` and `3f5b8e1e` both file under `reynolds pens\|` |
 | 2 | Search page + per-product history | done | `scan_search` view in `0003_product_match_and_search.sql`; [/scans](frontend/app/scans/page.tsx), [/products/[id]](frontend/app/products/[id]/page.tsx). `?q=reynolds` returns both scans; the product page shows 2 scans, average 87 |
-| 3 | Evidence photos + notes on a scan | todo | the `evidence` table and its RLS exist since P1; nothing writes to it |
+| 3 | Evidence photos + notes on a scan | done | [evidence.ts](frontend/lib/evidence.ts) + [evidence.test.ts](frontend/lib/evidence.test.ts) (13 checks), [scan-evidence-photos.tsx](frontend/components/scan-evidence-photos.tsx), [scan-notes.tsx](frontend/components/scan-notes.tsx), `0004_evidence_on_a_scan.sql`. 13 hosted checks as a real inspector and a real viewer |
 | 4 | A listing's own "Manufacturer" label (really P2's) | done | [regex_layout.py](worker/pipeline/extractors/regex_layout.py), 3 new checks in [test_extract.py](worker/tests/test_extract.py); `eval/results/2026-09-08_p6-*.json` |
 
 ### What "Parle" actually returns
@@ -477,6 +477,49 @@ noun is a label only where a label stands, at the start of the box (`From the ma
 `Is Discontinued By Manufacturer : No` both print above the real row). 62.2% → 62.5%, real
 29.8% → 30.5%, violations untouched. Full accounting in `docs/EVAL.md`.
 
+### Evidence and notes: what was reused, and what the viewer is refused
+
+Nothing new authorises a file. The `evidence` table, its four RLS policies and the private
+`scans` bucket all date from `0001_init.sql`; evidence photographs sit beside the pack photos and
+the report at `<scan id>/evidence/<evidence id>.jpg` and are handed out as the same short-lived
+signed URLs the report downloads use. `0004` adds only what was missing: the `scan_id` index every
+other child of `scans` already had, and a check constraint saying a row must carry a photograph or
+a note. The note is `scans.notes` — a column since P1, which `report.py` already prints as
+"Inspector's notes", so P5 needed no change at all.
+
+Evidence is deliberately **not** a `scan_images` row with `kind = 'evidence'`. The worker
+downloads every `scan_images` row and re-reads it, so evidence filed there would change the score
+of a scan that has already been reported on.
+
+Verified on the hosted project with real sessions and the anon key, so the policies themselves are
+what refuse — 13 checks, all passing:
+
+| As | Check |
+|---|---|
+| inspector | two photos attached to a finished scan, each with its own object under `<scan>/evidence/` |
+| inspector | rows carry the scan, the path and the author |
+| inspector | the note saved and read back |
+| inspector | **the scan result is untouched** — score still 75, 7 declarations, 1 violation |
+| inspector | a row with neither photo nor note is refused by `evidence_carries_something` |
+| inspector | both signed URLs serve `image/jpeg`, HTTP 200 |
+| anyone | the same object without a token is HTTP 400 — the bucket is not public |
+| viewer | can read the evidence rows and open a signed URL |
+| viewer | **cannot** insert evidence — refused by RLS |
+| viewer | **cannot** change the note — 0 rows updated, note unchanged |
+| viewer | **cannot** upload to the bucket — `StorageApiError` |
+
+The scan page was then opened in a browser as both roles: the inspector sees a textarea, a Save
+button and an Add-evidence button; the viewer sees the note as text and neither button.
+
+### A bug only the browser found, again
+
+`ScanEvidencePhotos` is a client component and it formatted its dates with `toLocaleString()`.
+The server rendered "2:29:18 pm" and the browser re-rendered "2:29:18 PM", and React failed
+hydration over the difference — the whole page fell back to a client render, with a console error
+and no test anywhere to catch it. The date is now formatted once, on the server, and passed in as
+a string. Same lesson as P5's `scan-evidence.tsx` crash: typecheck, build and 534 tests all pass
+either way.
+
 ### The matcher's known ceiling
 
 Two words of the company, four of the generic name, both normalised. Two photographs of one pack
@@ -492,6 +535,29 @@ P8's first item is already done — it landed in P3.
 ---
 
 ## Log
+
+- **2026-09-08** — **P6 finished: evidence photographs and the inspector's note.** Both were built
+  out of what P1 already put there. The `evidence` table, its RLS and the private bucket needed no
+  change; a photo goes to `<scan id>/evidence/<id>.jpg` in the same bucket as the pack photos and
+  the report, and is read back through the same signed URLs, so there is no second way to
+  authorise a file anywhere in the app. The note is `scans.notes`, which `report.py` has printed
+  as "Inspector's notes" since P5 — nothing in the report was touched. `0004` adds an index and a
+  check constraint and nothing else.
+  The decision worth writing down is what evidence is **not**: a `scan_images` row with
+  `kind = 'evidence'`. The worker re-reads every `scan_images` row, so evidence filed there would
+  change the score of a scan already reported on. Evidence is a separate table and the upload path
+  never touches the scan; the note is written as a one-key patch built by `notesPatch`, which a
+  test pins, and the hosted run confirms the score, the declarations and the violations are all
+  unchanged afterwards.
+  All the deciding lives in `frontend/lib/evidence.ts` as plain functions, so it is testable
+  without a browser — 13 checks under node's own test runner, no test framework added to the
+  dependency list (`node --test --experimental-strip-types`, wired into `make test`). RLS is not
+  pretended to be testable from there: it was exercised against the hosted project with a real
+  inspector session and a real viewer session, 13 more checks, four of which are refusals.
+  Opening the page found the one bug the suite could not: a client component formatting a date
+  with `toLocaleString()` renders "pm" on the server and "PM" in the browser, and React failed
+  hydration on it. Fixed by formatting on the server.
+  `make test` 521 + 13 passed · `make lint` clean · `tsc --noEmit`, `pnpm lint`, `pnpm build` clean.
 
 - **2026-09-08** — **P6: the anchor that was rejected once, and why it works now.** "Search Parle
   returns its scans" needed a Parle scan with a maker on it, and no e-commerce listing had one:

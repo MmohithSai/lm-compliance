@@ -2,10 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { ScanEvidence, type Panel, type Violation } from "@/components/scan-evidence";
+import { ScanEvidencePhotos, type EvidencePhoto } from "@/components/scan-evidence-photos";
+import { ScanNotes } from "@/components/scan-notes";
 import { ScanRealtime } from "@/components/scan-realtime";
 import { ScanReports, type ReportFile } from "@/components/scan-reports";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { ScanStatus, Severity } from "@/lib/db";
+import type { Role, ScanStatus, Severity } from "@/lib/db";
+import { canAddEvidence, canEditNotes } from "@/lib/evidence";
 import { createClient } from "@/lib/supabase/server";
 
 const WAITING: Record<string, string> = {
@@ -25,8 +28,14 @@ export default async function ScanPage({ params }: { params: Promise<{ id: strin
     .single();
   if (!scan) notFound();
 
-  const [{ data: images }, { data: words }, { data: declarations }, { data: violations }, { data: report }] =
-    await Promise.all([
+  const [
+    { data: images },
+    { data: words },
+    { data: declarations },
+    { data: violations },
+    { data: report },
+    { data: evidence },
+  ] = await Promise.all([
       supabase.from("scan_images").select("id, kind, storage_path").eq("scan_id", id).order("kind"),
       supabase.from("ocr_words").select("id, image_id, x, y, w, h").eq("scan_id", id),
       supabase
@@ -35,7 +44,22 @@ export default async function ScanPage({ params }: { params: Promise<{ id: strin
         .eq("scan_id", id),
       supabase.from("violations").select("id, rule_id, rule_ref, severity, message, evidence").eq("scan_id", id),
       supabase.from("reports").select("pdf_path, docx_path, json_path").eq("scan_id", id).maybeSingle(),
+      supabase
+        .from("evidence")
+        .select("id, storage_path, note, created_at, profiles(full_name)")
+        .eq("scan_id", id)
+        .order("created_at"),
     ]);
+
+  // Who is looking, and therefore what they may change. Both checks mirror the RLS policies;
+  // Postgres is what actually refuses a viewer, this only decides what to draw.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const role = user
+    ? (((await supabase.from("profiles").select("role").eq("id", user.id).single()).data?.role ??
+        null) as Role | null)
+    : null;
 
   // One signed URL per report file. `download` puts a sensible filename on the saved file
   // instead of the bucket path, and the URL is only issued to a session that could read the
@@ -57,12 +81,22 @@ export default async function ScanPage({ params }: { params: Promise<{ id: strin
     )
   ).filter((f) => f !== null);
 
-  // The bucket is private, so every photo needs a short-lived signed URL.
-  const paths = (images ?? []).map((i) => i.storage_path);
+  // The bucket is private, so every photo needs a short-lived signed URL. Evidence photographs
+  // are signed in the same call and on the same terms as the pack photos: the session could read
+  // the scan row above, so it may see the scan's files.
+  const evidencePaths = (evidence ?? []).flatMap((e) => (e.storage_path ? [e.storage_path] : []));
+  const paths = [...(images ?? []).map((i) => i.storage_path), ...evidencePaths];
   const { data: signed } = paths.length
     ? await supabase.storage.from("scans").createSignedUrls(paths, 3600)
     : { data: [] };
   const url = new Map((signed ?? []).map((s) => [s.path, s.signedUrl]));
+  const evidencePhotos: EvidencePhoto[] = (evidence ?? []).map((e) => ({
+    id: e.id,
+    url: e.storage_path ? (url.get(e.storage_path) ?? null) : null,
+    note: e.note,
+    taken: new Date(e.created_at).toLocaleString(),
+    author: e.profiles?.full_name ?? null,
+  }));
   const panels: Panel[] = (images ?? []).flatMap((i) =>
     url.get(i.storage_path)
       ? [{ id: i.id, kind: i.kind, url: url.get(i.storage_path)! }]
@@ -128,6 +162,17 @@ export default async function ScanPage({ params }: { params: Promise<{ id: strin
         <h2 className="font-semibold">Report</h2>
         <ScanReports status={scan.status as ScanStatus} files={files} />
       </div>
+
+      <div className="space-y-2">
+        <h2 className="font-semibold">Inspector&rsquo;s note</h2>
+        <ScanNotes
+          scanId={id}
+          initial={scan.notes}
+          canEdit={canEditNotes(role, scan.inspector_id, user?.id ?? null)}
+        />
+      </div>
+
+      <ScanEvidencePhotos scanId={id} photos={evidencePhotos} canAdd={canAddEvidence(role)} />
 
       <ScanEvidence
         panels={panels}

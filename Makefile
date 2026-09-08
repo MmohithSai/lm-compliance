@@ -9,6 +9,7 @@ worker:
 
 test:
 	cd worker && uv run --extra pdf pytest -q
+	cd frontend && pnpm test
 
 eval:
 	cd worker && uv run --extra ocr python ../eval/run_eval.py --label $(LABEL)

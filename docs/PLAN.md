@@ -113,12 +113,17 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
       the first one's row. No maker declared → no product, and the scan says so.
 - [x] search page (name, brand, manufacturer, inspector, date); per-product history — one
       `scan_search` view carrying every searchable word, `/scans?q=`, and `/products/<id>`
-- [ ] evidence photos + notes on a scan
+- [x] evidence photos + notes on a scan — the `evidence` table, its RLS and the private bucket
+      all date from P1 and are reused as they stand; photos live at `<scan id>/evidence/<id>.jpg`
+      and are read through the same signed URLs as the reports. The note is `scans.notes`, which
+      the report already prints, so P5 is untouched.
 - Done when: search "Parle" returns its scans and history.
   **True.** Verified on the hosted project: a real amazon.in Parle-G 800 g listing pushed through
   the worker (`cddac6b6`) files under the product **Parle Biscuits Pvt Ltd**, and `?q=Parle`
   returns it. The two Reynolds pen scans (`5e0811b8`, `3f5b8e1e`), read with different OCR noise,
-  file under one product and `/products/<id>` shows both with an average score.
+  file under one product and `/products/<id>` shows both with an average score. Evidence and notes
+  were smoke tested against the hosted project with real inspector and viewer sessions — 13 checks,
+  including the four the viewer must be refused. **P6 is done.**
 - [x] the listings' own label. "Manufacturer :" was not an anchor — "manufactured by" was,
       "importer" was, the bare noun was not — so no e-commerce listing had a maker to match on.
       Three measured runs, `docs/EVAL.md`: the anchor alone is flat (and was already rejected once

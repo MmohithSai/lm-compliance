@@ -13,7 +13,7 @@ cp .env.example .env && cp .env.example frontend/.env.local   # then fill in the
 supabase link --project-ref <your-ref> && supabase db push     # schema + RLS + bucket + views
 cd frontend && pnpm install && pnpm dev                        # http://localhost:3000
 cd worker && uv sync && uv run --env-file ../.env python main.py
-cd worker && uv run --extra pdf pytest -q
+cd worker && uv run --extra pdf pytest -q && cd ../frontend && pnpm test
 ```
 
 **Windows, for the PDF report only:** WeasyPrint binds to GTK's native libraries, which Windows
