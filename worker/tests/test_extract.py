@@ -297,6 +297,40 @@ def test_a_listing_s_quantity_row_is_the_net_quantity() -> None:
     assert "net_quantity" not in fields([line("ADDED QUANTITY PER 100 ml", 100, wid=1)])
 
 
+# ---------------------------------------------------------------- a unit price by its shape
+
+
+def test_an_unlabelled_unit_price_is_found_by_its_shape() -> None:
+    """Amazon prints the price and the unit price in one line with no label, and PP-OCR runs
+    them together; the value is the span that is the unit price, not the whole line."""
+    got = fields([line("900011.25/100 g", 100, wid=1)])
+    assert got["unit_sale_price"] == "11.25/100 g"
+    assert fields([line("486.00Rs.4.86/ml", 100, wid=1)])["unit_sale_price"] == "4.86/ml"
+
+
+def test_a_nutrition_table_is_not_a_unit_price() -> None:
+    lines = [
+        "Servings per Package 16: Amount per 100g, *%RDA/Serve (15g): Energy",
+        "PER 100ml",
+        "1 serving per container",
+        "Energy (kcal) 172, 1.3%; Protein (g) 1.9",
+        "24/01/25 23/01/26 RA22",
+    ]
+    assert "unit_sale_price" not in fields(
+        [line(t, 100 + 40 * i, wid=i) for i, t in enumerate(lines)]
+    )
+
+
+def test_a_labelled_unit_price_still_wins_over_the_shape() -> None:
+    got = fields(
+        [
+            line("(11.25/100 g)", 100, wid=1),
+            line("UNIT SALE PRICE : 0.23 PER g", 300, wid=2),
+        ]
+    )
+    assert got["unit_sale_price"] == "UNIT SALE PRICE : 0.23 PER g"
+
+
 # ---------------------------------------------------------------- the figure has a shape
 
 

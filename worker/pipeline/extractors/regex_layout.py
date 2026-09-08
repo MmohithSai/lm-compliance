@@ -125,6 +125,17 @@ PRICE_AFTER_LABEL = re.compile(AMOUNT, re.I)
 # A unit price is "<amount> per g": the amount comes first, so a box holding only the words
 # "per g" is not a label with its figure printed elsewhere, and is not sent looking for one.
 SUFFIX_ANCHORS = {"per g", "per kg", "per ml", "per l"}
+# Rule 6(11)'s unit sale price is a price per unit, and listings and packs print it with no
+# label at all: "(₹11.25 /100 g)", "Rs. 4.86/ml", "₹2.90 /100 g". So where no label claims
+# it, it is found by its shape — an amount, then "/" or "per", then a unit — and the value is
+# the span that matched, not the whole line. The decimal form is tried first: Amazon sets the
+# price and the unit price in one line and PP-OCR runs them together ("₹90⁰⁰ (₹11.25 /100 g)"
+# reads "900011.25/100 g"), and the figure with the point is the one that survives the glue.
+UNIT_PRICE = re.compile(
+    r"(?:(?!0[0-9])[0-9]{1,4}\.[0-9]{1,2}|(?<![0-9.])(?!0[0-9])[0-9]{1,4})"
+    r"(?:/-)?\s*(?:/|per)\s*(?:100\s*)?(?:g|kg|ml|l|gm|pc|pcs|unit|n)(?![a-z])",
+    re.I,
+)
 
 
 def looks_like_price(text: str) -> bool:
@@ -524,7 +535,35 @@ class RegexLayoutExtractor:
         # printed right beside it.
         for mode in ("strict", "table", "label"):
             found.update(self._pass(words, found, mode=mode, wrap=wrap))
+        if "unit_sale_price" not in found:
+            found.update(self._unit_price_by_shape(words, found))
         return list(found.values())
+
+    def _unit_price_by_shape(
+        self, words: list[Word], found: dict[str, Declaration]
+    ) -> dict[str, Declaration]:
+        """The first unlabelled "<amount> per <unit>" on the panel, in reading order. Only a box
+        no label claimed and no declaration used; the value is the matched span, and the box
+        is still the evidence."""
+        taken = {i for d in found.values() for i in d.word_ids}
+        frame = {image: i for i, image in enumerate(dict.fromkeys(w.image_id for w in words))}
+        for word in sorted(words, key=lambda w: (frame[w.image_id], w.y, w.x)):
+            if word.id in taken or claim(word.text) is not None:
+                continue
+            match = UNIT_PRICE.search(word.text)
+            if match is None:
+                continue
+            return {
+                "unit_sale_price": Declaration(
+                    field="unit_sale_price",
+                    value=match.group(0).strip(),
+                    confidence=word.confidence,
+                    word_ids=[word.id],
+                    image_id=word.image_id,
+                    extractor=self.name,
+                )
+            }
+        return {}
 
     def _pass(
         self, words: list[Word], found: dict[str, Declaration], mode: str, wrap: bool
