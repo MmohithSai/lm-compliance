@@ -12,6 +12,7 @@ import hashlib
 import json
 import re
 import sys
+import unicodedata
 from collections import Counter
 from datetime import date
 from importlib import import_module
@@ -87,15 +88,23 @@ SENTENCE_DOT = re.compile(r"(?<!\d)\.|\.(?!\d)")
 
 
 def norm(s: str) -> str:
-    """Loose text equality: casefold, fold the currency marker, drop punctuation and spacing.
+    """Loose text equality: casefold, fold the currency marker and accents, drop punctuation
+    and spacing.
 
     eval/dataset/README.md has said from the start that spacing is ignored, but *collapsing* runs
     of spaces is not the same as ignoring them: gold "NET WEIGHT 64 g" failed a correct read of
     "NET WEIGHT 64g", because PP-OCR does not put a space back where the print had one. Dropping
     every space is what the README promises. It cannot merge two different values: "1C g" and
     "10 g" stay different.
+
+    Accents are folded for the same reason the rupee sign is: the English recognition model has
+    no "ñ" or "É" to emit, so gold "España" against a faithful read of "Espana" was measuring the
+    dictionary, not the extraction. NFKD, then the combining marks dropped, so "ñ" and "n" compare
+    equal and nothing else changes.
     """
-    text = SENTENCE_DOT.sub(" ", CURRENCY.sub("", s))
+    text = unicodedata.normalize("NFKD", s)
+    text = "".join(ch for ch in text if not unicodedata.combining(ch))
+    text = SENTENCE_DOT.sub(" ", CURRENCY.sub("", text))
     return re.sub(r"[^\w@./-]", " ", text).casefold().replace(" ", "")
 
 

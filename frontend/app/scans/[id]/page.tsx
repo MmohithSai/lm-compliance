@@ -38,7 +38,9 @@ export default async function ScanPage({ params }: { params: Promise<{ id: strin
     { data: report },
     { data: evidence },
   ] = await Promise.all([
-      supabase.from("scan_images").select("id, kind, storage_path").eq("scan_id", id).order("kind"),
+      // Upload order — the order the worker read them in — not alphabetical by kind, which put
+      // the back panel above the front.
+      supabase.from("scan_images").select("id, kind, storage_path").eq("scan_id", id).order("storage_path"),
       supabase.from("ocr_words").select("id, image_id, x, y, w, h").eq("scan_id", id),
       supabase
         .from("declarations")
