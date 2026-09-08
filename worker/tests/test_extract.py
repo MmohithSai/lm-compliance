@@ -168,13 +168,113 @@ def test_a_bare_anchor_will_not_take_a_box_that_is_a_declaration_itself() -> Non
 
 
 def test_a_box_across_the_panel_is_not_the_value_of_a_bare_anchor() -> None:
+    """And a bare "Made in" with nothing beside it is no declaration at all: the label names
+    one without carrying one, the same as "MRP" over "SEE BOTTLE"."""
     got = fields(
         [
             line("Made in", 100, x=60, w=200, h=40, wid=1),
             line("SPAIN", 100, x=1400, w=300, h=40, wid=2),
         ]
     )
-    assert got["country_of_origin"] == "Made in"
+    assert "country_of_origin" not in got
+
+
+# ---------------------------------------------------------------- the figure has a shape
+
+
+def test_a_batch_code_beside_mrp_is_not_the_price() -> None:
+    """The Ching's soy sauce in eval/dataset: the value column sits half a line below the label
+    column, so the batch code is the box nearest "MRP:" — and the price is one line down."""
+    got = fields(
+        [
+            line("BATCH NO:", 774, x=202, w=165, h=43, wid=1),
+            line("AA4L10002502)", 796, x=443, w=285, h=46, wid=2),
+            line("MRP:", 808, x=207, w=104, h=39, wid=3),
+            line("25Rs.0.28/9)", 829, x=444, w=264, h=50, wid=4),
+        ]
+    )
+    assert got.get("mrp", "") != "MRP: AA4L10002502)"
+
+
+def test_a_price_beside_use_by_is_not_the_date() -> None:
+    got = fields(
+        [
+            line("USE BY:", 1173, x=101, w=201, h=90, wid=1),
+            line("79/-", 1195, x=716, w=152, h=98, wid=2),
+        ]
+    )
+    assert "best_before" not in got
+
+
+def test_a_licence_number_is_not_a_month_and_year() -> None:
+    assert "mfg_date" not in fields([line("Mfg Licno.:DNH/C/18", 100, wid=1)])
+
+
+def test_best_before_in_months_needs_no_figure() -> None:
+    got = fields([line("BEST BEFORE SIX MONTHS FROM MANUFACTURE", 100, wid=1)])
+    assert got["best_before"] == "BEST BEFORE SIX MONTHS FROM MANUFACTURE"
+
+
+def test_a_price_glued_to_its_label_is_still_a_price() -> None:
+    assert fields([line("M.R.P10.00", 100, wid=1)]) == {"mrp": "M.R.P10.00"}
+
+
+def test_a_two_line_label_finds_its_figure_beside_the_second_line() -> None:
+    """The Balaji wafers: "MRP" over "(INCL. OF ALL TAXES)", and "5.00" level with the second
+    line of the label, off the first line's row by a full line."""
+    got = fields(
+        [
+            line("NET WEIGHT:", 1270, x=14, w=223, h=80, wid=1),
+            line("25g", 1300, x=454, w=98, h=90, wid=2),
+            line("MRP", 1367, x=9, w=126, h=79, wid=3),
+            line("(INCL.OF ALL TAXES)", 1441, x=17, w=343, h=96, wid=4),
+            line("5.00", 1451, x=558, w=108, h=82, wid=5),
+            line("UNIT SALE PRIE3020DC", 1512, x=14, w=475, h=87, wid=6),
+        ]
+    )
+    assert got["mrp"] == "MRP (INCL.OF ALL TAXES) 5.00"
+    assert got["net_quantity"] == "NET WEIGHT: 25g"
+
+
+def test_a_figure_on_the_next_line_in_the_value_column_is_found() -> None:
+    """The Cetaphil lotion: the price is printed a line below its label and indented to the
+    value column, and the packing code on the label's own row is not a price."""
+    got = fields(
+        [
+            line("MRP (Inclusive of all taxes)", 1024, x=204, w=215, h=52, wid=1),
+            line("FIL1745.V00", 1022, x=1019, w=99, h=41, wid=2),
+            line("486.00Rs.4.86/ml", 1134, x=481, w=546, h=82, wid=3),
+        ]
+    )
+    assert got["mrp"] == "MRP (Inclusive of all taxes) 486.00Rs.4.86/ml"
+
+
+def test_a_date_a_full_line_off_its_label_is_taken_when_it_is_the_only_date_in_reach() -> None:
+    """The Quaker oats, photographed at an angle: the value column sits a line above the label
+    column. The relaxed reach is only open to a box of the right shape."""
+    got = fields(
+        [
+            line("MFD:", 1022, x=94, w=139, h=88, wid=1),
+            line("06SEP23", 960, x=620, w=306, h=129, wid=2),
+            line("05SEP24", 1074, x=618, w=310, h=135, wid=3),
+            line("USE BY:", 1173, x=101, w=201, h=90, wid=4),
+            line("79/-", 1195, x=716, w=152, h=98, wid=5),
+        ]
+    )
+    assert got["mfg_date"] == "MFD: 06SEP23"
+    assert got["best_before"] == "USE BY: 05SEP24"
+
+
+def test_a_barcode_line_under_mrp_is_not_the_price() -> None:
+    """The Kissan jam: with a little slack for padded boxes, the line under "MRP (INCL. OF ALL
+    TAXES)" was the barcode, and a D5 the pack really fails turned into a pass."""
+    got = fields(
+        [
+            line("MRP  (INCL.OF ALL TAXES)", 100, x=60, w=500, h=40, wid=1),
+            line("69725945 JAM.INGREDIENTS:SUGAR 8901030922787>", 136, x=60, w=900, h=40, wid=2),
+        ]
+    )
+    assert "mrp" not in got
 
 
 def test_an_anchor_still_counts_when_ocr_glues_the_value_to_it() -> None:
