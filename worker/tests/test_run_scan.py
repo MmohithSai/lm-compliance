@@ -21,6 +21,7 @@ from pipeline.models import (
     Violation,
     Word,
 )
+from pipeline.product import link_product
 
 
 class FakeTable:
@@ -39,6 +40,11 @@ class FakeTable:
 
     def upsert(self, row: dict[str, Any], on_conflict: str = "") -> FakeTable:
         self.db.upserted.setdefault(self.name, []).append((row, on_conflict))
+        self.rows = [row]  # Postgres returns the row it wrote, id and all
+        return self
+
+    def update(self, row: dict[str, Any]) -> FakeTable:
+        self.db.updated.setdefault(self.name, []).append(row)
         return self
 
     def execute(self) -> FakeTable:
@@ -77,6 +83,7 @@ class FakeClient:
         self.seed = seed
         self.written: dict[str, list[dict[str, Any]]] = {}
         self.upserted: dict[str, list[tuple[dict[str, Any], str]]] = {}
+        self.updated: dict[str, list[dict[str, Any]]] = {}
         self.downloaded: list[str] = []
         self.uploaded: dict[str, tuple[bytes, dict[str, str]]] = {}
         self.storage = FakeStorage(self)
@@ -183,3 +190,78 @@ def test_run_scan_fails_when_the_ocr_read_nothing(monkeypatch: pytest.MonkeyPatc
     with pytest.raises(ValueError, match="no text was read"):
         run_scan(cast(Client, db), SCAN)
     assert db.written == {}
+
+
+# ---------------------------------------------------------------- P6: filing a scan under a pack
+
+PACK = [
+    Declaration(field="manufacturer", value="Mfd by: Parle Products Pvt Ltd, Mumbai 400057"),
+    Declaration(field="generic_name", value="Common Name: Biscuits"),
+]
+
+
+def test_a_scan_is_filed_under_the_product_its_declarations_name() -> None:
+    db = fake()
+    product_id = link_product(cast(Client, db), "s1", PACK)
+    row, on_conflict = db.upserted["products"][0]
+    assert on_conflict == "match_key"  # the second photo of this pack must land on this row
+    assert row == {
+        "match_key": "parle products|biscuits",
+        "name": "Biscuits",
+        "manufacturer": "Parle Products Pvt Ltd, Mumbai 400057",
+    }
+    assert db.updated["scans"] == [{"product_id": product_id}]
+
+
+def test_a_pack_with_no_generic_name_is_named_after_its_maker() -> None:
+    db = fake()
+    link_product(cast(Client, db), "s1", PACK[:1])
+    row, _ = db.upserted["products"][0]
+    assert row["match_key"] == "parle products|"
+    assert row["name"] == "Parle Products Pvt Ltd"
+
+
+def test_the_maker_s_street_does_not_end_up_in_the_product_s_name() -> None:
+    """The Reynolds pen on the hosted project: PP-OCR dropped the comma after "Limited", and
+    the repository listed the product as "…Private Limited Plot No. C-21"."""
+    db = fake()
+    link_product(
+        cast(Client, db),
+        "s1",
+        [
+            Declaration(
+                field="manufacturer",
+                value="Manufactured,Marketed and Brand Owned bye Reynolds Pens India Private "
+                "Limited Plot No. C-21, SlPCOT Industrial Park",
+            )
+        ],
+    )
+    assert db.upserted["products"][0][0]["name"] == "Reynolds Pens India Private Limited"
+
+
+def test_an_imported_pack_is_filed_under_its_importer() -> None:
+    db = fake()
+    link_product(
+        cast(Client, db),
+        "s1",
+        [Declaration(field="importer", value="Imported by: Nestle India Ltd, Gurugram")],
+    )
+    assert db.upserted["products"][0][0]["match_key"] == "nestle india|"
+
+
+def test_a_pack_that_names_no_maker_is_filed_under_nothing() -> None:
+    """Which is D1, and a product row invented here would put another pack's scans in its
+    history. The scan stays searchable by its inspector, place and note."""
+    db = fake()
+    assert link_product(cast(Client, db), "s1", [Declaration(field="mrp", value="MRP 20")]) is None
+    assert db.upserted == {} and db.updated == {}
+
+
+def test_run_scan_files_the_scan_it_just_stored(monkeypatch: pytest.MonkeyPatch) -> None:
+    db = fake()
+    monkeypatch.setattr(
+        "pipeline.run_local", lambda images, ctx: RESULT.model_copy(update={"declarations": PACK})
+    )
+    run_scan(cast(Client, db), SCAN)
+    assert db.upserted["products"][0][0]["match_key"] == "parle products|biscuits"
+    assert db.updated["scans"] == [{"product_id": "900"}]

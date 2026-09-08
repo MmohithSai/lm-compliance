@@ -115,6 +115,13 @@ export type Database = {
             foreignKeyName: "declarations_scan_id_fkey"
             columns: ["scan_id"]
             isOneToOne: false
+            referencedRelation: "scan_search"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "declarations_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
             referencedRelation: "scans"
             referencedColumns: ["id"]
           },
@@ -151,6 +158,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scan_search"
             referencedColumns: ["id"]
           },
           {
@@ -197,6 +211,13 @@ export type Database = {
           scan_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "model_calls_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scan_search"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "model_calls_scan_id_fkey"
             columns: ["scan_id"]
@@ -252,6 +273,13 @@ export type Database = {
             foreignKeyName: "ocr_words_scan_id_fkey"
             columns: ["scan_id"]
             isOneToOne: false
+            referencedRelation: "scan_search"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_words_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
             referencedRelation: "scans"
             referencedColumns: ["id"]
           },
@@ -266,6 +294,7 @@ export type Database = {
           created_by: string | null
           id: string
           manufacturer: string | null
+          match_key: string | null
           name: string
         }
         Insert: {
@@ -276,6 +305,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           manufacturer?: string | null
+          match_key?: string | null
           name: string
         }
         Update: {
@@ -286,6 +316,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           manufacturer?: string | null
+          match_key?: string | null
           name?: string
         }
         Relationships: [
@@ -349,6 +380,13 @@ export type Database = {
             foreignKeyName: "reports_scan_id_fkey"
             columns: ["scan_id"]
             isOneToOne: false
+            referencedRelation: "scan_search"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
             referencedRelation: "scans"
             referencedColumns: ["id"]
           },
@@ -383,6 +421,13 @@ export type Database = {
           width?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "scan_images_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scan_search"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "scan_images_scan_id_fkey"
             columns: ["scan_id"]
@@ -497,6 +542,13 @@ export type Database = {
             foreignKeyName: "violations_scan_id_fkey"
             columns: ["scan_id"]
             isOneToOne: false
+            referencedRelation: "scan_search"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "violations_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
             referencedRelation: "scans"
             referencedColumns: ["id"]
           },
@@ -513,6 +565,40 @@ export type Database = {
           scans_this_week: number | null
         }
         Relationships: []
+      }
+      scan_search: {
+        Row: {
+          compliance_score: number | null
+          created_at: string | null
+          finished_at: string | null
+          id: string | null
+          inspector_id: string | null
+          inspector_name: string | null
+          location: string | null
+          product_brand: string | null
+          product_id: string | null
+          product_manufacturer: string | null
+          product_name: string | null
+          search: string | null
+          source: string | null
+          status: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scans_inspector_id_fkey"
+            columns: ["inspector_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scans_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       top_violations: {
         Row: {

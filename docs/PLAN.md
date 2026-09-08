@@ -108,10 +108,18 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
       embedded, nothing fetched at render time.
 
 ## P6 — repository + search + history + evidence
-- [ ] product match by name + manufacturer on scan completion
-- [ ] search page (name, brand, manufacturer, inspector, date); per-product history
+- [x] product match by name + manufacturer on scan completion — `worker/pipeline/product.py`,
+      keyed on `products.match_key` (unique), upserted so the second photograph of a pack joins
+      the first one's row. No maker declared → no product, and the scan says so.
+- [x] search page (name, brand, manufacturer, inspector, date); per-product history — one
+      `scan_search` view carrying every searchable word, `/scans?q=`, and `/products/<id>`
 - [ ] evidence photos + notes on a scan
 - Done when: search "Parle" returns its scans and history.
+  **True for a pack whose maker the OCR read.** Verified on the hosted project: the two Reynolds
+  pen scans (`5e0811b8`, `3f5b8e1e`), read with different OCR noise, file under one product and
+  `/products/<id>` shows both with an average score. A real amazon.in Parle-G listing pushed
+  through the worker (`cddac6b6`) came back **unmatched**, and the cause is not the matcher: the
+  listing labels the field "Manufacturer :", which was not an anchor — see the next item.
 
 ## P7 — dashboard + roles + audit
 - [ ] dashboard: scans this week, compliance rate, top 5 violations, by category, recent scans
@@ -143,6 +151,22 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - Total monthly cost: ₹0.
 
 ## Decisions log
+- 2026-09-08 — P6. **A pack's identity is the maker plus the generic name, and nothing else.**
+  `products.match_key` is `"<two words of the company>|<four words of the name>"`, both
+  normalised, and it is a unique index the worker upserts on — so matching is Postgres's job and
+  not a similarity function's. The company is cut to two words on purpose: what ends a company
+  name inside an address block is a comma, and the comma is the first thing a photograph loses.
+  The same Reynolds pen reads "…Private Limited, Plot No. C-21" in one shot and
+  "…Private Limited Plot No. C-21" in the next; two words survive both, four do not.
+- 2026-09-08 — P6. **A pack that declares no maker gets no product row.** That is D1, and the
+  honest answer is "not identified" on the scan. Filing it under a name derived from anything
+  else would put one company's scans in another company's history, which is the one thing a
+  repository must not do. The scan stays searchable by inspector, place, note and id.
+- 2026-09-08 — P6. **Search is one view, not five filters.** `scan_search` concatenates product,
+  brand, maker, category, inspector, place, note and scan id into a `search` column and the page
+  does `ilike '%q%'` over it. `security_invoker`, so the caller's RLS still decides which rows
+  they are. The alternative — the client `or`-ing filters across two embedded tables — is not
+  expressible in one PostgREST query and would have needed two round trips to say less.
 - 2026-09-08 — P5. **The scan detail page had never been loaded, and it crashed on the first
   try.** `scan-evidence.tsx` read `e.currentTarget.naturalWidth` *inside* the `setSize` updater;
   React clears `currentTarget` when the handler returns and the updater runs after that, so every

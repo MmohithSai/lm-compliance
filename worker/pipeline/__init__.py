@@ -18,6 +18,7 @@ from .measure import measure_declarations, pdp_area_cm2, resolve_scale
 from .models import PipelineResult, ReportImage, ScaleSource, ScanContext, ScanRow, Word
 from .ocr import ocr_words
 from .preprocess import preprocess
+from .product import link_product
 from .report import annotate_panels, build_report, render_docx, render_html, render_json, render_pdf
 from .rules_engine import run_rules, score
 
@@ -138,6 +139,9 @@ def run_scan(sb: Client, scan: ScanRow) -> PipelineResult:
             ],
             paths,
         )
+    # After the rows are written, and outside the temp directory: filing the scan under a
+    # product needs the declarations, not the photographs.
+    link_product(sb, scan.id, result.declarations)
     return result
 
 

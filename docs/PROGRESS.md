@@ -22,7 +22,7 @@ Last updated: 2026-09-08.
 | P3 rule engine + detail page | **done** | — (the page was finally opened in a browser during P5; it crashed, see the log) |
 | P4 scale + font / contrast / grouping | **done**, half of it measured | 5 real photos with a card still need a person (same blocker as P0 item 10) |
 | P5 reports | **done** | — |
-| P6 repository + search + history | todo | — |
+| P6 repository + search + history | **partial** | evidence photos + notes on a scan |
 | P7 dashboard + roles + audit | todo | — |
 | P8 e-commerce mode | todo | — |
 | P9 deploy + docs | todo | — |
@@ -447,7 +447,35 @@ scan.** The bucket is private, the page only mints a signed URL for a session th
 the scan row through RLS, and `middleware.ts` sends anyone without a session to `/login`. There
 is no new authorisation surface in P5, which is the reason there is no new policy in `0002`.
 
-## P6–P9
+## P6 — repository + search + history
+
+**Done when:** search "Parle" returns its scans and history. **True for any pack whose maker the
+OCR read** — verified on the hosted project, see the evidence column.
+
+| # | Item | Status | Where / evidence |
+|---|---|---|---|
+| 1 | Product match on scan completion | done | [product.py](worker/pipeline/product.py), [test_product.py](worker/tests/test_product.py) (12 checks) + 5 wiring checks in [test_run_scan.py](worker/tests/test_run_scan.py). Live: scans `5e0811b8` and `3f5b8e1e` both file under `reynolds pens\|` |
+| 2 | Search page + per-product history | done | `scan_search` view in `0003_product_match_and_search.sql`; [/scans](frontend/app/scans/page.tsx), [/products/[id]](frontend/app/products/[id]/page.tsx). `?q=reynolds` returns both scans; the product page shows 2 scans, average 87 |
+| 3 | Evidence photos + notes on a scan | todo | the `evidence` table and its RLS exist since P1; nothing writes to it |
+
+### What "Parle" actually returns
+
+The one honest gap, and it is not in P6. A real amazon.in Parle-G 800 g listing
+(`eval/dataset/ecom_amazon_parle_g_800g`) was pushed through the hosted worker as scan
+`cddac6b6`: it finished `done` with a score of 75 and **no product**. The listing prints
+`Manufacturer : Parle Biscuits Pvt Ltd`, and a bare "Manufacturer" was not in `ANCHORS` —
+"manufactured by" and "marketed by" were, "importer" was, that one was not. So the maker was
+never extracted and there was nothing to match on. The scan is still found by "parle" through
+its note and its place, which is the search working and the extractor not.
+
+### The matcher's known ceiling
+
+Two words of the company, four of the generic name, both normalised. Two photographs of one pack
+that disagree about more than punctuation, the legal form or the label will make two products
+rather than one wrong one. Duplicates are visible in the repository and mergeable; a wrong merge
+is not. Fuzzy matching is the upgrade if it ever becomes a nuisance.
+
+## P7–P9
 
 Not started. See `docs/PLAN.md` for the item list and the "done when" line of each phase.
 P8's first item is already done — it landed in P3.
@@ -455,6 +483,25 @@ P8's first item is already done — it landed in P3.
 ---
 
 ## Log
+
+- **2026-09-08** — **P6: a scan is filed under a pack, and the repository is searchable.** The
+  identity is `products.match_key`, two words of the maker and four of the generic name, and it
+  is a unique index the worker upserts on, so "is this the same product" is answered by Postgres
+  rather than by a similarity score. The two rules that matter are both refusals: a pack that
+  declares no maker gets no product (that is D1, and inventing one puts another company's scans
+  in its history), and nothing but the pack's own declarations decides the match.
+  **Reading the real data changed the code twice.** Written against the gold files, `company_key`
+  cut the company at the first comma — and the Reynolds pen on the hosted project prints
+  "Manufactured,Marketed and Brand Owned by", a comma *inside the label*, so the key came out
+  empty and the pack had no identity at all. Then the same pack, photographed twice, produced
+  "…Private Limited, Plot No. C-21" and "…Private Limited Plot No. C-21": the comma that ends a
+  company name is the first thing a photograph loses, which is why the key keeps two words and
+  not four. Both readings now land on one product, and `/products/<id>` shows both scans and
+  their average. Search is a single `scan_search` view — product, brand, maker, category,
+  inspector, place, note and scan id concatenated into one column, `ilike` over it,
+  `security_invoker` so RLS still applies.
+  `make test` 518 passed, `make lint` clean, `tsc --noEmit` and `pnpm build` clean, and the two
+  pages were opened in a browser against the hosted project rather than trusted to typecheck.
 
 - **2026-09-08** — **P5: the report is one model rendered three ways.** `build_report` turns a
   finished scan into a `Report`, and the JSON, the PDF and the DOCX are three renderings of it —

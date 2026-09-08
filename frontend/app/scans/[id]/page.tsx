@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { ScanEvidence, type Panel, type Violation } from "@/components/scan-evidence";
@@ -17,7 +18,11 @@ type Evidence = { word_ids?: number[]; status?: string; reason?: string | null }
 export default async function ScanPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
-  const { data: scan } = await supabase.from("scans").select("*").eq("id", id).single();
+  const { data: scan } = await supabase
+    .from("scans")
+    .select("*, products(id, name, manufacturer)")
+    .eq("id", id)
+    .single();
   if (!scan) notFound();
 
   const [{ data: images }, { data: words }, { data: declarations }, { data: violations }, { data: report }] =
@@ -85,6 +90,20 @@ export default async function ScanPage({ params }: { params: Promise<{ id: strin
       <h1 className="text-xl font-semibold">Scan</h1>
       <p>
         <Badge>{scan.status}</Badge> · {scan.source} · {new Date(scan.created_at).toLocaleString()}
+      </p>
+      {/* Which pack this is, matched on the maker and the generic name the OCR read off it.
+          Unmatched is the honest answer when the pack declared no maker — which is D1. */}
+      <p className="text-sm">
+        {scan.products ? (
+          <>
+            <Link href={`/products/${scan.products.id}`} className="underline">
+              {scan.products.name}
+            </Link>
+            {scan.products.manufacturer && ` · ${scan.products.manufacturer}`}
+          </>
+        ) : (
+          <span className="text-muted-foreground">Product not identified from this pack.</span>
+        )}
       </p>
       {scan.compliance_score !== null && (
         <div>
