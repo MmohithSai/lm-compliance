@@ -18,7 +18,7 @@ Last updated: 2026-09-08.
 |---|---|---|
 | P0 dataset + eval harness | **done** | photos with a reference card still need a person (F1/F2) |
 | P1 schema + auth + upload + worker loop | **done** | — |
-| P2 OCR + extractor baseline | measured, below target | 98.2% synthetic, **29.8% real**; target 70% |
+| P2 OCR + extractor baseline | measured, below target | 98.4% synthetic, **44.0% real** (was 30.5% before the 2026-09-08 audit); target 70% |
 | P3 rule engine + detail page | **done** | — (the page was finally opened in a browser during P5; it crashed, see the log) |
 | P4 scale + font / contrast / grouping | **done**, half of it measured | 5 real photos with a card still need a person (same blocker as P0 item 10) |
 | P5 reports | **done** | — |
@@ -117,6 +117,8 @@ Those are the photos the shot list still asks for.
 | 5 | Realtime status on the scan detail page | done | [scan-realtime.tsx](frontend/components/scan-realtime.tsx), mounted only while the scan is queued/processing |
 | 6 | Worker marks a fake scan `done` | done | [pipeline/__init__.py](worker/pipeline/__init__.py), [test_run_scan.py](worker/tests/test_run_scan.py) |
 | 7 | One scan end to end from a phone | done | scan `5e0811b8`, 2026-09-07, `192.168.1.10:3000` |
+| 8 | Photographs read in upload order | done, 2026-09-08 audit | `run_scan` had no `order by` and the extractor sorted by `image_id` (a uuid on a real scan). Reversing the images on the 37 multi-image real cases changed 7 of them, 9 declarations and one D5 verdict. `order("storage_path")` + the extractor keeps the order given; regression tests in `test_run_scan.py` and `test_extract.py`; eval byte-identical |
+| 9 | Retry / stale `processing` | **todo** | a worker crash after `claim_scan` leaves the scan `processing` forever. Wants `started_at` and a requeue after 10 min — a P9 migration |
 
 ### How the loop was checked
 
@@ -165,8 +167,9 @@ phase reaches for them.
 ## P2 — OCR + regex/layout extractor (baseline)
 
 **Done when:** `make eval LABEL=baseline-v1` >= 70% field extraction on clean photos.
-**98.2% on the 16 synthetic labels. 29.8% on the 38 real cases.** Met on clean labels, not met on
-photographs. The harness prints the two apart because one number hid which half moved.
+**98.4% on the 18 synthetic labels. 44.0% on the 38 real cases** (2026-09-08 audit; was 30.5%).
+Met on clean labels, not met on photographs. The harness prints the two apart because one
+number hid which half moved.
 
 | # | Item | Status | Where / evidence |
 |---|---|---|---|
@@ -178,6 +181,9 @@ photographs. The harness prints the two apart because one number hid which half 
 | 6 | Measured on real photographs | done | 28.9%, `eval/results/2026-09-07_p2-real-final.json` |
 | 7 | 70% on real photographs | **not met** | see the three causes below |
 | 8 | Printed declaration tables | done | 2026-09-08, six labelled runs: real 28.4% -> 29.8%, **7 fewer false accusations, no new misses** |
+| 9 | Per-miss error report and a run diff | done | [error_report.py](eval/error_report.py), [compare.py](eval/compare.py); `eval/results/<run>_errors.{md,json}` |
+| 10 | The audit round | done | nine labelled changes, real **30.5% -> 44.0%**, 26 fields better / 1 worse, spurious 13 -> 6, violation precision 0.74 -> 0.77 with recall 0.99 unchanged. Runs, per-field table and what is left: `docs/EVAL.md`, `docs/AUDIT.md` |
+| 11 | 70% on real photographs | **not met** | 44.0%; the 79 misses are 32 OCR (23 never detected, 9 misread), 20 unlabelled generic names, 27 the extractor could still touch |
 
 ### Reading a printed declarations table
 
@@ -244,7 +250,25 @@ are not comparable to each other. Within each group one variable changed per run
 
 Real-only: **18.5% -> 28.9%**, measured on the same 53 cases with the same OCR cache.
 
-### Where the remaining real-photo gap is
+### Where the remaining real-photo gap is (2026-09-08 audit)
+
+`eval/results/2026-09-08_eval-accents-are-folded-like-the-rupee-sign_errors.md` lists all 79
+misses with the gold, the best OCR line and the stage that lost it:
+
+| Cause | Misses | Can the extractor reach it? |
+|---|---|---|
+| OCR never detected the print (small white print on curved bottles, a tilted jar, 12 px sachet print, sideways text) | 23 (29%) | No — the OCR step |
+| The common name is printed with no label | 20 (25%) | No — the Stretch item |
+| Read but spread over boxes the extractor did not group (care blocks missing their contact line; sideways packs) | 17 (22%) | Partly |
+| Character errors on the line used | 9 (11%) | No — the recognition model |
+| Wrong neighbour | 8 (10%) | Some; two are gold conventions |
+| Wrapped value cut short or over-merged | 2 (3%) | Some |
+
+The next levers: a 90° detection pass merged with the upright one, and `det_limit_side_len=1600`
+re-measured now that split lines hurt less (both need a full re-OCR); transposed geometry for a
+box taller than it is wide; and the VLM for the unlabelled generic name only.
+
+### Where the gap was before the audit
 
 Counting the 96 misses on the real cases:
 
@@ -690,14 +714,13 @@ a pass and not a failure — the pack or listing was never checked against the R
 **Not fixed here, and written down instead.** Two things the hosted run showed that belong to
 P2 and to P1, not to P8:
 
-- `run_scan` reads `scan_images` with no `order by`, so the order the photographs are handed to
-  `run_local` is whatever Postgres returns. "First box in reading order wins" is then decided
+- `run_scan` read `scan_images` with no `order by`, so the order the photographs were handed to
+  `run_local` was whatever Postgres returned, and "first box in reading order wins" was decided
   across images by that order: the same six tiles read `M.R.P.32.00` locally and `M.R.P: 260.00`
-  on the hosted run. The E1 verdict was identical both times, but the declaration quoted on the
-  report is not stable. One `order("storage_path")` fixes it; it is a P1 wiring bug and wants its
-  own measured change.
-- Real-photo field extraction is still 30.5%, unchanged by this phase and still the largest
-  error in the system. P2's business.
+  on the hosted run. **Fixed in the 2026-09-08 audit** (P1 item 8): measured first, it changed
+  7 of 37 multi-image cases and one D5 verdict.
+- Real-photo field extraction was 30.5%, unchanged by this phase. The audit took it to 44.0%;
+  still the largest error in the system, P2's business.
 
 ---
 
@@ -708,6 +731,27 @@ Not started. See `docs/PLAN.md` for the item list and the "done when" line.
 ---
 
 ## Log
+
+- **2026-09-08** — **Audit of P0–P8 against the implementation, and the P2 real-photo number
+  taken apart.** Full matrix in `docs/AUDIT.md`. What held: the rule engine (all 56 gold verdicts
+  from gold declarations), RLS and audit (53 of 53 hosted checks, each one read), the report path,
+  the unreadable gate, and reproducibility (the baseline matched the last committed run on every
+  key). What did not: the worker read photographs in whatever order Postgres returned them —
+  measured by reversing the images, 7 of 37 multi-image cases change and a D5 verdict flips —
+  fixed with an `order by` and an extractor that keeps the order given. Then nine labelled
+  extractor changes, each judged on a per-case diff before the next was started: padded boxes
+  may overlap, a figure has a shape, a label may be two lines and a figure is one label's value,
+  anchors survive dropped spaces, an address block passes over the licence number, the fullest
+  address block wins, an unlabelled unit price is found by its shape, a best-before sentence
+  wraps one line, and the eval folds accents. Real **30.5% → 44.0%**, synthetic unchanged,
+  violation precision 0.74 → 0.77 with recall 0.99, spurious claims 13 → 6, 26 fields better and
+  1 worse. The 79 misses left are counted one by one (`eval/error_report.py`): 32 belong to the
+  OCR step, 20 to generic names printed with no label, 27 to the extractor. A VLM is justified
+  for the 20 and not for the 32; two OCR-side experiments are named first. Findings left as
+  findings: D5b is unreachable from the extractor, product matching merges a company's unnamed
+  packs, a crashed worker leaves a scan `processing`, three gold files are questionable.
+  `make test` 577 + 29 · `make lint` clean · `make check-rls` 53/53 · `tsc`, `pnpm lint`,
+  `pnpm build` clean.
 
 - **2026-09-08** — **P8 finished: a listing gives Rule 6(10), an unreadable image gives a
   sentence.** The first half of the phase was already there — `_applies` has judged an e-commerce

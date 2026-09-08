@@ -36,25 +36,34 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - [x] `extractors/regex_layout.py` anchors + nearest-box layout rule
 - [x] `run_local` wired: preprocess → ocr → extract → (measure: none) → rules → score
 - [x] measured on real photographs, one variable per run, every result file kept
+- [x] the audit round of 2026-09-08: a per-miss error report (`eval/error_report.py`), a result
+      diff (`eval/compare.py`), and nine labelled extractor changes measured one at a time
 - Done when: `make eval LABEL=baseline-v1` ≥ 70% field extraction on clean photos. Save the result file.
-  **98.2% on the 16 synthetic labels. 28.9% on the 37 real cases** (2026-09-07,
-  `eval/results/2026-09-07_p2-final.json`; the harness prints the two apart).
-  **The 70% line is met on clean labels and not on real photographs.** Seven measured changes took
-  the real half from 18.5% to 28.9%; the remaining gap is not one bug. It is three things, in
-  order of size:
-  1. **generic_name** — 23 of 37 misses. Indian packs print the common name with no label at all
-     ("SPICED BUTTERMILK", "CARBONATED WATER", "Lip Balm"). An anchor extractor structurally
-     cannot find it. This is the case for the Stretch item, not for more regex.
-  2. **manufacturer / consumer_care** — the address wraps over four printed lines and PP-OCRv4
-     drops one or two of them on a curved bottle, so the merged block is never word for word.
-  3. Everything the photograph itself loses: thumbs over the panel, packs held sideways, the
-     value column cropped out of frame.
-  Four hypotheses were measured and rejected, result files kept: `det_limit_side_len=1600`
-  (54.5%), merging continuation lines for short fields (51.4%), `manufacturer`/`packer` as
-  listing-table anchors (flat, more false positives), and a second OCR pass at 90° for packs held
-  sideways (real 28.9% → 28.1%, and it doubles OCR time). CLAHE was measured and kept: it took the
-  rendered labels 94.5% → 98.2% and left the photographs where they were.
-  Nothing named in this plan is untried now. The next lever is the Stretch item.
+  **98.4% on the 18 synthetic labels. 44.0% on the 38 real cases** (2026-09-08,
+  `eval/results/2026-09-08_eval-accents-are-folded-like-the-rupee-sign.json`; the harness prints
+  the two apart). **The 70% line is met on clean labels and not on real photographs.** The audit
+  round took the real half from 30.5% to 44.0% — 26 fields better, 1 worse, spurious claims
+  13 → 6, violation precision 0.74 → 0.77 with recall 0.99 unchanged. The 79 misses left are
+  counted one by one in `eval/results/<run>_errors.md`, and they are five things, in order of size:
+  1. **OCR never detected the print** — 23 (29%). Small white print on curved bottles, a tilted
+     jar, sachet print a dozen pixels high, sideways text. The extractor never sees these words;
+     only the OCR step can reach them.
+  2. **generic_name printed with no label** — 20 (25%). "SPICED BUTTERMILK", "Lip Balm",
+     "Coated Wafer". An anchor extractor structurally cannot find it. This is the case for the
+     Stretch item, not for more regex.
+  3. **words read, spread over boxes the extractor did not group** — 17 (22%). Mostly consumer
+     care blocks whose phone or e-mail line PP-OCR did not detect, and packs photographed
+     sideways, where the label/value geometry is transposed.
+  4. **character errors on the very line used** — 9 (11%): "Net Wt.1 g" for "10 g", "SlPCOT".
+  5. **wrong neighbour** — 8 (10%); over-merge — 2.
+  Before this round: `det_limit_side_len=1600` (54.5%), merging continuation lines for short
+  fields (51.4%), listing-table anchors alone (flat), a second OCR pass at 90° (real 28.9% →
+  28.1%) were all measured and rejected; CLAHE was measured and kept. Within this round three
+  intermediate states were measured and reverted before their run was kept: a below-right reach
+  ahead of the cell test (took the pen box's date for its price), a loosened row test with no
+  value shape (took a net weight for a price), and a bare "Quantity" anchor without the
+  fuller-label rule (took Amazon's buy box). The next lever for (1) is the OCR step, for (2) the
+  Stretch item.
 
 ## P3 — rule engine + scan detail page
 - [x] fill `CHECKS` in `rules_engine.py`; delete the `xfail` line in `tests/test_rules.py`
@@ -185,6 +194,75 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - Total monthly cost: ₹0.
 
 ## Decisions log
+- 2026-09-08 — Audit. **Photographs are read in upload order, on the hosted worker too.**
+  `run_scan` read `scan_images` with no `order by`, and the extractor then sorted words by
+  `image_id` — a file name in the eval, which sorts like the upload, and a uuid on a real scan,
+  which does not. So "first box in reading order wins" was decided across images by row order,
+  and the eval could never see it. Measured by reversing the images on the 37 multi-image real
+  cases: **7 cases change, 9 declarations differ, and one D5 verdict flips** (the Ching's soy
+  sauce, 25 points). Not cosmetic. `order("storage_path")` in `run_scan`, and the extractor keeps
+  the images in the order it was handed; the eval is byte-identical, and a regression test seeds
+  the fake rows back to front.
+- 2026-09-08 — Audit. **The three address fields take the fullest candidate, not the first.**
+  A listing names the maker as a bullet and again as a table row, and the law wants the whole
+  address, so for `manufacturer`, `importer` and `consumer_care` a block that carries an address
+  (the rule engine's own `has_address`) beats one that does not, and among equals the longer
+  wins. This also makes those fields independent of which photograph came first. For everything
+  else first-in-reading-order stands, with one exception: a fuller label ("Net Quantity")
+  replaces a bare noun that came first ("Quantity: 1" in Amazon's buy box).
+- 2026-09-08 — Audit. **A figure has a shape.** "Any digit" was the test for the box beside a
+  price, quantity or date label, and the real packs defeated it: beside "MRP" the nearest box
+  with a digit was the batch code, a packing code or the barcode line; beside "USE BY" it was the
+  price; "Mfg Lic. No.: DNH/C/18" carries digits and no month. A price is now a figure that
+  starts and ends a word (at most five digits, not the tail of a code, not glued to a unit), a
+  date is what `month_and_year` can read, and a quantity keeps the digit test because its unit
+  glues to it. "Use by" and "exp" name a date; "best before" need not. The Devanagari digit ७
+  matched `\d` and was refused too. A bare label with nothing beside or under it claims nothing.
+- 2026-09-08 — Audit. **A label may be two lines, and a printed figure is the value of one
+  label.** "MRP" over "(INCL. OF ALL TAXES)" with "5.00" level with the second line missed the
+  first line's row by a full line. A label that still has no figure now grows one line at a time
+  into a cell and looks beside the whole cell; a figure may also sit on the next line in the
+  value column, but only after the cell test — the pen box's "02/2026" is a row under its "MRP".
+  And boxes already read into another declaration are out of reach: without that, "MRP" a line
+  under "NET WEIGHT: 25g" took the 25g back as its price the moment the row test was loosened.
+- 2026-09-08 — Audit. **An anchor survives the spaces PP-OCR drops.** "MADEIN INDIA",
+  "CONTACICUSTOMER CARE EXECUTIVE", "NESTLECONSUMERCARE", "DATE OFMFG:". The words of an anchor
+  may run together, and a long anchor (ten letters or more) is recognised with another word
+  glued to its front; short ones keep their boundary so "made in" is not found in "homemade
+  indian". An e-mail address is one word and never a label — read as one,
+  "reynoldsindiaconsumercare@…" stopped the care block short of the e-mail D6 asks for.
+- 2026-09-08 — Audit. **An address block passes over the licence number.** The FSSAI logo (read
+  as "fssat"), the licence number and a storage instruction are not lines of an address. They are
+  skipped without moving the window, so one printed inside a block is stepped over and one
+  printed after it ends the block — judging the nearest line instead cut the Muuchstac block off
+  before its address. For consumer care an "address: same as …" / "at the above address" line is
+  the address Rule 6(2) asks for and is kept; it can sit in the middle of the block.
+- 2026-09-08 — Audit. **An unlabelled unit price is found by its shape.** Rule 6(11)'s unit sale
+  price is a price per unit, and listings and packs print it with no label: "(₹11.25 /100 g)",
+  "Rs. 4.86/ml". Where no label claims it, the first "<amount> per <unit>" on the panel is the
+  declaration and the matched span is its value — the first field whose value is a span rather
+  than a whole line; the box is still the evidence. Recall 0.64 → 0.88. The one false claim is a
+  unit price from the related-products carousel at the foot of an Amazon tile, beside an MRP from
+  the same carousel that was already claimed: a screenshot does not say which price is the
+  listing's.
+- 2026-09-08 — Audit. **The eval folds accents like the rupee sign.** The English recognition
+  model has no ñ or É to emit, so gold "España" against a faithful read of "Espana" measured the
+  dictionary. NFKD, combining marks dropped, its own labelled run, one field. Fourth measurement
+  fix of this kind, same argument each time.
+- 2026-09-08 — Audit. **Three gold files are questionable and were left alone.** The Haldiram
+  photograph prints "MRP ₹10.00 (Incl. of all taxes)", "USP ₹0.25 per g", a consumer care block
+  and a Marketed-by address, each with its first letter under a fold, and gold records none of
+  them and expects D5, D6 and D8; the dataset README's "cut off counts as absent" rule was applied
+  to a missing "M", which an inspector would not do. The Amazon listings' MRP gold is inconsistent
+  (the displayed price on two, the struck-through "M.R.P." row absent on a third). Three packs
+  print both a manufacturer and a marketer and gold picks one or the other. None was changed
+  mid-improvement — editing gold to meet the extractor is the one thing this record must not do —
+  and they are listed for the dataset's owner in `docs/AUDIT.md`.
+- 2026-09-08 — Audit. **D5b cannot fire on a real scan, and that is written down now.** The
+  extractor produces at most one declaration per field, so the rule engine never sees two MRPs.
+  The check is unit-tested and unreachable. It stays until the two-MRP photographs on the shot
+  list exist; then the extractor needs a second MRP declaration when a second, different amount
+  is printed, and the eval's per-case dict needs to stop taking the last one.
 - 2026-09-08 — P8. **A photograph nobody can read gets a sentence, not a verdict.** The gate is
   the number of characters PP-OCR returned, and it is measured rather than guessed. Across the 56
   eval cases (`eval/.ocr_cache`, so this cost no OCR time) the least legible reads 134 characters,

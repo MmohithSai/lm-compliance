@@ -125,7 +125,18 @@ Diagnose a run without re-OCRing anything:
 ```bash
 cd worker && uv run python ../eval/diagnose.py misses ../eval/results/2026-09-07_p2-final.json
 cd worker && uv run python ../eval/diagnose.py reach  ../eval/results/2026-09-07_p2-final.json
+cd worker && uv run python ../eval/error_report.py ../eval/results/<run>.json   # per-miss report, .md + .json
+cd worker && uv run python ../eval/compare.py ../eval/results/<before>.json ../eval/results/<after>.json
 ```
+
+`error_report.py` writes, for every real-photo miss, the gold value, the OCR line that best
+covers it, the final value and the stage that lost it (OCR never detected it, printed with no
+label, read but not grouped, misread, wrong neighbour). `compare.py` is how a labelled run is
+judged: every changed field and violation set, marked better or worse against gold.
+
+On Windows, run the worker's tests and the eval as `uv run --all-extras --no-sync …`: `--extra
+pdf` and `--extra ocr` each re-sync the venv and uninstall the other's packages. Set
+`PYTHONIOENCODING=utf-8` before printing gold values, or `₹` raises on the cp1252 console.
 
 OCR is memoised under `eval/.ocr_cache/` on (image, languages, hash of `preprocess.py` + `ocr.py`),
 so a rerun measures the change you made, not PaddleOCR reading 260 photos again. Edit either file

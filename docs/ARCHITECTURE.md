@@ -18,7 +18,14 @@ Python worker — laptop / HF Space / Oracle VM, service-role key, talks *out* o
                     put every box in a space the detail page cannot draw in.
     b. ocr          PaddleOCR PP-OCRv4 -> one box per printed *line* [text, box, confidence]
                     -> ocr_words.  Injectable (`run_local(..., ocr=)`) so the eval can memoise it.
-    c. extract      keyword anchors + nearest-box layout + wrapped-address merge -> declarations
+    c. extract      keyword anchors + nearest-box layout + wrapped-address merge -> declarations.
+                    Photographs in upload order (`order("storage_path")`, and the extractor keeps
+                    that order). A label that names a figure has to be followed by one of the
+                    right shape (a price is not a batch code, a date is what month_and_year
+                    reads); a label may be a two-line cell; a printed figure is the value of one
+                    label; anchors survive the spaces PP-OCR drops; the three address fields take
+                    the fullest candidate; an unlabelled unit price is found by its shape.
+                    [P2, audited 2026-09-08]
     d. scale        ArUco DICT_4X4_50 -> credit-card rectangle -> inspector PDP mm -> none.
                     Per photograph, never borrowed between frames. The card is only looked for
                     when the inspector said one is in the shot: ungated, the shape claimed a
@@ -82,7 +89,11 @@ Storage bucket `scans` (private): authenticated read; inspector/admin insert/upd
 
 `eval/` is a first-class part of the system, not a test folder: 56 cases (38 real photographs and
 listing screenshots, 18 rendered labels, two of them carrying a 50 mm ArUco marker at a known
-scale), a hand-written `gold.json` per case, and a committed result file per labelled run. `docs/EVAL.md` is the method; `docs/PROGRESS.md` is the numbers.
+scale), a hand-written `gold.json` per case, and a committed result file per labelled run.
+`eval/error_report.py` puts every real-photo miss beside the OCR line that best covers it and
+names the stage that lost it; `eval/compare.py` diffs two runs per field and per case, marking
+each change better or worse against gold. `docs/EVAL.md` is the method; `docs/PROGRESS.md` is
+the numbers; `docs/AUDIT.md` is the 2026-09-08 audit of P0–P8 against the implementation.
 
 The one architectural concession to it is that `run_local` takes its OCR step as an argument, so
 the eval can memoise PaddleOCR on disk and a rerun measures the change rather than re-reading 260
@@ -105,6 +116,13 @@ photographs. Nothing else passes anything but the default.
 - Every claim about accuracy has a committed result file behind it, including every change that
   was measured and then thrown away — nine so far, and they are the most useful entries in the
   record, because they stop the next person retrying them.
+- The answer does not depend on the order the photographs arrive in. Read in upload order, and
+  the fields that could still differ (the address blocks) take the fullest candidate. Measured
+  before the fix: reversing the images changed 7 of 37 multi-image cases and flipped a D5 verdict.
+- What the system cannot do is counted, not hidden: real-photo field extraction is 44.0% (62 of
+  141 declarations, 2026-09-08), and `eval/results/<run>_errors.md` says for each of the 79
+  misses whether the OCR never saw the print (23), the pack printed no label to anchor on (20),
+  the words were read but not grouped (17), or a character was misread (9).
 
 ## Deployment (₹0)
 

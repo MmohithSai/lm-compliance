@@ -55,6 +55,10 @@ because the strict version was measuring something other than extraction:
   them: gold `NET WEIGHT 64 g` failed a correct read of `NET WEIGHT 64g`, because PP-OCR does not
   put a space back where the print had one.
 
+- **accents** (2026-09-08) — the English recognition model has no `ñ` or `É` to emit, so gold
+  `España` against a faithful read of `Espana` measured the dictionary. NFKD, combining marks
+  dropped. One field moved.
+
 Each of those was its own labelled run with the argument written down in the `docs/PLAN.md`
 Decisions log, because loosening a metric is the easiest way to fake progress and has to be
 defended in public. None of them can make two different values compare equal: `1C g` and `10 g`
@@ -161,6 +165,31 @@ set — roughly 30 minutes with two processes; more than three at once ran the m
 
 ## Diagnosing a run
 
+Three tools, none of which OCRs anything.
+
+```bash
+cd worker
+uv run python ../eval/error_report.py ../eval/results/<run>.json
+uv run python ../eval/compare.py ../eval/results/<before>.json ../eval/results/<after>.json
+```
+
+`error_report.py` is the one to read first. For every real case and every field gold or the
+pipeline names, it writes the gold value, the OCR line that best covers it (with PP-OCR's own
+confidence on that line — no other confidence exists in this system, and none is invented), the
+final extracted value, and a failure category with the rule that assigned it, to
+`<run>_errors.md` and `<run>_errors.json` beside the result file. The categories are measurable
+things: under half the gold words anywhere in the OCR output is *OCR did not detect it*; the
+gold carrying none of the field's label words is *printed with no label*; the words present but
+the best single line holding under 90% of them is *read but not grouped*; a prediction 85%
+similar to gold is *misread characters*; and so on. The counts by category and by field are at
+the top. That table is what decided the order of the 2026-09-08 changes.
+
+`compare.py` is how a labelled run is judged. Every per-field precision / recall / tp / fp / fn
+delta, and every case whose value or violation set moved, marked **BETTER** / **WORSE** /
+neutral against gold. A change that raises the accuracy line while adding false fields shows up
+as WORSE rows beside the BETTER ones, and two of the nine changes below were reworked because
+of a WORSE row before they were kept.
+
 `eval/diagnose.py` reads the cache and never OCRs, so all of it is instant.
 
 ```bash
@@ -229,6 +258,52 @@ P4 and P5 ran on a 56-case set (the two marker cases joined it), so they are a t
 | `p6-manufacturer-anchor` | a bare `manufacturer` anchor, for the listings that label it that way | flat 62.2%, 4 more false positives — **on its own, no** |
 | `p6-ecom-no-address-wrap` | …and a screenshot's next line is the next row of the table, never the rest of an address | 62.5% (real 30.5%), manufacturer recall 0.38 → 0.41 |
 | `p6-bare-noun-anchor-must-start-the-box` | …and a bare noun is only a label where a label stands: at the start of the box | 62.5% (real 30.5%) — **no number moved, the answers did** |
+
+### The audit round, 2026-09-08
+
+Same 56 cases, same OCR cache. One variable per run; each run's `compare.py` output was read
+before the next change was started.
+
+| Run | Change | Real | Violations P / R / exact |
+|---|---|---|---|
+| `audit-baseline` | reproduces `p8-consumer-care-needs-a-contact` on every key | 30.5% | 0.741 / 0.986 / 51.8% |
+| `p1-images-in-upload-order` | `run_scan` orders `scan_images`; the extractor keeps that order | 30.5% — identical | identical |
+| `p2-padded-boxes-may-overlap` | a third of a line of slack for PP-OCR's padded boxes | 31.9% | 0.744 / 0.979 / 50.0% — a barcode passed as a price; **not kept alone** |
+| `p2-a-figure-has-a-shape` | a price looks like a price, a date like a date; a bare label claims nothing | 31.9% | 0.745 / 0.986 / 51.8% |
+| `p2-a-label-may-be-two-lines` | a label grows into a two-line cell; a figure is the value of one label | 35.5% | 0.757 / 0.993 / 53.6% |
+| `p2-ocr-drops-spaces` | anchors survive dropped spaces; "usp", "date of mfg", "Quantity"@start | 36.9% | 0.770 / 0.993 / 53.6% |
+| `p2-an-address-block-ends-at-the-licence-number` | licence, FSSAI and storage lines are not address lines; a care block keeps "same as … address" | 37.6% | 0.770 / 0.993 / 53.6% |
+| `p2-the-fullest-address-block-wins` | address fields take the fullest candidate, whichever photograph came first | 39.0% | 0.770 / 0.993 / 53.6% |
+| `p2-a-unit-price-by-its-shape` | an unlabelled "<amount> per <unit>" is the unit sale price | 42.6% | 0.774 / 0.993 / 53.6% |
+| `p2-best-before-wraps-one-line` | "BEST BEFORE TWELVE MONTHS" / "FROM MANUFACTURE" | 43.3% | unchanged |
+| `eval-accents-are-folded-like-the-rupee-sign` | measurement: NFKD | **44.0%** | unchanged |
+
+Baseline to final: field accuracy 62.5% → 69.7%, real **30.5% → 44.0%** (43 → 62 of 141),
+synthetic 98.4% unchanged, **26 fields better and 1 worse**, spurious predictions 13 → 6.
+
+| Field | precision | recall |
+|---|---|---|
+| best_before | 0.69 → 1.00 | 0.69 → 0.76 |
+| consumer_care | 0.81 → 0.74 | 0.59 → 0.59 |
+| country_of_origin | 0.75 → 1.00 | 0.55 → 0.73 |
+| generic_name | 0.95 → 0.95 | 0.47 → 0.47 |
+| importer | 0.33 → 0.67 | 0.33 → 0.67 |
+| manufacturer | 0.44 → 0.58 | 0.41 → 0.52 |
+| mfg_date | 0.73 → 0.83 | 0.76 → 0.76 |
+| mrp | 0.71 → 0.85 | 0.67 → 0.77 |
+| net_quantity | 0.88 → 0.91 | 0.80 → 0.85 |
+| unit_sale_price | 1.00 → 0.96 | 0.64 → 0.88 |
+
+The two that fell: consumer_care precision, because two care blocks that were not read at all
+before (Bisleri, KitKat) are now read with OCR errors in them — both D6 verdicts went from wrong
+to right, which is the number that matters for that field; and unit_sale_price precision, one
+unit price taken from the related-products carousel at the foot of an Amazon tile.
+
+The one field that got worse: the Ching's soy sauce use-by date. Its second photograph is
+sideways, the label boxes are 60–90 px wide and 130–270 px tall, and in that geometry the
+mfg-date label reaches the use-by's date first; once a figure could be the value of one label
+only, the use-by lost it. A rotated page needs transposed geometry, which is a separate
+experiment.
 
 ### P6: the same change, rejected in P2 and kept here
 
@@ -302,18 +377,35 @@ out contrast as the reason PP-OCR misses whole lines on a curved bottle.
 
 ## Where the remaining gap is
 
-Real photographs sit at 28.9% against a 70% target. Counting the 96 misses:
+Real photographs sit at 44.0% against a 70% target. The 79 misses, from
+`eval/results/2026-09-08_eval-accents-are-folded-like-the-rupee-sign_errors.md`, every one
+looked at:
 
 | Cause | Misses | Reachable by the extractor? |
 |---|---|---|
-| the common name is printed with **no label to anchor on** | 23 | **No.** `SPICED BUTTERMILK`, `CARBONATED WATER`, `Lip Balm`, `Flavoured Sandwich Biscuits`. An anchor extractor has nothing to key on. |
-| a wrapped address where PP-OCRv4 dropped a line | ~28 | Partly. The merge works; on a curved bottle one line of the address is never detected, so the block is never word for word. |
-| the photograph itself lost it | ~14 | No. Thumb over the panel, pack held sideways, value column cropped out of frame. |
-| recognition slips and wrong neighbours | ~31 | Some. |
+| **OCR did not detect the print** — under half the gold words are anywhere in the output | 23 (29%) | **No.** Small white print on the curve of a Bisleri, Kinley or Maaza bottle; the tilted Ching's jar, where the address lines under "MKT BY" were never detected; the Bru sachet, whose print is a dozen pixels high; KitKat's "₹ 10/-" read as "R10F"; sideways text. Legible to a person in every case. Only the OCR step can reach these. |
+| the common name is printed with **no label to anchor on** | 20 (25%) | **No.** `SPICED BUTTERMILK`, `CARBONATED WATER`, `Lip Balm`, `Coated Wafer`, `AYURVEDIC PROPRIETARY MEDICINE`. 17 of the 21 generic_name misses. This is the case for the Stretch item. |
+| the words were read but the extractor did not group them | 17 (22%) | Partly. Half are consumer care blocks where the phone or e-mail line was not detected, so the block never carries the contact D6 needs; the rest are sideways photographs, where the label / value geometry is transposed, and a Flipkart pack shot read as garbage. |
+| character errors on the line used | 9 (11%) | **No.** `Net Wt.1 g` for `10 g`, `SlPCOT`, `PHASE-` for `PHASE-1`, `DELH-100`. Same class as `Bjscuits` on the rendered labels; the lever is the recognition model, not the extractor. |
+| the anchor took the wrong neighbour | 8 (10%) | Some. Two are the Amazon MRP convention (the listing's own "M.R.P" row against the displayed price gold chose); two are packs printing both a manufacturer and a marketer; the rest are sideways or tilted panels. |
+| a wrapped value cut short or over-merged | 2 (3%) | Some. |
 
-The largest bucket is structural. `rules/pc_rules_2011.yaml` D2 requires the *common or generic
-name*, and Indian packs routinely print it as a bare line with no `Generic name:` label. No amount
-of regex reaches that, and a hand-written list of product categories would be fitted to this
-dataset rather than to the law. This is the case for the Stretch item in `docs/PLAN.md` — a local
-VLM extractor behind `EXTRACTOR=local_vlm`, measured against this same baseline and logged in
-`model_calls`. It is the next thing to try, and the numbers above are the bar it has to clear.
+Spurious predictions are down to 6, and four of those are the same two Amazon tiles: a price and
+a unit price from the related-products carousel, and a "Mfg. Date" / "Exp. Date" pair the listing
+really does print in its details table and gold omits.
+
+Two things follow. First, the extractor's remaining reach is small: of the 79 misses, 32 are
+OCR failures of one kind or another and 20 are structural, leaving about 27 the extractor could
+in principle touch, most of them on sideways or tilted photographs. The next extractor-side
+experiment is transposed geometry for a box that is taller than it is wide; the next OCR-side
+experiment is a second detection pass at 90° merged with the upright one rather than replacing
+it (the earlier rejection replaced), and a re-measurement of `det_limit_side_len=1600` now that
+the extractor tolerates split lines better. Both cost a full re-OCR of the set.
+
+Second, the structural bucket is the case for the Stretch item in `docs/PLAN.md` — a local VLM
+extractor behind `EXTRACTOR=local_vlm`, measured against this same baseline and logged in
+`model_calls`. `rules/pc_rules_2011.yaml` D2 requires the *common or generic name*, Indian packs
+print it as a bare line, no amount of regex reaches that, and a hand-written list of product
+categories would be fitted to this dataset rather than to the law. It is justified for that one
+field. It is not justified for the OCR bucket: a VLM reading the same 1600 px photograph faces
+the same twelve-pixel print, and that bucket wants a better detector, not a different reader.
