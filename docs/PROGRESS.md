@@ -20,7 +20,7 @@ Last updated: 2026-09-08.
 | P1 schema + auth + upload + worker loop | **done** | — |
 | P2 OCR + extractor baseline | measured, below target | 98.2% synthetic, **29.8% real**; target 70% |
 | P3 rule engine + detail page | **done** | seeing the detail page on screen needs a login |
-| P4 scale + font / contrast / grouping | todo | — |
+| P4 scale + font / contrast / grouping | **done**, half of it measured | 5 real photos with a card still need a person (same blocker as P0 item 10) |
 | P5 reports | todo | — |
 | P6 repository + search + history | todo | — |
 | P7 dashboard + roles + audit | todo | — |
@@ -36,7 +36,7 @@ Last updated: 2026-09-08.
 | # | Item | Status | Where / evidence |
 |---|---|---|---|
 | 1 | Eval harness runs and writes a result file | done | [run_eval.py](eval/run_eval.py) → `eval/results/2026-09-07_p0-synthetic-16.json` |
-| 2 | Synthetic label generator | done | [make_synthetic.py](eval/make_synthetic.py), 16 cases |
+| 2 | Synthetic label generator | done | [make_synthetic.py](eval/make_synthetic.py), 18 cases (16 + 2 with a marker, added in P4) |
 | 3 | Gold format written down | done | [eval/dataset/README.md](eval/dataset/README.md) |
 | 4 | Gold files validated automatically | done | [test_dataset.py](worker/tests/test_dataset.py), 5 checks × 16 cases |
 | 5 | Shot list for the real set | done | [eval/dataset/README.md](eval/dataset/README.md) |
@@ -67,9 +67,12 @@ Last updated: 2026-09-08.
 | `synthetic_ecom_missing_qty` | `source: ecommerce` | E1 |
 | `synthetic_ecom_complete` | `source: ecommerce` | none |
 
-**Not covered by synthetics, on purpose:** F1, F2 (need a real scale), P1 (needs two panels),
-P2 contrast, P3 seam, P4 language, D5b (needs two MRP boxes on one pack), E2. These come from
-the real photos. The unit tests in `worker/tests/test_rules.py` already pin their behaviour.
+**Not covered by synthetics, on purpose:** P1 (needs two panels), P3 seam, P4 language, D5b
+(needs two MRP boxes on one pack), E2. These come from the real photos, and the unit tests in
+`worker/tests/test_rules.py` already pin their behaviour. F1, F2 and P2 were in this list until
+P4: two further rendered cases now carry a 50 mm ArUco marker at a known scale
+(`synthetic_marker_font_ok`, `synthetic_marker_font_small`), which tests the measuring chain but
+not a photograph of one — the shot list is still open.
 
 ### Latest eval run
 
@@ -341,15 +344,108 @@ Not built here, on purpose: F1, F2 and P2 report `unverifiable` because nothing 
 `height_mm`, `width_height_ratio` or `contrast` yet — that is P4. P3 pins what they say when the
 measurement is missing.
 
-## P4–P9
+## P4 — reference card scale + font / contrast / grouping
+
+**Done when:** font check correct on 5 photos with a card; "not verifiable" without one.
+**The second half is measured and true. The first half needs a person with a card** — that is
+P0 item 10, and no photograph in the set has a scale reference in frame.
+
+| # | Item | Status | Where / evidence |
+|---|---|---|---|
+| 1 | ArUco DICT_4X4_50 → mm/px | done | [measure.py](worker/pipeline/measure.py); recovers 0.1253 against a true 0.1250 on the marker cases |
+| 2 | Credit-card rectangle → mm/px | done, gated | only when the inspector ticked the box: ungated it claimed a scale in 14 card-less frames |
+| 3 | Inspector PDP mm fallback | done | panel width in mm ÷ the photo's width in px, which assumes the panel fills the frame; the upload form now says so |
+| 4 | `height_mm`, `width_height_ratio`, `contrast` per declaration | done | `ink()` measures the print inside each OCR box, on the photograph as uploaded |
+| 5 | F1, F2, P2 live | done | they fire on `synthetic_marker_font_small` and report `unverifiable` on all 54 photographs, costing no points |
+| 6 | P1 grouping live | **not possible** | a scale does not tell two photographs apart; see the Decisions log. P1 passes or reports unverifiable, as in P3 |
+| 7 | `xfail` line deleted from `tests/test_measure.py` | done | the 26 xfails are gone; 465 tests pass |
+| 8 | A live case in the eval set | done | two rendered labels with a 50 mm marker, one expecting F1 |
+
+### How a millimetre is arrived at
+
+1. **A scale, per photograph.** ArUco marker → credit card (only if the inspector said one is
+   there) → the inspector's panel width against the photo's pixel width → none. A scale is never
+   borrowed from another frame: a marker in frame 3 says nothing about how far away frame 2 was
+   shot, and borrowing one would be the same class of error as inventing one.
+2. **The print, not the box.** A PP-OCR box is padded and spans a whole line. Inside it Otsu
+   separates ink from paper, blobs shorter than 40% of the line's ink are dropped as dots and
+   grain, and what is left are the glyphs. The height is their 90th percentile — the capitals and
+   numerals Table I is about. The width/height ratio is the median of each glyph's own width over
+   its own height, which needs no scale at all.
+3. **Contrast** is the CIE Lab distance between the core of the stroke and the paper beside it,
+   over 100. The same crop, so the lighting is common to both sides and largely cancels.
+4. **Nothing without a reference.** No scale in that frame → all three stay `None` → F1, F2 and
+   P2 report `unverifiable` with a reason and cost no points.
+
+### Every labelled run, in order
+
+Extraction is untouched throughout. The field numbers move only where the two marker cases joined
+the set (54 → 56 cases).
+
+| Run | Change | Field acc. (real / synth) | Violations P / R / exact |
+|---|---|---|---|
+| `p4-address-block-seven-lines` | the P3 baseline | 59.8 (29.8 / 98.2) | 0.74 / 0.98 / 48.1% |
+| `p4-measure-wired` | scale + height + ratio + contrast, all live | 59.8 (29.8 / 98.2) | **0.64** / 0.98 / 38.9% |
+| `p4-card-only-when-the-inspector-says-so` | a rectangle is not a card unless the form says one is there | 59.8 (29.8 / 98.2) | 0.65 / 0.98 / 38.9% |
+| `p4-contrast-in-colour` | contrast as Lab distance, not brightness | 59.8 (29.8 / 98.2) | 0.65 / 0.98 / 38.9% |
+| `p4-contrast-needs-a-shot-made-for-measuring` | P2 joins F1/F2 behind a scale reference | 59.8 (29.8 / 98.2) | **0.74** / 0.98 / 48.1% |
+| `p4-marker-cases` | two rendered cases with a 50 mm marker | 62.2 (29.8 / 98.4) | 0.74 / 0.98 / **50.0%** |
+| `p4-height-is-the-tall-glyphs` | height = the 90th percentile glyph, not the 75th | 62.2 (29.8 / 98.4) | 0.74 / 0.98 / 50.0% |
+
+### Three things the measurements got wrong first
+
+Every one of them was caught by a number, not by reading the code.
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| A scale on 14 frames with no card in them | any quadrilateral with 85.6 × 54 proportions counted as a card: a product photo on a listing, a carton side, a label panel | the inspector's own answer gates the card path. The marker path needs no gate — a marker's bits are error-corrected |
+| **27 of 27 real photographs called low-contrast** (precision 0.74 → 0.64) | brightness alone. Red print on green is legible and almost equally bright. Lab distance fixed 1 case of 27; measuring the stroke's core instead of its anti-aliased edge moved the real median 0.38 → 0.47 and the rendered labels 0.87 → a true 0.99, and 54% were still under the floor | enlarging the worst crops settled it — a shadow across a Sprite bottle, and "500 mL" in pale blue that is perfectly legible on the carton. That is the light and the focus, not the print, so P2 now needs a photo shot to be measured, like F1 and F2 |
+| A mostly lower-case line measured 2.26 mm where its capitals are 3.13 mm | the 75th percentile of glyph heights lands on the x-height | the 90th percentile. Not the tallest glyph: one OCR box that swallowed a logo would then set the height for the whole declaration |
+
+### A P3 bug the P0 tests caught on the way
+
+`rules_engine.TABLE_I` ended `(inf, 6.0, 6.0)`: above 2500 cm² an embossed numeral was held to
+6 mm where Rule 7 and `docs/RULES.md` both say 8. `tests/test_measure.py` has asserted the right
+number since P0 behind its `xfail`, and deleting that line surfaced it. There is now one Table I,
+in `measure.py`, which the rule engine imports along with the ⅓ ratio and the exempt characters.
+
+### What P4 does not do
+
+- **P1 has no failure side.** A scale does not tell two photographs apart, and the note in the P3
+  entry that said it would was wrong. It needs the inspector's answer, the way P3 already asks
+  about the bottom and the seam, or photo-to-photo matching. Neither is a measurement.
+- **Contrast is not stored.** `declarations` has no `contrast` column and `store()` still drops
+  it. When P2 fails the value is in the violation's evidence, which is what the report will read;
+  when it passes, nobody has asked for the number. Add the column if P5's PDF wants it.
+- **No real photograph has ever been measured**, only rendered ones. Glare, perspective and focus
+  are untested, and the eval cannot speak to them until the shot list is shot.
+- Rule 8's cylinder and irregular shapes stay out of scope: `pdp_area_cm2` is the inspector's
+  width × height, and without it F1 says the panel area is unknown.
+
+## P5–P9
 
 Not started. See `docs/PLAN.md` for the item list and the "done when" line of each phase.
-`tests/test_measure.py` carries 26 strict `xfail(raises=NotImplementedError)` for P4; deleting
-that line is how the phase gets marked done. P8's first item is already done — it landed in P3.
+P8's first item is already done — it landed in P3.
 
 ---
 
 ## Log
+
+- **2026-09-08** — **P4: print size and contrast are measured, or honestly refused.** A scale per
+  photograph (ArUco → card → the inspector's panel width → none), the print measured inside each
+  OCR box rather than the box itself, and F1/F2/P2 live. Seven labelled runs, three of them
+  corrections the eval forced: the card detector was claiming a scale in **14 frames with no card
+  in them**, so it is now gated on the inspector's own answer; contrast on brightness alone called
+  **27 of 27 real photographs** low-contrast, and after two improvements to the estimator 54% were
+  still under the floor, so P2 joined F1 and F2 behind a scale reference — the crops behind the
+  worst readings are a shadow on a bottle and pale but perfectly legible print, which is the light
+  and not the pack; and the glyph-height percentile was reading a lower-case line 28% short.
+  Violation precision ends where it started at 0.74, exact-set accuracy 48.1% → 50.0%, extraction
+  untouched. Two rendered cases with a 50 mm marker give the font path a live test, where the
+  pipeline recovers 0.1253 mm/px against a true 0.1250. On the way, the P0 test suite caught a
+  real bug in P3's code: Table I's last row held an embossed numeral to 6 mm where the law says 8.
+  **What is still missing is a photograph with a card in it** — no amount of rendering substitutes
+  for glare and perspective.
 
 - **2026-09-08** — **The extractor can read a printed declarations table.** A real scan showed
   a pack whose declarations are a bordered two-column table, a layout no case in the web set has,

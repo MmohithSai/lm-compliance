@@ -64,14 +64,20 @@ stay different.
 
 ## The dataset
 
-53 cases in `eval/dataset/`, one folder each.
+56 cases in `eval/dataset/`, one folder each.
 
 | Prefix | What | How many | Source |
 |---|---|---|---|
 | `off_` | Indian food packs | 26 | Open Food Facts, CC-BY-SA 3.0 |
 | `obf_` | Indian cosmetics and personal care | 5 | Open Beauty Facts, CC-BY-SA 3.0 |
 | `ecom_` | product listings | 6 | amazon.in, flipkart.com, headless Chrome |
-| `synthetic_` | rendered labels | 16 | `eval/make_synthetic.py` |
+| `phone_` | shot for this project through the app | 1 | ours |
+| `synthetic_` | rendered labels | 18 | `eval/make_synthetic.py` |
+
+Two of the rendered labels carry a 50 mm ArUco marker at a known 8 px per millimetre. They are
+the only cases with a scale, and therefore the only ones where the font and contrast checks do
+anything but report "not verifiable" — see `eval/dataset/README.md`. A rendered marker is not a
+photographed one, so the shot list is still open.
 
 The real cases are **photographs other people took**: thumbs in frame, glare, packs held
 sideways, panels half out of the crop. That unevenness is the point — a rendered label is not a

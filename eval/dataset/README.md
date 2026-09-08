@@ -64,11 +64,26 @@ Read off the declarations above plus the context, by the rules in `rules/pc_rule
 
 - `violations` lists non-`info` codes only; `worker/tests/test_dataset.py` rejects `info` codes,
   duplicates, unknown codes, unknown field names and a missing image.
-- **F1, F2, P1–P4, D5b and E2 are never in gold for these cases.** F1/F2 need a scale, and no
-  photo here has an ArUco marker or a card, so those checks are `unverifiable` and cost no points
+- **F1, F2, P1–P4, D5b and E2 are never in gold for these cases**, with one exception below.
+  F1/F2/P2 need a scale, and no photograph here has an ArUco marker or a card, so those checks
+  are `unverifiable` and cost no points
   (see `docs/PLAN.md`). P1/P3 need to know which panel is which, P2 needs a calibrated contrast,
   D5b needs two MRP boxes in one frame, E2 is `info`. They come from photos shot to order, with a
   reference card — the shot list below.
+
+### The one exception: the marker cases
+
+`synthetic_marker_font_ok` and `synthetic_marker_font_small` print a 50 mm `DICT_4X4_50` marker
+at a known 8 px per millimetre, so the true scale — and therefore the true printed height in
+millimetres — is known by construction. They are the only cases with any scale at all, and
+`synthetic_marker_font_small` is the only gold file that expects **F1**: same print on both, but
+its panel is 3000 cm², where Table I asks for 6 mm and the pack prints 3.13 mm.
+
+They exist so the font path has a live test instead of only an `unverifiable` one. What they
+cannot test is a photograph: a rendered marker has no glare, no perspective and no focus, so the
+shot list below still stands. `worker/tests/test_dataset.py` excludes F1/F2/P2 when it replays
+the engine over gold declarations — gold holds the text as printed, and no text stands in for a
+measurement.
 
 ## Where these images came from
 
@@ -105,7 +120,7 @@ scale reference in frame, and OFF crops rarely show two panels at once. Those ne
 
 | How many | What | Tests |
 |---|---|---|
-| 15 | Everyday kitchen packs, clean labels, credit card or printed ArUco (`DICT_4X4_50`) flat in frame | F1, F2 |
+| 15 | Everyday kitchen packs, clean labels, credit card or printed ArUco (`DICT_4X4_50`) flat in frame **and beside the declarations, in the same shot** — the scale is measured per photograph and never borrowed from another | F1, F2, P2 |
 | 6 | Declarations split across two panels, or printed on a seam / bottom | P1, P3 |
 | 5 | Low contrast, glossy, embossed or curved surfaces | P2, unverifiable paths |
 | 5 | Non-English or bilingual labels | P4 |

@@ -19,15 +19,21 @@ Python worker — laptop / HF Space / Oracle VM, service-role key, talks *out* o
     b. ocr          PaddleOCR PP-OCRv4 -> one box per printed *line* [text, box, confidence]
                     -> ocr_words.  Injectable (`run_local(..., ocr=)`) so the eval can memoise it.
     c. extract      keyword anchors + nearest-box layout + wrapped-address merge -> declarations
-    d. scale        ArUco DICT_4X4_50 -> credit-card rectangle -> inspector PDP mm -> none  [P4]
-    e. measure      height_mm, width/height ratio, contrast, same-panel grouping (only with scale)
+    d. scale        ArUco DICT_4X4_50 -> credit-card rectangle -> inspector PDP mm -> none.
+                    Per photograph, never borrowed between frames. The card is only looked for
+                    when the inspector said one is in the shot: ungated, the shape claimed a
+                    scale in 14 eval frames with no card in them.                    [P4, built]
+    e. measure      height_mm, width/height ratio and contrast of the *print inside* each OCR
+                    box (Otsu, then the glyphs), measured on the photograph as uploaded rather
+                    than the preprocessed copy, and only where step d found a scale. No scale ->
+                    all three stay None and F1/F2/P2 report "not verifiable".        [P4, built]
     f. rules        rules/pc_rules_2011.yaml -> violations [rule_id, rule_ref, severity, message,
                     evidence]                                                            [P3]
     g. score+report 100 - penalties; HTML -> PDF + DOCX + JSON -> Storage scans/<id>/report.*  [P5]
     h. write back   ocr_words, declarations, violations, reports, scans.status = done | failed
 
-  Steps d-g are not built yet. `run_local` catches NotImplementedError from the rule engine and
-  scores 100, so the queue works before the rules do; that try/except is deleted in P3.
+  Step g is not built yet (P5). Grouping (P1) has no failure side and will not get one here: a
+  scale says how big a pixel is, not whether two photographs show one panel or two.
   One `Word` is one PP-OCR line box, never a split of one — the split coordinates would be
   invented, and this project does not invent measurements.
 
@@ -54,9 +60,9 @@ Storage bucket `scans` (private): authenticated read; inspector/admin insert/upd
 
 ## Measurement
 
-`eval/` is a first-class part of the system, not a test folder: 53 cases (37 real photographs and
-listing screenshots, 16 rendered labels), a hand-written `gold.json` per case, and a committed
-result file per labelled run. `docs/EVAL.md` is the method; `docs/PROGRESS.md` is the numbers.
+`eval/` is a first-class part of the system, not a test folder: 56 cases (38 real photographs and
+listing screenshots, 18 rendered labels, two of them carrying a 50 mm ArUco marker at a known
+scale), a hand-written `gold.json` per case, and a committed result file per labelled run. `docs/EVAL.md` is the method; `docs/PROGRESS.md` is the numbers.
 
 The one architectural concession to it is that `run_local` takes its OCR step as an argument, so
 the eval can memoise PaddleOCR on disk and a rerun measures the change rather than re-reading 260
@@ -65,10 +71,13 @@ photographs. Nothing else passes anything but the default.
 ## Why it is defensible
 
 - The rule engine is deterministic and cites the rule. No AI decides compliance. No external AI API anywhere.
-- Nothing is estimated: no scale reference → the font check says "not verifiable" and costs no points.
+- Nothing is estimated: no scale reference in that frame → the font *and contrast* checks say
+  "not verifiable" and cost no points. A scale is never borrowed from another photograph, and a
+  card-shaped rectangle is only a card when the inspector said one is in the shot.
 - Every part is open source and self-hostable. Rules live in a YAML file DoCA can edit without code.
-- Every claim about accuracy has a committed result file behind it, including the four changes
-  that were measured and rejected.
+- Every claim about accuracy has a committed result file behind it, including every change that
+  was measured and then thrown away — nine so far, and they are the most useful entries in the
+  record, because they stop the next person retrying them.
 
 ## Deployment (₹0)
 

@@ -78,10 +78,27 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
   when extraction does.
 
 ## P4 — reference card scale + font / contrast / grouping
-- [ ] ArUco (DICT_4X4_50) and credit-card rectangle detection → mm/px; inspector PDP mm fallback
-- [ ] `height_mm`, `width_height_ratio`, `contrast` per declaration; F1/F2/P1/P2 live
-- [ ] delete the `xfail` line in `tests/test_measure.py`
+- [x] ArUco (DICT_4X4_50) and credit-card rectangle detection → mm/px; inspector PDP mm fallback
+      — `measure.py`. The card is only looked for when the inspector ticked the box: measured on
+      the eval set, the rectangle detector claimed a scale in **14 frames with no card in them**.
+- [x] `height_mm`, `width_height_ratio`, `contrast` per declaration; F1/F2/P2 live
+      — measured off the print inside each OCR box, on the photograph as uploaded, and only on a
+      frame that carries a scale reference. **P1 is not live and cannot be** — see the Decisions
+      log: a scale does not tell two photographs apart, so P1 still passes or says unverifiable.
+- [x] delete the `xfail` line in `tests/test_measure.py` — 26 xfails gone, 465 tests pass
+- [x] two rendered cases with a 50 mm marker in `eval/dataset`, so the chain has a live path:
+      `synthetic_marker_font_ok` (30 cm² panel, 1 mm required, 3.13 mm printed → passes) and
+      `synthetic_marker_font_small` (3000 cm² panel, 6 mm required, same print → F1)
 - Done when: font check correct on 5 photos with a card; "not verifiable" without one.
+  **The second half is true and measured** (`eval/results/2026-09-08_p4-height-is-the-tall-glyphs.json`:
+  every check that needs a scale reports `unverifiable` on all 54 photographs and screenshots,
+  costing no points; violation precision is unchanged at 0.74).
+  **The first half still needs a person.** No photograph in the set has a card or a marker in
+  frame — the same blocked P0 item — so the measuring chain is verified two other ways instead:
+  unit tests on generated markers and cards, and the two rendered marker cases, where the true
+  scale is known by construction. On those the pipeline recovers **0.1253 mm/px against a true
+  0.1250** (0.2% out) and reads 3.13 mm print as 3.13 mm. What that does not prove is glare,
+  focus and perspective on a real pack, which is exactly what the shot list is for.
 
 ## P5 — reports
 - [ ] `report.html` → PDF (WeasyPrint), DOCX (python-docx), JSON; uploaded to `scans/<id>/report.*`
@@ -124,6 +141,55 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - Total monthly cost: ₹0.
 
 ## Decisions log
+- 2026-09-08 — P4. **Table I's last row was wrong in the code, and the test written in P0 caught
+  it.** `rules_engine.TABLE_I` had `(inf, 6.0, 6.0)`: above 2500 cm² an embossed numeral was held
+  to 6 mm where Rule 7 and `docs/RULES.md` both say 8. There is now one table, in `measure.py`,
+  which the rule engine imports along with the width ratio and the exempt characters. Two copies
+  of the law in one repo is how they drift.
+- 2026-09-08 — P4. **A card is only a card when the inspector says one is in the frame.** An
+  ArUco marker identifies itself — the bits are error-corrected — but a card is a shape, and
+  measured over the eval set the rectangle detector claimed a scale in **14 frames that contain
+  no card**: product photos on a listing, a flat carton side, a label panel. A wrong scale is
+  worse than no scale, because it turns "not verifiable" into a confident millimetre. The upload
+  form has asked "is a reference card in the photo" since P1 and the answer was going unused.
+- 2026-09-08 — P4. **Contrast is measured in colour, and only on a photo shot to be measured.**
+  Three labelled runs. Measuring it on brightness alone called **27 of the 27 real photographs**
+  low-contrast (`p4-measure-wired`, violation precision 0.74 → 0.64): red print on a green pack
+  is perfectly legible and has almost no difference in brightness. Measuring CIE Lab distance
+  instead fixed one case out of 27 (`p4-contrast-in-colour`). Measuring the core of the stroke
+  rather than its anti-aliased edge moved the real median from 0.38 to 0.47 and the rendered
+  labels from 0.87 to a true 0.99 — a better estimator, kept — and still left **54% of real
+  declaration lines under the 0.5 floor**. Enlarging the worst of them settles it: a shadow
+  across a Sprite bottle, and "500 mL" in pale blue that is perfectly legible on the carton. That
+  number is the light and the focus, not the print, so P2 now joins F1 and F2 behind a scale
+  reference and says so in its reason. Precision back to 0.74, exact-set 48.1% → 50.0%.
+- 2026-09-08 — P4. **The height is the print, not the OCR box.** A PP-OCR box is padded and spans
+  a whole line, so its height is ascender-to-descender at best; Table I measures the numerals. So
+  the glyphs are found inside the box (connected components, dropping anything under 40% of the
+  line's ink) and their 90th-percentile height is the reading. The 75th percentile was tried
+  first and read a mostly lower-case line as 2.26 mm where its capitals are 3.13 mm — 28% short,
+  in the direction that accuses a compliant pack. Not the tallest glyph either: one OCR box that
+  swallowed a logo would then set the height for the whole declaration.
+- 2026-09-08 — P4. **A scale belongs to the photograph it was measured in.** Each frame gets its
+  own mm/px, and a declaration is measured with the scale of the frame it was read from. A marker
+  in frame 3 says nothing about how far away frame 2 was shot, and borrowing it would be the same
+  class of error as inventing one. The consequence for the inspector is on the upload form: the
+  card goes beside the declarations, not in a photo of its own.
+- 2026-09-08 — P4. Measurements are taken from the photograph as uploaded, never from the
+  preprocessed copy. `preprocess` runs CLAHE, and reporting the contrast of an equalised crop
+  measures the equalisation. It moves no pixel, so the OCR boxes index both images.
+- 2026-09-08 — P4. **P1 (grouping) is still not live, and the P3 entry below that said P4's scale
+  would make its failure side real was wrong.** A scale says how big a pixel is; it does not say
+  whether two photographs show one panel or two. What would settle it is either the inspector's
+  answer, the way P3 already asks about the bottom and the seam, or matching one photo against
+  another — neither is a measurement, and neither is P4. P1 keeps passing when everything is in
+  one frame and saying `unverifiable` otherwise.
+- 2026-09-08 — P4. Two rendered cases with a 50 mm marker joined `eval/dataset` so the font path
+  has a live test at all: same print, two panel areas, one expected F1. Their gold carries **F1**,
+  which no other case does, and `test_engine_reproduces_gold_from_gold_declarations` now excludes
+  F1/F2/P2 — gold holds the declarations as printed, and no amount of text stands in for a
+  measurement. A rendered marker is not a photograph of one: it has no glare, no perspective and
+  no focus, so `eval/dataset/README.md`'s shot list still asks for real packs with a card.
 - 2026-09-08 — The extractor can read a printed declarations table. A pack that sets its
   declarations in a bordered table centres the value against the whole label cell, so a two line
   label ("MRP" over "(incl. of all taxes)") puts its value half a line below the anchor's own

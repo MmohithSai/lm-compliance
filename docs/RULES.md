@@ -26,10 +26,10 @@ Severity → score: critical −25, major −10, minor −3, info 0. Score = max
 | Code | Rule ref | Check | Severity |
 |---|---|---|---|
 | F1 | Rule 7, Table I **verify** | Height of numerals ≥ Table I minimum for the PDP area. Needs a scale (ArUco / card / inspector PDP mm) and the PDP area; otherwise `unverifiable`. | major |
-| F2 | Rule 7 **verify** | Width ≥ ⅓ of height, except the characters 1, i, I, l. | minor |
+| F2 | Rule 7 **verify** | Width ≥ ⅓ of height, except the characters 1, i, I, l. Same scale requirement as F1. | minor |
 | F3 | Medical Devices Rules, 2017 (LM PC Rules amendment, Oct 2025) **verify** | Medical device pack: font rules of the Medical Devices Rules apply. Flag and skip F1/F2. | info |
 
-Table I (principal display panel area → minimum numeral height; embossed / blown numerals in brackets):
+Table I (principal display panel area → minimum numeral height; embossed / blown numerals in brackets). It lives once in the code, in `worker/pipeline/measure.py`, which the rule engine imports:
 
 | PDP area | Height |
 |---|---|
@@ -45,7 +45,7 @@ Rule 8 — PDP area: rectangle → one full side (width × height); cylinder →
 | Code | Rule ref | Check | Severity |
 |---|---|---|---|
 | P1 | Rule 9(1)(a) **verify** | All mandatory declarations grouped together on one panel | major |
-| P2 | Rule 9(1)(a) **verify** | Legible and in contrast with the background (measured contrast ≥ 0.3, else `unverifiable` when not measured) | major |
+| P2 | Rule 9(1)(a) **verify** | Legible and in contrast with the background. Measured as CIE Lab distance between the print and the paper beside it, over 100; the floor is `params.min_contrast` in the YAML (0.5), which is ours and not the law's. Needs a scale reference in the frame for the same reason F1 does — without one the number is the lighting, not the print — else `unverifiable` | major |
 | P3 | Rule 9(1)(b) **verify** | Not on the bottom, crimp or seam. Only the inspector can say; unasked → `unverifiable` | major |
 | P4 | Rule 9(3) **verify** | Declarations in English or Hindi (Devanagari) | major |
 
