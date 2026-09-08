@@ -457,16 +457,25 @@ OCR read** — verified on the hosted project, see the evidence column.
 | 1 | Product match on scan completion | done | [product.py](worker/pipeline/product.py), [test_product.py](worker/tests/test_product.py) (12 checks) + 5 wiring checks in [test_run_scan.py](worker/tests/test_run_scan.py). Live: scans `5e0811b8` and `3f5b8e1e` both file under `reynolds pens\|` |
 | 2 | Search page + per-product history | done | `scan_search` view in `0003_product_match_and_search.sql`; [/scans](frontend/app/scans/page.tsx), [/products/[id]](frontend/app/products/[id]/page.tsx). `?q=reynolds` returns both scans; the product page shows 2 scans, average 87 |
 | 3 | Evidence photos + notes on a scan | todo | the `evidence` table and its RLS exist since P1; nothing writes to it |
+| 4 | A listing's own "Manufacturer" label (really P2's) | done | [regex_layout.py](worker/pipeline/extractors/regex_layout.py), 3 new checks in [test_extract.py](worker/tests/test_extract.py); `eval/results/2026-09-08_p6-*.json` |
 
 ### What "Parle" actually returns
 
-The one honest gap, and it is not in P6. A real amazon.in Parle-G 800 g listing
-(`eval/dataset/ecom_amazon_parle_g_800g`) was pushed through the hosted worker as scan
-`cddac6b6`: it finished `done` with a score of 75 and **no product**. The listing prints
-`Manufacturer : Parle Biscuits Pvt Ltd`, and a bare "Manufacturer" was not in `ANCHORS` —
-"manufactured by" and "marketed by" were, "importer" was, that one was not. So the maker was
-never extracted and there was nothing to match on. The scan is still found by "parle" through
-its note and its place, which is the search working and the extractor not.
+A real amazon.in Parle-G 800 g listing (`eval/dataset/ecom_amazon_parle_g_800g`) was pushed
+through the hosted worker as scan `cddac6b6`. It finished `done`, score 75, filed under the
+product **Parle Biscuits Pvt Ltd**, and `/scans?q=Parle` returns it — through the product, not
+through the note it was uploaded with.
+
+Getting there took a fourth item that is really P2's. The listing prints
+`Manufacturer : Parle Biscuits Pvt Ltd` and a bare "Manufacturer" was not an anchor, so nothing
+was ever extracted to match on. That anchor had been tried once before and reverted
+(`p2-real-listing-labels`: flat, three more false positives), and `p6-manufacturer-anchor`
+reproduced that verdict exactly — the anchor alone is worth nothing. It pays with two rules
+beside it: a screenshot's next line is the next row of the specification table and not the rest
+of an address (it was finding the maker all along and swallowing `ASIN …` behind it), and a bare
+noun is a label only where a label stands, at the start of the box (`From the manufacturer` and
+`Is Discontinued By Manufacturer : No` both print above the real row). 62.2% → 62.5%, real
+29.8% → 30.5%, violations untouched. Full accounting in `docs/EVAL.md`.
 
 ### The matcher's known ceiling
 
@@ -483,6 +492,25 @@ P8's first item is already done — it landed in P3.
 ---
 
 ## Log
+
+- **2026-09-08** — **P6: the anchor that was rejected once, and why it works now.** "Search Parle
+  returns its scans" needed a Parle scan with a maker on it, and no e-commerce listing had one:
+  they label the field `Manufacturer :`, and the bare noun was not an anchor. It had been tried in
+  P2 and reverted for being flat with three extra false positives, and retrying it reproduced that
+  almost to the number — flat, four extra. The result files did their job: they said *the anchor is
+  not the missing piece*. What was missing sat either side of it. A screenshot's next line is the
+  next row of the specification table, so the extractor had been finding
+  `Manufacturer : Parle Biscuits Pvt Ltd` all along and then swallowing `ASIN B0754HP7X2` behind
+  it — turning off the address wrap for `source = ecommerce` took the real half 29.8% → 30.5%. And
+  a bare noun is a label only where a label stands, at the start of the box: `From the
+  manufacturer` is an Amazon heading, `Is Discontinued By Manufacturer : No` is a different row,
+  and both print above the real one. That last run moved no number at all and is kept anyway,
+  because it changed the Tata Salt answer from "Is Discontinued By Manufacturer : No" to a
+  company. Manufacturer precision fell 0.478 → 0.44 while recall rose 0.379 → 0.414 — three
+  listings moved from finding nothing to finding the company but not the exact gold string, which
+  is a trade worth making here, because `company_key` reads the first two words after the label
+  and files the scan correctly on a near miss. Violations untouched on all three runs. Scan
+  `cddac6b6` now sits under **Parle Biscuits Pvt Ltd** on the hosted project.
 
 - **2026-09-08** — **P6: a scan is filed under a pack, and the repository is searchable.** The
   identity is `products.match_key`, two words of the maker and four of the generic name, and it

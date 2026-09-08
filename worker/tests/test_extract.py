@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pipeline.extractors.regex_layout import RegexLayoutExtractor
-from pipeline.models import Declaration, ScanContext, Word
+from pipeline.models import Declaration, ScanContext, Source, Word
 
 EXTRACT = RegexLayoutExtractor()
 
@@ -268,3 +268,36 @@ def test_the_next_row_of_a_table_is_not_part_of_the_label_cell() -> None:
         ]
     )
     assert got["mrp"] == "MRP 25.00"
+
+
+# ------------------------------------------------- P6: a listing labels it "Manufacturer"
+
+
+def test_a_bare_manufacturer_label_is_the_maker() -> None:
+    """Every e-commerce listing writes it this way, and so do packs that set their declarations
+    in a table. "manufactured by" and "importer" were anchors; this one was the oversight."""
+    assert fields([line("Manufacturer : Parle Biscuits Pvt Ltd", 160, wid=1)]) == {
+        "manufacturer": "Manufacturer : Parle Biscuits Pvt Ltd"
+    }
+
+
+def test_the_word_manufacturer_inside_a_line_is_not_a_label() -> None:
+    """Both of these stand above the real row on the amazon.in Tata Salt listing, and first box
+    in reading order wins, so either one shadowed the declaration itself."""
+    words = [
+        line("From the manufacturer", 60, wid=0),
+        line("Is Discontinued By Manufacturer : No", 120, wid=1),
+        line("Manufacturer : Tata Chemicals Limited", 180, wid=2),
+    ]
+    assert fields(words) == {"manufacturer": "Manufacturer : Tata Chemicals Limited"}
+
+
+def test_a_screenshot_does_not_wrap_an_address_into_the_next_row() -> None:
+    """On a pack the line under an address is the rest of it. On a listing it is the next row of
+    the specification table, and swallowing it lost both declarations."""
+    words = [
+        line("Manufacturer : Parle Biscuits Pvt Ltd", 160, wid=0),
+        line("ASIN B0754HP7X2", 200, wid=1),
+    ]
+    decls = EXTRACT.extract(words, ScanContext(source=Source.ecommerce))
+    assert [d.value for d in decls] == ["Manufacturer : Parle Biscuits Pvt Ltd"]

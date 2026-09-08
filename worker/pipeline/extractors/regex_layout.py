@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 
-from ..models import Declaration, ScanContext, Word
+from ..models import Declaration, ScanContext, Source, Word
 
 # Keyword anchors -> canonical field. Value = nearest OCR box to the right of or below the anchor.
 # Wordings taken off the packs in eval/dataset, not invented: Indian labels shorten
@@ -55,6 +55,12 @@ ANCHORS: dict[str, list[str]] = {
         # anchor covers the family, and it has to beat the bare "manufactured" that anchors
         # the date, which it does by being longer.
         "manufactured, marketed",
+        # The noun on its own. Every e-commerce listing labels the field this way
+        # ("Manufacturer : Parle Biscuits Pvt Ltd") and so do packs that set their declarations
+        # in a table. "importer" was already here on its own; this one was the oversight.
+        # It cannot steal the date: "Manufacture" in "Month & Year of Manufacture" is a
+        # different word, and a longer anchor still wins the box it is in.
+        "manufacturer",
     ],
     "consumer_care": [
         "customer care",
@@ -117,6 +123,12 @@ def norm(s: str) -> str:
     return " ".join(re.sub(r"\W+", " ", s, flags=re.UNICODE).casefold().split())
 
 
+# Anchors that are a bare noun rather than a phrase, and so only count where a *label* would
+# stand: at the start of the box. "Manufacturer : Parle Biscuits Pvt Ltd" is a declaration; on the
+# same listing "Is Discontinued By Manufacturer : No" and the heading "From the manufacturer" are
+# not, and both stand before it in reading order, where first box wins.
+AT_START = {"manufacturer"}
+
 # Longest anchor first: 'mfd by' has to beat 'mfd' on "Mfd by: Brite Foods Pvt Ltd".
 ANCHOR_LIST: list[tuple[str, str]] = sorted(
     ((field, norm(a)) for field, anchors in ANCHORS.items() for a in anchors),
@@ -131,7 +143,8 @@ def claim(text: str) -> tuple[str, bool] | None:
         # `(?![a-z])`, not `\b`: PP-OCR drops the space before a value, so the anchor comes back
         # glued to it ("UNIT SALE PRICE0.20PER g"). A following *letter* is still another word,
         # so "exp" does not claim "export".
-        match = re.search(rf"\b{re.escape(anchor)}(?![a-z])", normalized)
+        start = "^" if anchor in AT_START else r"\b"
+        match = re.search(rf"{start}{re.escape(anchor)}(?![a-z])", normalized)
         if match:
             return field, match.end() >= len(normalized)
     return None
@@ -285,16 +298,20 @@ class RegexLayoutExtractor:
 
     def extract(self, words: list[Word], ctx: ScanContext) -> list[Declaration]:
         found: dict[str, Declaration] = {}
+        # A printed address wraps onto the next line. A listing's next line is the next row of
+        # the specification table — "ASIN", "Item part number" — so on a screenshot the line
+        # below a declaration is another declaration, never the rest of this one.
+        wrap = ctx.source is not Source.ecommerce
         # Two passes over the panel. The first takes only values that sit squarely beside or
         # under their anchor; the second lets what is left reach into a table cell. A pack that
         # prints "Mfg." twice would otherwise have the first one claim a loosely aligned box and
         # shut out the second, which had the date printed right beside it.
         for table in (False, True):
-            found.update(self._pass(words, found, table=table))
+            found.update(self._pass(words, found, table=table, wrap=wrap))
         return list(found.values())
 
     def _pass(
-        self, words: list[Word], found: dict[str, Declaration], table: bool
+        self, words: list[Word], found: dict[str, Declaration], table: bool, wrap: bool
     ) -> dict[str, Declaration]:
         found = dict(found)
         for word in sorted(words, key=lambda w: (w.image_id, w.y, w.x)):
@@ -316,7 +333,7 @@ class RegexLayoutExtractor:
                 block.append(value_box)
             elif needs_number:
                 continue  # nothing on this panel carries the figure
-            if field in WRAPS:
+            if wrap and field in WRAPS:
                 block += continuations(block, words)
             value = join_lines(block)
             ids = [w.id for w in block]

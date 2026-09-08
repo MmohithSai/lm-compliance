@@ -115,11 +115,16 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
       `scan_search` view carrying every searchable word, `/scans?q=`, and `/products/<id>`
 - [ ] evidence photos + notes on a scan
 - Done when: search "Parle" returns its scans and history.
-  **True for a pack whose maker the OCR read.** Verified on the hosted project: the two Reynolds
-  pen scans (`5e0811b8`, `3f5b8e1e`), read with different OCR noise, file under one product and
-  `/products/<id>` shows both with an average score. A real amazon.in Parle-G listing pushed
-  through the worker (`cddac6b6`) came back **unmatched**, and the cause is not the matcher: the
-  listing labels the field "Manufacturer :", which was not an anchor — see the next item.
+  **True.** Verified on the hosted project: a real amazon.in Parle-G 800 g listing pushed through
+  the worker (`cddac6b6`) files under the product **Parle Biscuits Pvt Ltd**, and `?q=Parle`
+  returns it. The two Reynolds pen scans (`5e0811b8`, `3f5b8e1e`), read with different OCR noise,
+  file under one product and `/products/<id>` shows both with an average score.
+- [x] the listings' own label. "Manufacturer :" was not an anchor — "manufactured by" was,
+      "importer" was, the bare noun was not — so no e-commerce listing had a maker to match on.
+      Three measured runs, `docs/EVAL.md`: the anchor alone is flat (and was already rejected once
+      in P2), and it pays only with two rules beside it — a screenshot's next line is the next row
+      of the table, and a bare noun is a label only at the start of a box. 62.2% → 62.5%
+      (real 29.8% → 30.5%), violations untouched.
 
 ## P7 — dashboard + roles + audit
 - [ ] dashboard: scans this week, compliance rate, top 5 violations, by category, recent scans

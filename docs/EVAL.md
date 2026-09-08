@@ -226,6 +226,34 @@ P4 and P5 ran on a 56-case set (the two marker cases joined it), so they are a t
 |---|---|---|
 | `p4-marker-cases` | the two rendered marker cases join the set; nothing in the code changed | 62.2% (real 29.8%) |
 | `p5-reports` | `run_rules` reworked to go through the new `applicable_rules`, which the report needs to list what passed | **62.2% (real 29.8%) — identical on every key** |
+| `p6-manufacturer-anchor` | a bare `manufacturer` anchor, for the listings that label it that way | flat 62.2%, 4 more false positives — **on its own, no** |
+| `p6-ecom-no-address-wrap` | …and a screenshot's next line is the next row of the table, never the rest of an address | 62.5% (real 30.5%), manufacturer recall 0.38 → 0.41 |
+| `p6-bare-noun-anchor-must-start-the-box` | …and a bare noun is only a label where a label stands: at the start of the box | 62.5% (real 30.5%) — **no number moved, the answers did** |
+
+### P6: the same change, rejected in P2 and kept here
+
+`p2-real-listing-labels` above is this same `manufacturer` anchor, tried in P2 and reverted for
+being flat with three more false positives. `p6-manufacturer-anchor` retried it and reproduced
+that result almost exactly — flat, four more false positives — so the P2 verdict was right about
+the anchor **on its own**. What it was missing is the two things that make the anchor usable, and
+neither is about wording:
+
+1. On a listing the line under a declaration is the next row of the specification table, not the
+   rest of an address. The anchor was finding `Manufacturer : Parle Biscuits Pvt Ltd` all along
+   and then swallowing `ASIN B0754HP7X2` and `Item part number : 8901719102820` behind it.
+2. `Manufacturer` is a noun, not a phrase, and a noun is only a label where a label stands — at
+   the start of the box. Amazon prints `From the manufacturer` as a heading and
+   `Is Discontinued By Manufacturer : No` as a row, both *above* the real one, and first box in
+   reading order wins. The last run moved no number and changed the Tata Salt answer from
+   "Is Discontinued By Manufacturer : No" to "Manufacturer : Tata Sampann"; it is kept for that,
+   not for the score.
+
+The three runs together buy 0.3 points overall and 0.7 on the real half, and they cost manufacturer
+precision (0.478 → 0.44) while raising its recall (0.379 → 0.414): three listings moved from
+"found nothing" to "found the company, not the exact gold string". Violations are untouched —
+precision 0.74, recall 0.97, exact-set 46.4% on all three runs. The reason to keep a trade like
+that is P6: `company_key` reads the first two words after the label, so a near-miss string still
+files the scan under the right maker, and all four listings with a manufacturer now have one.
 
 `p5-reports` is the only run in this file that was expected to change nothing, and that is what
 it is for. The report has to say which checks *passed*, and a rule that raised nothing is
