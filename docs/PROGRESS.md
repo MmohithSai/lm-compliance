@@ -23,7 +23,7 @@ Last updated: 2026-09-08.
 | P4 scale + font / contrast / grouping | **done**, half of it measured | 5 real photos with a card still need a person (same blocker as P0 item 10) |
 | P5 reports | **done** | — |
 | P6 repository + search + history | **done** | — |
-| P7 dashboard + roles + audit | todo | — |
+| P7 dashboard + roles + audit | **done** | — |
 | P8 e-commerce mode | todo | — |
 | P9 deploy + docs | todo | — |
 
@@ -527,7 +527,129 @@ that disagree about more than punctuation, the legal form or the label will make
 rather than one wrong one. Duplicates are visible in the repository and mergeable; a wrong merge
 is not. Fuzzy matching is the upgrade if it ever becomes a nuisance.
 
-## P7–P9
+## P7 — dashboard + roles + audit
+
+**Done when:** viewer cannot upload; admin sees everything. **True**, and proved against the
+hosted project rather than inferred from the UI code.
+
+| # | Item | Status | Where / evidence |
+|---|---|---|---|
+| 1 | Dashboard: scans this week, compliance rate, top 5 violations, by category, recent scans | done | [dashboard/page.tsx](frontend/app/dashboard/page.tsx) over `dashboard_summary`, `top_violations`, `scans_by_category`, `dashboard_recent_scans` in `0005`; week maths in [dashboard.ts](frontend/lib/dashboard.ts) with 10 checks in [dashboard.test.ts](frontend/lib/dashboard.test.ts) |
+| 2 | Roles enforced in UI, verified against RLS | done | [roles.ts](frontend/lib/roles.ts) + 6 checks in [roles.test.ts](frontend/lib/roles.test.ts), [upload/layout.tsx](frontend/app/upload/layout.tsx), [nav.tsx](frontend/components/nav.tsx). Hosted proof: [check_rls.py](supabase/check_rls.py), 53 checks, `make check-rls` |
+| 3 | Audit triggers on scans / products / evidence | done | `public.audit()` and three triggers in `0005_dashboard_roles_audit.sql`; 11 hosted checks inside `check_rls.py` |
+| 4 | Rule catalogue for the dashboard's rule names | done | `public.rules` in `0005`, `sync_rules` in [main.py](worker/main.py), 3 checks in [test_sync_rules.py](worker/tests/test_sync_rules.py). 23 rules synced to the hosted project |
+| 5 | `security definer` functions taken off the public API | done | `0006_lock_down_definer_functions.sql`, found by Supabase's security advisor |
+
+### The dashboard, and where each number comes from
+
+Nothing on the page is computed from a photograph. Six queries, five of them aggregated by
+Postgres, all against `security_invoker` views so the caller's RLS decides which scans are in the
+totals:
+
+| Card | Source | Definition |
+|---|---|---|
+| Scans this week | `scans` count, `created_at >= weekStart(now)` | Monday 00:00 Asia/Kolkata |
+| Compliance rate | `dashboard_summary` | `status = 'done' and compliance_score = 100`, over `status = 'done'` |
+| Average score | `dashboard_summary` | `avg(compliance_score)` over finished scans |
+| Violations found | `dashboard_summary` | counts by severity; `info` is excluded everywhere, so notes and `unverifiable` checks never appear |
+| Most common violations | `top_violations` | grouped by rule, left-joined to `public.rules` for the title |
+| By category | `scans_by_category` | `group by products.category`, **null left as null** |
+| Recent scans | `dashboard_recent_scans` | one row per scan with its violation counts already added up |
+| Recent activity | `audit_log` | admin only, and the RLS policy says so too |
+
+Read back from the hosted project on 2026-09-08 and checked against the tables by hand: 4 scans,
+scores 75 / 87 / 25 / 87 → average **68.5**; none scored 100, so the compliance rate is **0%** and
+not a blank; 4 scans since Monday; 8 violations that cost points (4 critical, 2 major, 2 minor);
+D2 and D8 twice each, D1, D3 and D5 once. Every product in the project has `category = null`, so
+the category panel shows one row reading *Category not recorded*, in italics, and no bucket is
+invented for it.
+
+**A failed scan is not a compliant scan.** `score([])` is 100 by construction, so this is the one
+sum that must not be got wrong. Proved on the hosted project rather than argued: two rows are
+inserted — one `done` with 100, one `failed` — and the deltas on `dashboard_summary` are
+`+1 failed, +1 done, +1 compliant, +2 total`. Both rows are then deleted and every total returns
+to what it was.
+
+### Roles: what was checked, and against what
+
+The nav hides Upload from a viewer, `app/upload/layout.tsx` redirects one who types the URL, and
+neither is the security boundary. `supabase/check_rls.py` signs in as all three demo users with
+the anon key and goes straight at PostgREST and Storage — **53 checks, all passing**:
+
+| As | Checks | Result |
+|---|---|---|
+| inspector | insert a scan, upload to the bucket, add evidence, edit the note on their own scan | all allowed — P1 and P6 intact |
+| inspector | edit somebody else's scan, delete any scan, read the audit log | all refused |
+| viewer | insert a scan; insert a scan as somebody else; upload to the bucket; attach an image; add evidence; edit a note; change a compliance score; delete a scan; insert a product; rename a product; promote themselves to admin; edit somebody else's evidence; delete somebody else's evidence | **13 writes, 13 refused** — `new row violates row-level security policy` on the inserts, `0 rows affected` on the updates and deletes |
+| viewer | read scans, read the dashboard | allowed — a viewer is still for something |
+| viewer | the scan and its evidence afterwards | byte-identical; no audit entry anywhere has the viewer as actor |
+| viewer / inspector | read `audit_log` | 0 rows, both |
+| admin | all four dashboard views, every profile, the audit log, at least what a viewer sees | all allowed |
+
+In the browser, as all three demo users, at 375 px and 1280 px: the viewer's nav has no Upload
+link and `/upload` lands on `/scans`; the inspector's nav has it and the form renders; the admin
+sees a *Recent activity* panel that neither other role is shown. On the scan page the viewer gets
+the note as plain text with no Save button and no Add-evidence button, which is P6's behaviour
+unchanged.
+
+### Audit: written by the database, and proved by a write that skips the app
+
+One `public.audit()` trigger function, three triggers. `security definer` so it can write a table
+that has no insert policy — nobody may forge their own audit row. Verified on the hosted project:
+
+| Check | Result |
+|---|---|
+| scan INSERT | recorded, whole new row stored, actor is the inspector's user id |
+| scan UPDATE | recorded as `{"notes": null} → {"notes": "inspector note"}` — the changed key only, both sides |
+| scan DELETE | recorded, whole old row stored, actor is the admin who deleted it |
+| evidence INSERT and the cascaded DELETE | both recorded |
+| product INSERT / UPDATE / DELETE **with the service-role key** | all three recorded, `actor_id` null |
+| timestamp | populated on every entry |
+| `audit_log` auditing itself | 0 rows, ever |
+| anything the viewer attempted | 0 rows |
+
+The product row is the important one: it is written with the service-role key, which never touches
+a browser and bypasses RLS, and the trigger fires anyway. The audit does not depend on the
+frontend, and a null actor is the honest record of a write by the worker.
+
+### Two bugs the tests did not catch
+
+**The check script edited a real inspection note.** Its "an inspector cannot edit somebody else's
+scan" case picked the oldest scan in the project to fail against, and that scan belonged to the
+inspector, so the update succeeded and overwrote scan `5e0811b8`'s note with "not mine". Nothing
+failed loudly; one assertion further down went red for a reason that looked unrelated. `audit_log`
+had the old value and the note was restored from it. The script now creates every row it touches
+— including a second scan owned by the admin — and deletes them at the end.
+
+**The new trigger function was on the public API.** Supabase's security advisor flagged
+`public.audit()` as callable at `/rest/v1/rpc/audit` by anyone with the anon key, because a
+`security definer` function in the `public` schema is exposed by default. Calling it raises rather
+than writing anything, but `0006` revokes it, and `auth_role()` and `handle_new_user()` with it.
+`auth_role()` needed care: every RLS policy calls it and a policy runs as the signed-in user, so
+the blanket PUBLIC grant comes off and an explicit grant goes back to `authenticated`. Re-checked
+afterwards — 53 RLS checks, a fresh auth user still getting a profile, `claim_scan` still
+returning.
+
+### Known and accepted
+
+- **Every product has `category = null`.** Nothing on an Indian pack declares a category and the
+  worker does not guess one, so the category panel has exactly one row. That row says *Category
+  not recorded* and the number beside it is real. A category would have to come from the inspector
+  or from a catalogue; neither is in this phase.
+- **`auth_role()` is still callable by `authenticated`, on purpose.** It is the last remaining
+  advisor warning of its class. It returns the caller's own role and every RLS policy depends on
+  it, so it cannot be revoked from the role that needs it.
+- **Leaked-password protection is off** on the hosted project. That is a switch in the Supabase
+  Auth dashboard, not code, and it is the account owner's to flip.
+- **Pre-existing performance findings were read and left alone.** Five unindexed foreign keys from
+  `0001` and `auth.<fn>()` re-evaluated per row in seven P1 policies. Both matter at scale, neither
+  matters at four scans, and rewriting seven RLS policies inside the phase whose job is to prove
+  those policies work is the wrong trade. `dashboard_recent_scans` plans as a hash join in 0.65 ms.
+- **`audit_log` carries the check runs.** 62 entries, mostly rows the script created and removed.
+  An audit log that gets tidied is not one, and the entries are exactly what the admin panel is
+  there to show.
+
+## P8–P9
 
 Not started. See `docs/PLAN.md` for the item list and the "done when" line of each phase.
 P8's first item is already done — it landed in P3.
@@ -535,6 +657,36 @@ P8's first item is already done — it landed in P3.
 ---
 
 ## Log
+
+- **2026-09-08** — **P7 finished: dashboard, roles, audit.** Built on what was already there: the
+  `audit_log` table, the three roles and the RLS policies all date from `0001`, and `0005` adds the
+  values, the triggers and the views rather than a second permission system beside them.
+  The dashboard reads back and never recomputes. Compliant means `compliance_score = 100` — the
+  score the worker stored and the PDF prints — replacing P1's view, which said "no critical or
+  major violation" and so disagreed with both. A failed scan is in neither half of the fraction,
+  which matters because `score([])` is 100 by construction; proved on the hosted project by
+  inserting one `done`/100 and one `failed` row and reading the deltas.
+  "This week" is Monday 00:00 Asia/Kolkata, in one tested function rather than a `date_trunc` in a
+  view: the reports print UTC because a report timestamps an event, but a week cut at 00:00 UTC
+  throws an Indian inspector's Monday dawn into last week. Six boundary tests.
+  Rule names on the dashboard come from `rules/pc_rules_2011.yaml` through `public.rules`, which
+  the worker mirrors at start up. A migration full of titles would have been the second copy of the
+  law in this repo and a TSX map the third.
+  Roles: the nav hides Upload, a server layout redirects a viewer who types `/upload`, and neither
+  is the boundary. `supabase/check_rls.py` signs in as all three demo users with the anon key and
+  attacks PostgREST and Storage directly — 53 checks, 13 of them writes a viewer must be refused,
+  all refused, with the scan and its evidence byte-identical afterwards. `make check-rls`.
+  Audit is three triggers on the tables, so a write with the service-role key — no browser, no RLS
+  — is recorded exactly like one from the app, with a null actor. An UPDATE stores only the keys
+  that changed, both sides. Nothing audits `audit_log`.
+  Two things the green suite could not have found. The first check script picked a real scan to
+  attack and overwrote an inspection note; `audit_log` held the old value to restore from, before
+  the phase that added it was even finished. And Supabase's security advisor found that the new
+  `security definer` trigger function was callable at `/rest/v1/rpc/audit` by anyone with the anon
+  key — `0006` revokes it and the two of its class that predate P7, taking care over `auth_role()`,
+  which every RLS policy calls and which therefore needs an explicit grant back to `authenticated`.
+  `make test` 524 + 29 passed · `make lint` clean · `make check-rls` 53/53 · `tsc --noEmit`,
+  `pnpm lint`, `pnpm build` clean · browser checked as all three roles at 375, 768 and 1280 px.
 
 - **2026-09-08** — **P6 finished: evidence photographs and the inspector's note.** Both were built
   out of what P1 already put there. The `evidence` table, its RLS and the private bucket needed no

@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-slate-50 text-slate-900 antialiased">
         <Providers>
           <Nav />
-          <main className="mx-auto max-w-4xl p-4">{children}</main>
+          <main className="mx-auto max-w-5xl p-4">{children}</main>
         </Providers>
       </body>
     </html>

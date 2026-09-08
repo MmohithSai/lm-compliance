@@ -46,9 +46,16 @@ Dashboard — Next.js server components read the views directly under the caller
 
 ## Schema (see `supabase/migrations/0001_init.sql`)
 
-profiles(role) · products · scans · scan_images · ocr_words · declarations · violations · reports · evidence · audit_log · model_calls.
-Views: `dashboard_summary`, `top_violations` (30 days), `violations_by_category`. All `security_invoker`.
-Function `claim_scan()` (service role only). Trigger: new auth user → profile with role `viewer`.
+profiles(role) · products · scans · scan_images · ocr_words · declarations · violations · reports · evidence · audit_log · rules · model_calls.
+Views: `scan_search` (P6) and, for the dashboard, `dashboard_summary`, `top_violations`,
+`scans_by_category`, `dashboard_recent_scans`. All `security_invoker`, so a caller sees totals
+over exactly the scans their RLS lets them read.
+`rules` is a mirror of `rules/pc_rules_2011.yaml`, refreshed by the worker at start up
+(`sync_rules`), so the dashboard can name a rule without a second copy of the law in the repo.
+Functions: `claim_scan()` (service role only), `auth_role()` (authenticated only, called by every
+policy), `audit()` (trigger only). Triggers: new auth user → profile with role `viewer`; insert,
+update and delete on `scans`, `products` and `evidence` → `audit_log`, actor `auth.uid()`, null
+for the service role. No trigger on `audit_log` itself.
 
 ## RLS summary
 

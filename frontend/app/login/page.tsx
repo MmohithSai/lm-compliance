@@ -22,7 +22,7 @@ export default function LoginPage() {
     try {
       const { error } = await createClient().auth.signInWithPassword({ email, password });
       if (error) return setError(error.message);
-      router.push("/upload");
+      router.push("/dashboard");
       router.refresh();
     } catch (err) {
       // a misconfigured env throws here; without this the button just sits on "Signing in…"

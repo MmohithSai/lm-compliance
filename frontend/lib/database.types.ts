@@ -45,6 +45,8 @@ export type Database = {
           actor_id: string | null
           at: string
           id: number
+          new_row: Json | null
+          old_row: Json | null
           row_id: string | null
           table_name: string
         }
@@ -53,6 +55,8 @@ export type Database = {
           actor_id?: string | null
           at?: string
           id?: never
+          new_row?: Json | null
+          old_row?: Json | null
           row_id?: string | null
           table_name: string
         }
@@ -61,6 +65,8 @@ export type Database = {
           actor_id?: string | null
           at?: string
           id?: never
+          new_row?: Json | null
+          old_row?: Json | null
           row_id?: string | null
           table_name?: string
         }
@@ -115,6 +121,13 @@ export type Database = {
             foreignKeyName: "declarations_scan_id_fkey"
             columns: ["scan_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_recent_scans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "declarations_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
             referencedRelation: "scan_search"
             referencedColumns: ["id"]
           },
@@ -158,6 +171,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_recent_scans"
             referencedColumns: ["id"]
           },
           {
@@ -215,6 +235,13 @@ export type Database = {
             foreignKeyName: "model_calls_scan_id_fkey"
             columns: ["scan_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_recent_scans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "model_calls_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
             referencedRelation: "scan_search"
             referencedColumns: ["id"]
           },
@@ -267,6 +294,13 @@ export type Database = {
             columns: ["image_id"]
             isOneToOne: false
             referencedRelation: "scan_images"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_words_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_recent_scans"
             referencedColumns: ["id"]
           },
           {
@@ -380,6 +414,13 @@ export type Database = {
             foreignKeyName: "reports_scan_id_fkey"
             columns: ["scan_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_recent_scans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
             referencedRelation: "scan_search"
             referencedColumns: ["id"]
           },
@@ -391,6 +432,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rules: {
+        Row: {
+          rule_id: string
+          rule_ref: string
+          severity: string
+          synced_at: string
+          title: string
+        }
+        Insert: {
+          rule_id: string
+          rule_ref: string
+          severity: string
+          synced_at?: string
+          title: string
+        }
+        Update: {
+          rule_id?: string
+          rule_ref?: string
+          severity?: string
+          synced_at?: string
+          title?: string
+        }
+        Relationships: []
       }
       scan_images: {
         Row: {
@@ -421,6 +486,13 @@ export type Database = {
           width?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "scan_images_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_recent_scans"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "scan_images_scan_id_fkey"
             columns: ["scan_id"]
@@ -501,6 +573,13 @@ export type Database = {
             foreignKeyName: "scans_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_recent_scans"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "scans_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
@@ -542,6 +621,13 @@ export type Database = {
             foreignKeyName: "violations_scan_id_fkey"
             columns: ["scan_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_recent_scans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "violations_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
             referencedRelation: "scan_search"
             referencedColumns: ["id"]
           },
@@ -556,13 +642,36 @@ export type Database = {
       }
     }
     Views: {
+      dashboard_recent_scans: {
+        Row: {
+          category: string | null
+          compliance_score: number | null
+          created_at: string | null
+          critical: number | null
+          id: string | null
+          inspector_name: string | null
+          location: string | null
+          major: number | null
+          minor: number | null
+          product_id: string | null
+          product_manufacturer: string | null
+          product_name: string | null
+          source: string | null
+          status: string | null
+        }
+        Relationships: []
+      }
       dashboard_summary: {
         Row: {
           avg_score: number | null
           scans_compliant: number | null
           scans_done: number | null
           scans_failed: number | null
-          scans_this_week: number | null
+          scans_pending: number | null
+          scans_total: number | null
+          violations_critical: number | null
+          violations_major: number | null
+          violations_minor: number | null
         }
         Relationships: []
       }
@@ -595,25 +704,36 @@ export type Database = {
             foreignKeyName: "scans_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_recent_scans"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "scans_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
+      }
+      scans_by_category: {
+        Row: {
+          avg_score: number | null
+          category: string | null
+          compliant: number | null
+          scans: number | null
+          scored: number | null
+        }
+        Relationships: []
       }
       top_violations: {
         Row: {
           count: number | null
           rule_id: string | null
           rule_ref: string | null
+          scans: number | null
           severity: string | null
-        }
-        Relationships: []
-      }
-      violations_by_category: {
-        Row: {
-          category: string | null
-          count: number | null
-          severity: string | null
+          title: string | null
         }
         Relationships: []
       }

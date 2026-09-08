@@ -25,6 +25,21 @@ need nothing; the Docker image installs the libraries with `apt`.
 
 Demo users: `cd worker && uv run --env-file ../.env python ../supabase/seed_users.py` (admin / inspector / viewer, see the script for passwords).
 
+## Checking the roles against the real database
+
+`make test` proves what the app *draws* for each role. It cannot prove what Postgres *allows*, and
+the UI is not the security boundary. This does:
+
+```bash
+make check-rls
+```
+
+`supabase/check_rls.py` signs in as all three demo users with the anon key and goes straight at
+PostgREST and Storage — 53 checks, including every write a viewer must be refused and every audit
+entry the triggers must write. It creates the rows it touches and deletes them at the end, so it
+is safe to run against the project you are demoing. Exit code 1 if anything passes that should
+not. Needs `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` in `.env`.
+
 ## Supabase MCP (optional, for Claude Code)
 
 `.mcp.json` adds the Supabase MCP server **read-only**, so Claude can inspect the schema, run

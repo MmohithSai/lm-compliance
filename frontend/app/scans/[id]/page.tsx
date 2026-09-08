@@ -7,8 +7,9 @@ import { ScanNotes } from "@/components/scan-notes";
 import { ScanRealtime } from "@/components/scan-realtime";
 import { ScanReports, type ReportFile } from "@/components/scan-reports";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { Role, ScanStatus, Severity } from "@/lib/db";
+import type { ScanStatus, Severity } from "@/lib/db";
 import { canAddEvidence, canEditNotes } from "@/lib/evidence";
+import { currentRole } from "@/lib/roles";
 import { createClient } from "@/lib/supabase/server";
 
 const WAITING: Record<string, string> = {
@@ -53,13 +54,7 @@ export default async function ScanPage({ params }: { params: Promise<{ id: strin
 
   // Who is looking, and therefore what they may change. Both checks mirror the RLS policies;
   // Postgres is what actually refuses a viewer, this only decides what to draw.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const role = user
-    ? (((await supabase.from("profiles").select("role").eq("id", user.id).single()).data?.role ??
-        null) as Role | null)
-    : null;
+  const { user, role } = await currentRole(supabase);
 
   // One signed URL per report file. `download` puts a sensible filename on the saved file
   // instead of the bucket path, and the URL is only issued to a session that could read the

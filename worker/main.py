@@ -15,6 +15,7 @@ from supabase import Client, create_client
 
 from pipeline import run_scan
 from pipeline.models import ScanRow
+from pipeline.rules_engine import load_rules
 
 log = logging.getLogger("worker")
 POLL_SECONDS = float(os.environ.get("WORKER_POLL_SECONDS", "3"))
@@ -23,6 +24,29 @@ POLL_SECONDS = float(os.environ.get("WORKER_POLL_SECONDS", "3"))
 def connect() -> Client:
     url = os.environ.get("SUPABASE_URL") or os.environ["NEXT_PUBLIC_SUPABASE_URL"]
     return create_client(url, os.environ["SUPABASE_SERVICE_ROLE_KEY"])
+
+
+def sync_rules(sb: Client) -> int:
+    """Mirror rules/pc_rules_2011.yaml into public.rules, so the dashboard can print a rule's
+    name beside its code without a second copy of the law living in the frontend.
+
+    The YAML is the law; this table is a projection of it, refreshed every time the worker
+    starts. Upsert on the primary key, so editing a title in the YAML changes it here and a
+    rule that was never added is added. Rules deleted from the YAML are left behind on purpose:
+    violations already recorded under them still need their name.
+    """
+    rows = [
+        {
+            "rule_id": r.rule_id,
+            "rule_ref": r.rule_ref,
+            "title": r.title,
+            "severity": r.severity.value,
+            "synced_at": datetime.now(UTC).isoformat(),
+        }
+        for r in load_rules()
+    ]
+    sb.table("rules").upsert(rows).execute()
+    return len(rows)
 
 
 def claim(sb: Client) -> ScanRow | None:
@@ -59,6 +83,7 @@ def process_one(sb: Client) -> bool:
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     sb = connect()
+    log.info("synced %d rules", sync_rules(sb))
     log.info("worker up, polling every %ss", POLL_SECONDS)
     while True:
         if not process_one(sb):

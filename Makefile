@@ -1,5 +1,5 @@
 LABEL ?= dev
-.PHONY: dev worker test eval lint db-push db-types seed
+.PHONY: dev worker test eval lint db-push db-types seed check-rls
 
 dev:
 	cd frontend && pnpm dev
@@ -15,7 +15,7 @@ eval:
 	cd worker && uv run --extra ocr python ../eval/run_eval.py --label $(LABEL)
 
 lint:
-	cd worker && uv run ruff check . ../eval && uv run ruff format --check . ../eval && uv run mypy .
+	cd worker && uv run ruff check . ../eval ../supabase && uv run ruff format --check . ../eval ../supabase && uv run mypy .
 	cd frontend && pnpm lint
 
 db-push:
@@ -26,3 +26,6 @@ db-types:
 
 seed:
 	cd worker && uv run --env-file ../.env python ../supabase/seed_users.py
+
+check-rls:
+	cd worker && uv run --env-file ../.env python ../supabase/check_rls.py

@@ -132,10 +132,31 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
       (real 29.8% → 30.5%), violations untouched.
 
 ## P7 — dashboard + roles + audit
-- [ ] dashboard: scans this week, compliance rate, top 5 violations, by category, recent scans
-- [ ] roles enforced in UI (viewer cannot upload) and verified against RLS
-- [ ] audit triggers on scans / products / evidence → `audit_log`
+- [x] dashboard: scans this week, compliance rate, top 5 violations, by category, recent scans
+      — `frontend/app/dashboard/page.tsx` over four `security_invoker` views and one count query.
+      Every figure is read back from what the worker stored; nothing is recomputed on the page.
+      Compliant means `compliance_score = 100` — the score the PDF prints, and the only definition
+      in the repo. A failed scan is neither done nor compliant, proved by deltas on the hosted
+      project. "This week" is Monday 00:00 Asia/Kolkata, decided in `frontend/lib/dashboard.ts`
+      and pinned by 6 boundary tests, never taken from the browser's clock.
+- [x] roles enforced in UI (viewer cannot upload) and verified against RLS
+      — the nav hides Upload, `app/upload/layout.tsx` turns a viewer away on the server, and
+      `supabase/check_rls.py` proves the same refusals at PostgREST and Storage with three real
+      signed-in sessions: **53 checks, all passing**, 13 of them writes the viewer must be refused.
+      Nothing the viewer tried left a row or an audit entry behind.
+- [x] audit triggers on scans / products / evidence → `audit_log`
+      — one `public.audit()` trigger function in `0005`, on the tables, so a write by the frontend,
+      by the worker's service-role key or by psql is recorded the same way. An INSERT stores the
+      new row, a DELETE the old one, an UPDATE only the keys that changed with both sides. Actor is
+      `auth.uid()`; null means the service role, which is the worker. No trigger on `audit_log`.
 - Done when: viewer cannot upload; admin sees everything.
+  **True since 2026-09-08.** Verified against the hosted project (`jcjxukjgrbmkuydpsnuc`) and in a
+  browser as all three demo users: the viewer has no Upload link, is redirected off `/upload`, and
+  is refused by Postgres on every one of 13 direct writes; the inspector keeps everything P1 and P6
+  gave them; the admin reads all four dashboard views, every profile, and the audit log, which no
+  other role can read at all. Supabase's own security advisor found one thing this phase
+  introduced — the new trigger function was callable at `/rest/v1/rpc/audit` — fixed in `0006`
+  along with two of the same class that predate it.
 
 ## P8 — e-commerce screenshot mode
 - [x] source = ecommerce → E1/E2 rules, no font checks — landed in P3 (`_applies` in
@@ -161,6 +182,78 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - Total monthly cost: ₹0.
 
 ## Decisions log
+- 2026-09-08 — P7. **Compliant means the stored score is 100, and that is the only definition.**
+  The `dashboard_summary` view written in P1 said "no critical or major violation", which lets a
+  minor one through and disagrees with both the score on the scan page and the score in the PDF.
+  Three definitions of compliance in one product is how a report says 87 and a dashboard says
+  "compliant" about the same pack. The view now reads `compliance_score = 100` off the column the
+  worker wrote, which is the same rule P5 set for the report: the dashboard consumes the result,
+  it never recomputes it. A `failed` scan has no score and is counted in neither half of the
+  fraction — `score([])` is 100 by construction, so a failed scan admitted to the numerator would
+  be a perfect mark for a photograph nothing was read from.
+- 2026-09-08 — P7. **The week is Asia/Kolkata, and it is decided in one function that has tests.**
+  The reports print UTC because a report timestamps one event, and that stays. A dashboard does
+  something else: it buckets events into a human week, and the human is an inspector in India. A
+  week cut at 00:00 UTC throws every scan taken between midnight and 05:30 on Monday morning into
+  last week — a whole working dawn on the wrong side of the line. So `weekStart()` lives in
+  `frontend/lib/dashboard.ts`, takes its zone explicitly rather than from the machine it runs on,
+  and is pinned by six tests: the exact boundary, one millisecond before it, late Sunday night,
+  three days inside, the end instant, and the label. Deliberately **not** a `date_trunc('week',…)`
+  inside the view: the count is a filter the page passes in, so there is one implementation of the
+  boundary in the repo and it is the one that can be tested without a database.
+- 2026-09-08 — P7. **The rule titles come from the YAML by way of Postgres, not by way of a copy.**
+  The dashboard has to print "D1 — Name and address of manufacturer / packer / importer", and that
+  title exists in exactly one place: `rules/pc_rules_2011.yaml`. Writing the titles into a
+  migration would be a second copy of the law in the repo; writing them into a TSX map would be a
+  third. So `public.rules` is a mirror the worker refreshes from the YAML at start up
+  (`sync_rules`, 23 rows, three tests that compare the written rows to `load_rules()` field by
+  field), and `top_violations` left-joins it. If the worker has never run, the title is null and
+  the page falls back to the rule ref — a missing name, not a wrong one.
+- 2026-09-08 — P7. **The upload guard is a server layout, and it is still not the security
+  boundary.** Hiding the nav link stops nobody: `/upload` typed into the address bar rendered the
+  form for a viewer. `app/upload/layout.tsx` reads the role on the server and redirects, which is
+  ten lines and no file moved. What actually refuses the viewer is the `scans insert`,
+  `scan_images insert`, `evidence insert` and `scans bucket insert` policies, and
+  `supabase/check_rls.py` proves it with a real viewer JWT at PostgREST and Storage: 13 writes
+  attempted, 13 refused, the scan and its evidence byte-identical afterwards, and not one audit
+  entry with the viewer as actor.
+- 2026-09-08 — P7. **A check that proves nothing may not change anything, and the audit log is
+  what caught it.** The first `check_rls.py` picked the oldest real scan as the row to attack — and
+  its "an inspector cannot edit somebody else's scan" case then edited a real inspection note,
+  because that scan happened to be the inspector's own. It was found by reading `audit_log`, which
+  had the old value (`{"notes": null}`) to restore from. The script now creates every row it
+  touches, including a second scan owned by the admin to fail against, and deletes them at the
+  end. The audit log earned its place before the phase that added it was finished.
+- 2026-09-08 — P7. **An UPDATE audit stores what changed, not what the row is.** Both whole rows
+  on every update would be the largest table in the database within a week, and reading it would
+  still mean diffing two blobs to answer "who changed the score". `audit()` diffs in the trigger
+  with `jsonb_each`, stores the changed keys only, old and new side by side, and writes nothing at
+  all for an update that changed nothing. INSERT keeps the whole new row and DELETE the whole old
+  one, because there the whole row is the change.
+- 2026-09-08 — P7. **The audit triggers are on the tables, so nothing can write behind their
+  back.** Frontend logging would record what the frontend did, which is the one thing already
+  visible; the writes worth recording are the ones that skip it. Proved rather than asserted: the
+  check script makes a product with the service-role key — no browser, no RLS — and the INSERT,
+  UPDATE and DELETE all appear with a null actor, which is what a write by the worker looks like.
+  There is no trigger on `audit_log` itself, and a check asserts the table has never audited
+  itself.
+- 2026-09-08 — P7. **The security advisor found the hole this phase opened, one migration after
+  it opened it.** `public.audit()` is `security definer` so it can write a table nobody has an
+  insert policy on, and Supabase exposes every public function at `/rest/v1/rpc/<name>` — so the
+  new trigger function was callable by anyone holding the anon key. Calling it raises (there is no
+  NEW record outside a trigger) so nothing could be written through it, but a door that should
+  never have been in the wall is still a door. `0006` revokes it, and the two functions of the
+  same class that predate P7 with it. `auth_role()` is the one that cannot simply be revoked from
+  PUBLIC: every RLS policy in `0001` calls it and a policy is evaluated as the signed-in user, so
+  the blanket grant comes off and an explicit one goes back to `authenticated` — get that wrong
+  and every write in the app starts failing. Verified after pushing: 53 RLS checks still pass, a
+  fresh auth user still gets a profile from `handle_new_user`, and `claim_scan` still returns.
+- 2026-09-08 — P7. **No new indexes, because the plans were read first.** `dashboard_recent_scans`
+  is a hash join over four rows in 0.65 ms, and Supabase's performance advisor lists only
+  pre-existing findings — unindexed foreign keys from `0001` and `auth.<fn>()` re-evaluated per row
+  in seven P1 policies. Both are real at scale and neither is real at four scans; rewriting seven
+  RLS policies during the phase whose job is to prove those policies work is the wrong trade.
+  `audit_log` gets two indexes because it is the one table here that grows with every write.
 - 2026-09-08 — P6. **A pack's identity is the maker plus the generic name, and nothing else.**
   `products.match_key` is `"<two words of the company>|<four words of the name>"`, both
   normalised, and it is a unique index the worker upserts on — so matching is Postgres's job and

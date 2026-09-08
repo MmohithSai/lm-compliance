@@ -1,4 +1,4 @@
-"""Create the 3 demo users (admin, inspector, viewer). Demo passwords only; change for anything real.
+"""Create the 3 demo users (admin, inspector, viewer). Demo passwords only; change these.
 
 Run: cd worker && uv run --env-file ../.env python ../supabase/seed_users.py
 """
