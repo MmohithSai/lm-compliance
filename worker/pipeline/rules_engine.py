@@ -132,7 +132,8 @@ def _squash(s: str) -> str:
     return re.sub(r"[^a-z0-9]", "", s.casefold())
 
 
-def _has_address(value: str) -> bool:
+def has_address(value: str) -> bool:
+    """An address, not just a name: a six digit PIN, or several comma separated parts."""
     return bool(PIN.search(value)) or (value.count(",") >= 2 and len(value) >= 25)
 
 
@@ -170,7 +171,7 @@ def _field_present(decls: list[Declaration], ctx: ScanContext, rule: Rule) -> li
     needs_address = rule.params.get("needs_address") == "true"
     fields = [rule.params["field"], *filter(None, [rule.params.get("alt")])]
     found = [d for d in (_decl(decls, f) for f in fields) if d is not None]
-    if any(not needs_address or _has_address(d.value) for d in found):
+    if any(not needs_address or has_address(d.value) for d in found):
         return []
     values = {d.field: d.value for d in found}
     word_ids = [i for d in found for i in d.word_ids]

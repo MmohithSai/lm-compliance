@@ -11,7 +11,7 @@ import re
 from collections.abc import Callable
 
 from ..models import Declaration, ScanContext, Source, Word
-from ..rules_engine import month_and_year
+from ..rules_engine import has_address, month_and_year
 
 # Keyword anchors -> canonical field. Value = nearest OCR box to the right of or below the anchor.
 # Wordings taken off the packs in eval/dataset, not invented: Indian labels shorten
@@ -491,6 +491,15 @@ def label_cell(anchor: Word, words: list[Word], shape: Callable[[str], bool]) ->
     return out
 
 
+def fullness(value: str) -> tuple[bool, int]:
+    """How much of an address block this is: one that carries an address — the rule engine's
+    own test, a PIN code or a few comma-separated parts — beats one that does not, and among
+    equals the longer wins. So "Manufacturer : Tata Chemicals Limited, P.O. Mithapur-361 345,
+    ..." beats "Manufacturer : Tata Sampann", and a maker's bare name printed first is not
+    displaced by a marketer's bare name printed after it just for being a word longer."""
+    return has_address(value), len(value)
+
+
 def span(boxes: list[Word]) -> Word:
     """One box round several printed lines; keeps the first line's id so it is still the anchor."""
     x, y = min(b.x for b in boxes), min(b.y for b in boxes)
@@ -532,13 +541,29 @@ class RegexLayoutExtractor:
             if hit is None:
                 continue
             field, bare_anchor, anchor = hit
+            # A printed figure is the value of one label. Boxes already read into another
+            # declaration are out of reach: without this, once the row test was loosened for a
+            # figure of the right shape, "MRP" a line under "NET WEIGHT: 25g" took the 25g back
+            # as its price. And a label box already read is done: revisited in a later pass
+            # with its own value out of reach, "MARKETED BY:" took the FSSAI logo instead.
+            taken = {i for d in found.values() for i in d.word_ids}
+            if word.id in taken:
+                continue
+            free = [w for w in words if w.id not in taken]
+            fuller_label = False
             if field in found:
-                # First box in reading order wins — unless it won on a bare noun and this one
-                # carries the fuller label: Amazon prints "Quantity: 1" in its buy box above
-                # "Net Quantity : 800.0 Grams" in the product table, and the second is the
-                # declaration. Same test, fewer words, would keep the buy box.
+                # First box in reading order wins — with two exceptions. It won on a bare noun
+                # and this one carries the fuller label: Amazon prints "Quantity: 1" in its buy
+                # box above "Net Quantity : 800.0 Grams" in the product table, and the second
+                # is the declaration. Or the field is an address block, where the fullest
+                # candidate is the one to judge: the law wants the whole address, a listing
+                # prints the maker once as a bullet and once as a table row, and which of two
+                # photographs came first should not decide which one the report quotes.
                 prior = claim(found[field].value)
-                if prior is None or prior[2] not in AT_START or len(anchor) <= len(prior[2]):
+                fuller_label = (
+                    prior is not None and prior[2] in AT_START and len(anchor) > len(prior[2])
+                )
+                if not fuller_label and field not in WRAPS:
                     continue
             if POINTS_ELSEWHERE.search(word.text):
                 continue
@@ -551,12 +576,6 @@ class RegexLayoutExtractor:
             needs_value = in_box is not None and not in_box(strip_anchor(word.text, anchor))
             if needs_value and anchor in SUFFIX_ANCHORS:
                 continue
-            # A printed figure is the value of one label. Boxes already read into another
-            # declaration are out of reach: without this, once the row test was loosened for a
-            # figure of the right shape, "MRP" a line under "NET WEIGHT: 25g" took the 25g back
-            # as its price.
-            taken = {i for d in found.values() for i in d.word_ids}
-            free = [w for w in words if w.id not in taken]
             block = [word]
             look = bare_anchor or needs_value
             value_box = nearest(word, free, shape if needs_value else None, table) if look else None
@@ -587,6 +606,12 @@ class RegexLayoutExtractor:
                 continue
             if field == "consumer_care" and not CONTACT.search(value):
                 continue
+            if (
+                field in found
+                and not fuller_label
+                and fullness(value) <= fullness(found[field].value)
+            ):
+                continue  # an address block already read is at least as full as this one
             found[field] = Declaration(
                 field=field,
                 value=value,

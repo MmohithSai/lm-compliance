@@ -238,6 +238,52 @@ def test_the_fuller_label_beats_a_bare_noun_that_came_first() -> None:
     assert got == {"net_quantity": "Net Quantity : 800.0 Grams"}
 
 
+def test_the_fullest_address_block_wins_whichever_photograph_came_first() -> None:
+    """The amazon.in Tata Salt listing names the maker twice: "Manufacturer : Tata Sampann" in
+    the bullet list and the full address in the product table. The address is the declaration
+    D1 judges, and the answer must not depend on the order the tiles were uploaded in."""
+    short = line("Manufacturer : Tata Sampann", 100, wid=1).model_copy(update={"image_id": "a"})
+    full = line(
+        "Manufacturer : Tata Chemicals Limited, P.O. Mithapur-361 345, Gujarat", 100, wid=2
+    ).model_copy(update={"image_id": "b"})
+    want = {"manufacturer": full.text}
+    assert fields([short, full]) == want
+    assert fields([full, short]) == want
+
+
+def test_an_address_beats_a_bare_name_and_the_answer_does_not_depend_on_order() -> None:
+    """The Pepsi bottle names its manufacturer and, further along, its marketer, and neither
+    block carries an address; D1 fails on both. Whichever is chosen, it is the same one from
+    either order — and a block that does carry an address beats both."""
+    mfd = line("MFD.BY:VARUN BEVERAGESLIMITED", 610, x=825, w=265, h=32, wid=1)
+    mkt = line("MKT.BY. PEPSICO INDIA HOLDINGS PVL.LID", 685, x=1277, w=236, h=39, wid=2)
+    assert fields([mfd, mkt]) == fields([mkt, mfd])
+    full = line("MKT BY: Brite Foods Pvt Ltd, Plot 12, MIDC, Pune 411019", 900, x=825, wid=3)
+    assert fields([mkt, full, mfd])["manufacturer"] == full.text
+    assert fields([full, mkt, mfd])["manufacturer"] == full.text
+
+
+def test_a_label_box_already_read_is_not_read_again_in_a_later_pass() -> None:
+    """The Kurkure pack: "MARKETED BY:" found its value in the first pass, and revisited in
+    the table pass with that value out of reach it took the FSSAI logo line instead."""
+    got = fields(
+        [
+            line("MARKETED BY:", 563, x=1038, w=186, h=39, wid=1),
+            line("PepsiCo India Holdings Pvt.Ltd", 595, x=1040, w=360, h=47, wid=2),
+            line("fssat", 634, x=1110, w=170, h=91, wid=3),
+            line(
+                "For feedback or queries write indicating Batch No.and",
+                805,
+                x=1053,
+                w=440,
+                h=38,
+                wid=4,
+            ),
+        ]
+    )
+    assert got["manufacturer"] == "MARKETED BY: PepsiCo India Holdings Pvt.Ltd"
+
+
 def test_a_listing_s_quantity_row_is_the_net_quantity() -> None:
     """Flipkart labels the row "Quantity" with the figure under it; a water bottle's "ADDED
     QUANTITY PER 100 ml" starts with another word and is not one."""
