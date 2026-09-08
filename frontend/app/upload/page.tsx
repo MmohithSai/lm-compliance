@@ -157,7 +157,9 @@ export default function UploadPage() {
             <>
               <div className="flex items-center gap-2">
                 <Checkbox id="card" checked={hasCard} onCheckedChange={(v) => setHasCard(v === true)} />
-                <Label htmlFor="card">A reference card (ArUco or credit-card size) is in the photo</Label>
+                <Label htmlFor="card">
+                  A reference card (ArUco or credit-card size) is in the same photo as the declarations
+                </Label>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
@@ -184,7 +186,9 @@ export default function UploadPage() {
                 </div>
               </div>
               <p className="text-xs text-muted-foreground">
-                Without a card or panel size, font checks are reported as “not verifiable”. Nothing is estimated.
+                The card is measured in the frame it appears in, so put it beside the declarations, not in a
+                photo of its own. Give the panel size only if the panel fills the photo edge to edge. Without
+                either, print size and contrast are reported as “not verifiable”. Nothing is estimated.
               </p>
             </>
           )}

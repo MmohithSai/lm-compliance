@@ -22,7 +22,10 @@ export default async function ScanPage({ params }: { params: Promise<{ id: strin
   const [{ data: images }, { data: words }, { data: declarations }, { data: violations }] = await Promise.all([
     supabase.from("scan_images").select("id, kind, storage_path").eq("scan_id", id).order("kind"),
     supabase.from("ocr_words").select("id, image_id, x, y, w, h").eq("scan_id", id),
-    supabase.from("declarations").select("id, field, value, confidence, word_ids, image_id").eq("scan_id", id),
+    supabase
+      .from("declarations")
+      .select("id, field, value, confidence, word_ids, image_id, height_mm, width_height_ratio")
+      .eq("scan_id", id),
     supabase.from("violations").select("id, rule_id, rule_ref, severity, message, evidence").eq("scan_id", id),
   ]);
 
@@ -73,7 +76,10 @@ export default async function ScanPage({ params }: { params: Promise<{ id: strin
       {scan.error && <p className="text-sm text-red-600">{scan.error}</p>}
       {WAITING[scan.status] && <p className="text-sm text-muted-foreground">{WAITING[scan.status]}</p>}
       <p className="text-xs text-muted-foreground">
-        Reference card: {scan.has_reference_card ? "yes" : "no"}. Scale: {scan.mm_per_px ?? "not verifiable"}.
+        Reference card: {scan.has_reference_card ? "yes" : "no"}.{" "}
+        {scan.mm_per_px
+          ? `Scale: 1 pixel = ${Number(scan.mm_per_px).toFixed(3)} mm, so print size is measured.`
+          : "No scale in the photo, so print size and contrast are not verifiable."}
       </p>
 
       <ScanEvidence
@@ -89,6 +95,7 @@ export default async function ScanPage({ params }: { params: Promise<{ id: strin
           <TableRow>
             <TableHead>Field</TableHead>
             <TableHead>Value</TableHead>
+            <TableHead>Print height</TableHead>
             <TableHead>Confidence</TableHead>
           </TableRow>
         </TableHeader>
@@ -97,12 +104,19 @@ export default async function ScanPage({ params }: { params: Promise<{ id: strin
             <TableRow key={d.id}>
               <TableCell className="font-mono text-xs">{d.field}</TableCell>
               <TableCell>{d.value}</TableCell>
+              <TableCell className="whitespace-nowrap text-xs">
+                {d.height_mm === null
+                  ? "not measured"
+                  : `${Number(d.height_mm).toFixed(1)} mm${
+                      d.width_height_ratio === null ? "" : ` · w/h ${Number(d.width_height_ratio).toFixed(2)}`
+                    }`}
+              </TableCell>
               <TableCell>{d.confidence === null ? "—" : d.confidence.toFixed(2)}</TableCell>
             </TableRow>
           ))}
           {(declarations ?? []).length === 0 && (
             <TableRow>
-              <TableCell colSpan={3}>Nothing read from the photos yet.</TableCell>
+              <TableCell colSpan={4}>Nothing read from the photos yet.</TableCell>
             </TableRow>
           )}
         </TableBody>
