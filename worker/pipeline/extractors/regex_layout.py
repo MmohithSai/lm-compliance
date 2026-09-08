@@ -138,6 +138,77 @@ UNIT_PRICE = re.compile(
 )
 
 
+# Rule 6(1)(b) asks for the common or generic name, and Indian packs print it as a bare line with
+# no label at all: "SPICED BUTTERMILK", "Coated Wafer", "FACE WASH", "AYURVEDIC PROPRIETARY
+# MEDICINE". No anchor reaches that. What the line does have is a head noun: its last word names
+# the kind of commodity, and the kinds are enumerated by law rather than by this dataset — the
+# FSSAI food category system (Appendix A to the Food Safety and Standards (Food Products Standards
+# and Food Additives) Regulations, 2011, categories 1 to 16) for food; Schedule S of the Drugs and
+# Cosmetics Rules, 1945 (the BIS cosmetics standards) and section 3(h) of the Act ("ayurvedic
+# proprietary medicine") for the rest; a few stationery heads for the pen box in eval/dataset.
+# A line qualifies when it is two to seven words, carries no anchor, no figure and no sentence
+# words, and ends in one of these heads, optionally followed by a bracketed qualifier: "DARK SOY
+# SAUCE (SOYABEAN SAUCE)", "PROPRIETARY FOOD - NAMKEEN (15.1)". Plurals are folded ("biscuits").
+# Two words, not one: a brand line breaks into boxes on a photograph, and "WAFERS", "FRUIT" and
+# "Chutney" on their own were the brand ("Balaji WAFERS"), not the name. That costs the one pack
+# in eval/dataset that prints a bare "BISCUIT"; measured, the trade is worth it. Only on a pack:
+# a listing labels the field ("Generic Name : Salt"), and a bare line on a screenshot is a
+# category breadcrumb ("Snack Foods"). "fat" and "sweetener" are not heads: a nutrition row and
+# an ingredient line end in them far more often than a generic name does.
+GENERIC_HEADS = frozenset(
+    """
+    milk buttermilk lassi curd dahi yoghurt yogurt cheese paneer cream butter ghee oil vanaspati
+    margarine fruit vegetable juice nectar squash syrup jam jelly marmalade pickle achar
+    chutney sauce ketchup confectionery chocolate candy toffee lozenge gum cereal flour atta maida
+    suji rava rice oats noodle pasta vermicelli macaroni cornflakes biscuit cookie cracker wafer
+    bread cake rusk pastry meat fish egg sugar honey jaggery salt spice masala seasoning condiment
+    vinegar soup snack namkeen chips mixture bhujia papad water beverage drink tea coffee chicory
+    malt supplement formula pulse dal lentil nut seed cocoa custard food savoury
+    savouries mix powder sweet mithai dessert extract essence flavour colour kheer halwa sherbet
+    sharbat soap shampoo conditioner lotion gel wash cleanser moisturiser moisturizer balm
+    toothpaste mouthwash deodorant perfume talc sunscreen serum scrub mask medicine tablet capsule
+    ointment sanitiser sanitizer wipe tissue kajal sindoor mehndi lipstick dye cologne detergent
+    softener pen pencil marker notebook battery bulb lamp cable charger brush blade razor
+    """.split()
+)
+# A generic name is a noun phrase, not a sentence or a list: the words that make it one of those
+# — prepositions, "and", the ingredients and nutrition vocabulary — rule the line out, as do a
+# figure, a slash and a percentage (a marketing line, an ingredient or a nutrition row).
+NOT_A_GENERIC_NAME = re.compile(
+    r"\b(?:with|for|of|in|from|by|to|the|and|your|our|made|contains?|\w*gredients?|per|approx"
+    r"|serving|serve|values?|information|energy|kcal|free|new|now|only|best|since"
+    r"|total|added|saturated|trans|sugars|dietary|fibre|fiber|sodium|protein|carbohydrates?)\b"
+    # a comma makes it a list ("JUICE, BANANA PULP, PINEAPPLE JUICE"); an exclamation mark makes
+    # it a slogan ("Really tasty Fried Rice!"); "NGREDIENTS:WATER" is the ingredients line with
+    # its first letter under a fold
+    r"|[0-9/@%&,!?]",
+    re.IGNORECASE,
+)
+TRAILING_BRACKET = re.compile(r"\s*\([^()]*\)\s*$")
+MIN_GENERIC_NAME_WORDS = 2
+MAX_GENERIC_NAME_WORDS = 7
+
+
+def generic_head(text: str) -> bool:
+    """Does this printed line end in a commodity head noun, as a generic name would?"""
+    body = TRAILING_BRACKET.sub("", text)
+    if not body.strip() or NOT_A_GENERIC_NAME.search(body) or "." in body:
+        return False  # a dot in the body is a garbled row ("UER.SUGAR"), not a name
+    # A printed name capitalises every word ("Coated Wafer", "FACE WASH"); a slogan does not
+    # ("Really tasty Fried Rice"), and neither does a product line in lower case ("aloe vera
+    # gel") printed above the statutory "AYURVEDIC PROPRIETARY MEDICINE".
+    if any(w[0].islower() for w in body.split() if w[0].isalpha()):
+        return False
+    words = norm(body).split()
+    if not MIN_GENERIC_NAME_WORDS <= len(words) <= MAX_GENERIC_NAME_WORDS:
+        return False
+    if any(len(w) < 2 for w in words):
+        return False  # "H OATS": a stray letter is not a word of a name
+    head = words[-1]
+    singular = head[:-2] if head.endswith("es") else head[:-1] if head.endswith("s") else head
+    return any(len(f) >= 3 and f in GENERIC_HEADS for f in (head, singular))
+
+
 def looks_like_price(text: str) -> bool:
     return PRICE.search(text) is not None
 
@@ -278,6 +349,8 @@ MAX_LINES = 7
 # A label cell is a label, not an address: "MRP" over "(incl. of all taxes)" is the shape,
 # and two lines is as far as one goes on the packs in eval/dataset.
 MAX_LABEL_LINES = 2
+# A best-before sentence wraps onto at most two more lines.
+MAX_SENTENCE_LINES = 1
 
 
 # Lines that stand where an address block would continue and are not part of it: the food
@@ -511,6 +584,19 @@ def fullness(value: str) -> tuple[bool, int]:
     return has_address(value), len(value)
 
 
+def sideways(w: Word) -> bool:
+    """A box much taller than it is wide, holding more than a few characters, is a line printed
+    sideways: the pack was photographed on its side. PP-OCR reads the text either way; it is the
+    label-to-value geometry that has to turn with it."""
+    return len(w.text) >= 4 and w.h > 1.5 * w.w
+
+
+def transposed(words: list[Word]) -> list[Word]:
+    """The same boxes with x and y swapped, so a sideways line's neighbours are where an upright
+    line's would be. Ids and text are untouched; nothing is measured off these."""
+    return [w.model_copy(update={"x": w.y, "y": w.x, "w": w.h, "h": w.w}) for w in words]
+
+
 def span(boxes: list[Word]) -> Word:
     """One box round several printed lines; keeps the first line's id so it is still the anchor."""
     x, y = min(b.x for b in boxes), min(b.y for b in boxes)
@@ -537,7 +623,32 @@ class RegexLayoutExtractor:
             found.update(self._pass(words, found, mode=mode, wrap=wrap))
         if "unit_sale_price" not in found:
             found.update(self._unit_price_by_shape(words, found))
+        if "generic_name" not in found and ctx.source is Source.package:
+            found.update(self._generic_name_by_head(words, found))
         return list(found.values())
+
+    def _generic_name_by_head(
+        self, words: list[Word], found: dict[str, Declaration]
+    ) -> dict[str, Declaration]:
+        """The first unlabelled line on the panel, in reading order, that ends in a commodity
+        head noun. Only a box no label claimed and no declaration used; the whole line is the
+        value and the box is the evidence."""
+        taken = {i for d in found.values() for i in d.word_ids}
+        frame = {image: i for i, image in enumerate(dict.fromkeys(w.image_id for w in words))}
+        for word in sorted(words, key=lambda w: (frame[w.image_id], w.y, w.x)):
+            if word.id in taken or claim(word.text) is not None or not generic_head(word.text):
+                continue
+            return {
+                "generic_name": Declaration(
+                    field="generic_name",
+                    value=clean(word.text),
+                    confidence=word.confidence,
+                    word_ids=[word.id],
+                    image_id=word.image_id,
+                    extractor=self.name,
+                )
+            }
+        return {}
 
     def _unit_price_by_shape(
         self, words: list[Word], found: dict[str, Declaration]
@@ -615,30 +726,40 @@ class RegexLayoutExtractor:
             needs_value = in_box is not None and not in_box(strip_anchor(word.text, anchor))
             if needs_value and anchor in SUFFIX_ANCHORS:
                 continue
-            block = [word]
+            # A pack photographed on its side prints its lines sideways, and the geometry below
+            # is written for upright print: "beside" is along the line, "below" is the next
+            # line. So for a sideways anchor the panel is transposed, x for y, and the boxes it
+            # picks are the same boxes — only their ids and text are used from here on.
+            space = transposed(free) if sideways(word) else free
+            at = next(w for w in space if w.id == word.id)
+            block = [at]
             look = bare_anchor or needs_value
-            value_box = nearest(word, free, shape if needs_value else None, table) if look else None
+            value_box = nearest(at, space, shape if needs_value else None, table) if look else None
             label: list[Word] = []
             if value_box is None and mode == "label" and needs_value and shape is not None:
                 # One line at a time, and stop at the first cell the figure sits beside: the
                 # label is as long as it needs to be to meet its value, and no longer.
-                for extra in label_cell(word, free, shape):
+                for extra in label_cell(at, space, shape):
                     label.append(extra)
-                    value_box = nearest(span([word, *label]), free, shape, table=True)
+                    value_box = nearest(span([at, *label]), space, shape, table=True)
                     if value_box is not None:
                         break
             if value_box is not None:
-                block += label or wrapped_label(word, value_box, free)
+                block += label or wrapped_label(at, value_box, space)
                 block.append(value_box)
             elif needs_value:
                 continue  # nothing on this panel carries the figure
             if wrap and field in WRAPS:
-                block += continuations(block, free, field)
+                block += continuations(block, space, field)
             elif wrap and field == "best_before" and anchor == "best before":
-                # "BEST BEFORE TWELVE MONTHS" / "FROM MANUFACTURE" wraps like a sentence, and a
-                # sentence carries no figure: the one line under it that holds no digit is its
-                # end. A date ("USE BY 23/01/26") is one line and wraps into nothing.
-                block += [w for w in continuations(block, free, field)[:1] if not has_digit(w.text)]
+                # "BEST BEFORE THREE MONTHS FROM MANUFACTURE" / "WHEN STORED IN A COOL AND DRY
+                # PLACE" wraps like a sentence, and a sentence carries no figure: the lines under
+                # it that hold no digit are its end, two at most on the packs in eval/dataset. A
+                # date ("USE BY 23/01/26") is one line and wraps into nothing.
+                for extra in continuations(block, space, field)[:MAX_SENTENCE_LINES]:
+                    if has_digit(extra.text):
+                        break
+                    block.append(extra)
             if bare_anchor and len(block) == 1 and anchor not in SUFFIX_ANCHORS:
                 # "Made in", "MKT. BY", "A QUALITY PRODUCT OF" with nothing beside or under
                 # them: the label names the declaration and does not carry one. A suffix is

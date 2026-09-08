@@ -20,7 +20,7 @@ def fields(words: list[Word]) -> dict[str, str]:
 def test_one_line_per_declaration_keeps_the_whole_printed_line() -> None:
     got = fields(
         [
-            line("BRITE BISCUITS", 60, wid=0),
+            line("BRITE", 60, wid=0),
             line("Net Qty: 200 g", 160, wid=1),
             line("MRP 20.00 (Inclusive of all taxes)", 230, wid=2),
         ]
@@ -203,7 +203,7 @@ def test_an_anchor_still_counts_when_ocr_glues_its_own_words_together() -> None:
 def test_a_short_anchor_keeps_its_word_boundary() -> None:
     """The glue tolerance is for long anchors. "made in" inside "homemade indian" is not a
     country of origin, and "exp" inside "export" is not a date."""
-    assert fields([line("HOMEMADE INDIAN SNACKS", 100, wid=1)]) == {}
+    assert "country_of_origin" not in fields([line("HOMEMADE INDIAN SNACKS", 100, wid=1)])
 
 
 def test_usp_at_the_start_of_the_box_is_the_unit_sale_price() -> None:
@@ -693,3 +693,64 @@ def test_a_care_line_with_only_an_email_is_still_a_declaration() -> None:
 
 def test_a_care_heading_with_no_contact_under_it_claims_nothing() -> None:
     assert "consumer_care" not in fields([line("Consumer complaints", 160, wid=1)])
+
+
+def test_an_unlabelled_line_ending_in_a_commodity_noun_is_the_generic_name() -> None:
+    """Rule 6(1)(b)'s common name is printed bare on Indian packs: the head noun finds it."""
+    assert fields([line("SPICED BUTTERMILK", 100, wid=1)]) == {"generic_name": "SPICED BUTTERMILK"}
+    assert fields([line("Coated Wafer", 100, wid=1)]) == {"generic_name": "Coated Wafer"}
+    # a bracketed qualifier after the head, and a plural, are both still the name
+    got = fields(
+        [line("DARK SOY SAUCE (SOYABEAN SAUCE)", 100, wid=1), line("GLUCOSE BISCUITS", 200, wid=2)]
+    )
+    assert got == {"generic_name": "DARK SOY SAUCE (SOYABEAN SAUCE)"}
+    assert fields([line("PROPRIETARY FOOD - NAMKEEN (15.1)", 100, wid=1)]) == {
+        "generic_name": "PROPRIETARY FOOD - NAMKEEN (15.1)"
+    }
+
+
+def test_a_sentence_or_a_list_ending_in_a_commodity_noun_is_not_the_generic_name() -> None:
+    for text in (
+        "Ingredients: Edible Common Salt",  # a list
+        "PACKED WITH REAL FRUIT",  # a sentence
+        "TREATED WATER, MINERALS (SALTS OF",  # an ingredients continuation
+        "(Approx. 3 Biscuits)",  # a bracket with nothing before it, and a figure
+        "ADDED QUANTITY PER 100 ml",
+        "Energy 67 kcal",
+        "TOTAL SUGARS",  # a nutrition row
+        "WAFERS",  # one word: the brand line broken into boxes ("Balaji WAFERS")
+        "H OATS",  # a stray letter is not a word
+        "JUICE, BANANA PULP, PINEAPPLE JUICE",  # a comma makes it a list
+        "Really tasty Fried Rice",  # a slogan: a name capitalises every word
+        "aloe vera gel",  # a product line in lower case
+        "UER.SUGAR",  # a garbled nutrition row
+        "NGREDIENTS:WATER",  # the ingredients line, first letter under a fold
+    ):
+        assert "generic_name" not in fields([line(text, 100, wid=1)]), text
+    # a listing labels the field; a bare line on a screenshot is a category breadcrumb
+    listing = EXTRACT.extract(
+        [line("Snack Foods", 100, wid=1)], ScanContext(source=Source.ecommerce)
+    )
+    assert listing == []
+
+
+def test_a_labelled_generic_name_beats_the_head_noun_and_the_first_bare_line_wins() -> None:
+    got = fields([line("BISCUIT", 100, wid=1), line("Generic Name: Ball Pen", 200, wid=2)])
+    assert got == {"generic_name": "Generic Name: Ball Pen"}
+    got = fields([line("Lip Balm", 300, wid=1), line("FACE WASH", 100, wid=2)])
+    assert got == {"generic_name": "FACE WASH"}, "first in reading order"
+
+
+def test_a_sideways_label_takes_the_value_printed_along_its_own_line() -> None:
+    """A pack photographed on its side: boxes are taller than wide, the value sits under the
+    label in image coordinates, and the next label stands beside it, not below."""
+    words = [
+        Word(id=1, image_id="front", text="USE BY:", x=350, y=180, w=40, h=150, confidence=0.9),
+        Word(id=2, image_id="front", text="10/12/2025", x=340, y=470, w=40, h=280, confidence=0.9),
+        Word(
+            id=3, image_id="front", text="DATE OF MFG:", x=400, y=180, w=40, h=230, confidence=0.9
+        ),
+        Word(id=4, image_id="front", text="10/12/2024", x=400, y=470, w=40, h=280, confidence=0.9),
+    ]
+    got = fields(words)
+    assert got == {"best_before": "USE BY: 10/12/2025", "mfg_date": "DATE OF MFG: 10/12/2024"}
