@@ -29,6 +29,10 @@ ANCHORS: dict[str, list[str]] = {
         "net vol",
         "net volume",
         "net content",
+        # The bare noun, at the start of the box only: a Flipkart listing labels the row
+        # "Quantity" over "1000 g", while "ADDED QUANTITY PER 100 ml" on a water bottle is not
+        # a net quantity and starts with another word.
+        "quantity",
     ],
     "mfg_date": [
         "mfd",
@@ -42,6 +46,15 @@ ANCHORS: dict[str, list[str]] = {
         # table prints in the label cell: "Month & Year | of Manufacture" beside "02/2026".
         "month & year",
         "month and year",
+        # Longer forms off the packs in eval/dataset, so that "DATE OF MFG:" is one label and
+        # not a bare "mfg" three words in, and "FOR DATE OF MANUFACTURE ... SEE BOTTLE" is
+        # recognised as naming the date rather than left to "use by" further along the line.
+        "date of mfg",
+        "date of manufacture",
+        "mfg date",
+        "manufacturing date",
+        "date of packaging",
+        "packaging date",
     ],
     "importer": ["imported by", "importer"],
     "manufacturer": [
@@ -76,7 +89,9 @@ ANCHORS: dict[str, list[str]] = {
         "helpline",
     ],
     "country_of_origin": ["country of origin", "made in", "product of"],
-    "unit_sale_price": ["unit sale price", "per g", "per kg", "per ml", "per l"],
+    # "usp" is how the packs abbreviate it ("USP ₹ 0.20/- per g"), at the start of the box only:
+    # in the middle of one it is a pointer's list ("... BATCH NO., USP AND MRP: SEE BOTTLE").
+    "unit_sale_price": ["unit sale price", "usp", "per g", "per kg", "per ml", "per l"],
     "best_before": ["best before", "use by", "expiry", "exp"],
     "generic_name": ["generic name", "common name"],
 }
@@ -154,7 +169,7 @@ CONTACT = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+|\d[\d\s().+-]{6,}\d")
 # "ADDRESS: SAME AS MKT BY ADDRESS", "For Mkt. address, scan barcode". The line names the
 # declaration but does not carry it, and claiming it hides the real one printed further down.
 POINTS_ELSEWHERE = re.compile(
-    r"\bsame as\b"
+    r"\bsame\s*as\b"  # \s*: PP-OCR read "ADDRESS:SAMEASMANUFACTUREDBY" without the spaces
     r"|\bsee\b.{0,24}?\b(neck|cap|bottle|bottom|top|crimp|pack|packet|panel|below|above)\b"
     r"|\bscan\b.{0,24}?\b(qr|barcode|code)\b",
     re.IGNORECASE | re.DOTALL,
@@ -182,24 +197,50 @@ def norm(s: str) -> str:
 # stand: at the start of the box. "Manufacturer : Parle Biscuits Pvt Ltd" is a declaration; on the
 # same listing "Is Discontinued By Manufacturer : No" and the heading "From the manufacturer" are
 # not, and both stand before it in reading order, where first box wins.
-AT_START = {"manufacturer"}
+AT_START = {"manufacturer", "quantity", "usp"}
 
-# Longest anchor first: 'mfd by' has to beat 'mfd' on "Mfd by: Brite Foods Pvt Ltd".
+# PP-OCR drops spaces on a real pack, inside a phrase and on either side of it: "MADEIN INDIA",
+# "CONTACICUSTOMER CARE EXECUTIVE", "NESTLECONSUMERCARE", "DATE OFMFG:". So the words of an
+# anchor may run together, and a long anchor — ten letters or more — is recognised with another
+# word glued to its front. Short ones keep their word boundary: "made in" must not be found
+# inside "homemade indian", and "exp" not inside "export".
+GLUE_PREFIX_MIN_LETTERS = 10
+
+
+def anchor_pattern(anchor: str, glued_prefix: bool) -> re.Pattern[str]:
+    words = anchor.split()
+    letters = sum(len(w) for w in words)
+    if anchor in AT_START:
+        start = "^"
+    elif glued_prefix and letters >= GLUE_PREFIX_MIN_LETTERS:
+        start = ""
+    else:
+        start = r"\b"
+    # `(?![a-z])`, not `\b`, at the end: the space before a value goes missing too ("UNIT SALE
+    # PRICE0.20PER g"), and a following letter is still another word.
+    return re.compile(start + r"\s*".join(map(re.escape, words)) + r"(?![a-z])")
+
+
+# Longest anchor first: 'mfd by' has to beat 'mfd' on "Mfd by: Brite Foods Pvt Ltd". Two lists:
+# the tolerant one for a printed line, the strict one for a line holding an e-mail address, which
+# is one word and never a label — "reynoldsindiaconsumercare@newellco.com" is not "consumer
+# care", and reading it as one cut the block short of the very address D6 asks for.
 ANCHOR_LIST: list[tuple[str, str]] = sorted(
     ((field, norm(a)) for field, anchors in ANCHORS.items() for a in anchors),
-    key=lambda pair: -len(pair[1]),
+    key=lambda entry: -len(entry[1]),
 )
+PATTERNS = {
+    glued: [(field, anchor, anchor_pattern(anchor, glued)) for field, anchor in ANCHOR_LIST]
+    for glued in (True, False)
+}
 
 
 def claim(text: str) -> tuple[str, bool, str] | None:
-    """(field, anchor_is_the_whole_box, anchor) for the longest anchor in this box, or None."""
+    """(field, anchor_ends_the_box, anchor) for the longest anchor in this box, or None. A label
+    that ends the box has its value somewhere else — beside it, under it, or nowhere."""
     normalized = norm(text)
-    for field, anchor in ANCHOR_LIST:
-        # `(?![a-z])`, not `\b`: PP-OCR drops the space before a value, so the anchor comes back
-        # glued to it ("UNIT SALE PRICE0.20PER g"). A following *letter* is still another word,
-        # so "exp" does not claim "export".
-        start = "^" if anchor in AT_START else r"\b"
-        match = re.search(rf"{start}{re.escape(anchor)}(?![a-z])", normalized)
+    for field, anchor, pattern in PATTERNS["@" not in text]:
+        match = pattern.search(normalized)
         if match:
             return field, match.end() >= len(normalized), anchor
     return None
@@ -462,8 +503,14 @@ class RegexLayoutExtractor:
             if hit is None:
                 continue
             field, bare_anchor, anchor = hit
-            if field in found:  # first box in reading order wins
-                continue
+            if field in found:
+                # First box in reading order wins — unless it won on a bare noun and this one
+                # carries the fuller label: Amazon prints "Quantity: 1" in its buy box above
+                # "Net Quantity : 800.0 Grams" in the product table, and the second is the
+                # declaration. Same test, fewer words, would keep the buy box.
+                prior = claim(found[field].value)
+                if prior is None or prior[2] not in AT_START or len(anchor) <= len(prior[2]):
+                    continue
             if POINTS_ELSEWHERE.search(word.text):
                 continue
             # A label with no figure in it is a label: go looking for the figure, and for one
@@ -500,9 +547,10 @@ class RegexLayoutExtractor:
                 continue  # nothing on this panel carries the figure
             if wrap and field in WRAPS:
                 block += continuations(block, free)
-            if bare_anchor and len(block) == 1:
-                # "Made in", "MKT. BY", "EXPIRY DATE" on their own: the label names the
-                # declaration and nothing beside or under it carries one.
+            if bare_anchor and len(block) == 1 and anchor not in SUFFIX_ANCHORS:
+                # "Made in", "MKT. BY", "A QUALITY PRODUCT OF" with nothing beside or under
+                # them: the label names the declaration and does not carry one. A suffix is
+                # the exception, because its figure stands before it: "(USP0.20/-perg)".
                 continue
             value = join_lines(block)
             ids = [w.id for w in block]

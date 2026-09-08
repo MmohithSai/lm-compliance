@@ -179,6 +179,78 @@ def test_a_box_across_the_panel_is_not_the_value_of_a_bare_anchor() -> None:
     assert "country_of_origin" not in got
 
 
+# ---------------------------------------------------------------- OCR drops spaces
+
+
+def test_an_anchor_still_counts_when_ocr_glues_a_word_to_its_front() -> None:
+    """The Bisleri bottle: "CONTACT: CUSTOMER CARE EXECUTIVE" came back as one run of letters,
+    and a word boundary before "customer" refused the whole consumer care block."""
+    got = fields(
+        [
+            line("CONTACICUSTOMER CARE EXECUTIVE C1800-121-1007", 873, x=48, w=1271, h=121, wid=1),
+            line("EMAILWECARE@BISLERI.CO.IN", 988, x=57, w=715, h=67, wid=2),
+        ]
+    )
+    assert got["consumer_care"].startswith("CONTACICUSTOMER CARE EXECUTIVE")
+
+
+def test_an_anchor_still_counts_when_ocr_glues_its_own_words_together() -> None:
+    assert fields([line("MADEIN INDIA", 100, wid=1)]) == {"country_of_origin": "MADEIN INDIA"}
+    got = fields([line("DATE OFMFG: 10/12/2024", 100, wid=1)])
+    assert got == {"mfg_date": "DATE OFMFG: 10/12/2024"}
+
+
+def test_a_short_anchor_keeps_its_word_boundary() -> None:
+    """The glue tolerance is for long anchors. "made in" inside "homemade indian" is not a
+    country of origin, and "exp" inside "export" is not a date."""
+    assert fields([line("HOMEMADE INDIAN SNACKS", 100, wid=1)]) == {}
+
+
+def test_usp_at_the_start_of_the_box_is_the_unit_sale_price() -> None:
+    assert fields([line("(USP0.20/-perg)", 100, wid=1)]) == {"unit_sale_price": "(USP0.20/-perg)"}
+    # ...and in the middle of a pointer's list it is not
+    assert "unit_sale_price" not in fields(
+        [line("FOR DATE OF MANUFACTURE, USE BY, BATCH NO., USP AND", 100, wid=1)]
+    )
+
+
+def test_an_email_address_is_one_word_and_never_a_label() -> None:
+    """The glued-prefix tolerance must not find "consumer care" inside
+    "reynoldsindiaconsumercare@newellco.com": read as a label, the e-mail line stopped the
+    consumer care block just short of the e-mail D6 asks for."""
+    got = fields(
+        [
+            line(
+                "Consumer Care Officer at the above address. Toll Free No.: 0008 0005 04348",
+                100,
+                wid=1,
+            ),
+            line("E-mail: reynoldsindiaconsumercare@newellco.com", 134, wid=2),
+        ]
+    )
+    assert got["consumer_care"].endswith("reynoldsindiaconsumercare@newellco.com")
+
+
+def test_the_fuller_label_beats_a_bare_noun_that_came_first() -> None:
+    """Amazon's buy box prints "Quantity: 1" above the product table's "Net Quantity : 800.0
+    Grams". The bare noun is a label; the legal wording is the declaration."""
+    got = fields([line("Quantity:1", 100, wid=1), line("Net Quantity : 800.0 Grams", 900, wid=2)])
+    assert got == {"net_quantity": "Net Quantity : 800.0 Grams"}
+
+
+def test_a_listing_s_quantity_row_is_the_net_quantity() -> None:
+    """Flipkart labels the row "Quantity" with the figure under it; a water bottle's "ADDED
+    QUANTITY PER 100 ml" starts with another word and is not one."""
+    got = fields(
+        [
+            line("Quantity", 453, x=761, w=60, h=22, wid=1),
+            line("1000 g", 471, x=763, w=53, h=24, wid=2),
+        ]
+    )
+    assert got == {"net_quantity": "Quantity 1000 g"}
+    assert "net_quantity" not in fields([line("ADDED QUANTITY PER 100 ml", 100, wid=1)])
+
+
 # ---------------------------------------------------------------- the figure has a shape
 
 
