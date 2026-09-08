@@ -18,7 +18,7 @@ Last updated: 2026-09-08.
 |---|---|---|
 | P0 dataset + eval harness | **done** | photos with a reference card still need a person (F1/F2) |
 | P1 schema + auth + upload + worker loop | **done** | — |
-| P2 OCR + extractor baseline | measured, below target | 98.4% synthetic, **44.0% real** (was 30.5% before the 2026-09-08 audit); target 70% |
+| P2 OCR + extractor baseline | measured, below target | 98.4% synthetic, **50.4% real** (30.5% before the 2026-09-08 audit, 44.0% after it); target 70% |
 | P3 rule engine + detail page | **done** | — (the page was finally opened in a browser during P5; it crashed, see the log) |
 | P4 scale + font / contrast / grouping | **done**, half of it measured | 5 real photos with a card still need a person (same blocker as P0 item 10) |
 | P5 reports | **done** | — |
@@ -167,9 +167,9 @@ phase reaches for them.
 ## P2 — OCR + regex/layout extractor (baseline)
 
 **Done when:** `make eval LABEL=baseline-v1` >= 70% field extraction on clean photos.
-**98.4% on the 18 synthetic labels. 44.0% on the 38 real cases** (2026-09-08 audit; was 30.5%).
-Met on clean labels, not met on photographs. The harness prints the two apart because one
-number hid which half moved.
+**98.4% on the 18 synthetic labels. 50.4% on the 38 real cases** (2026-09-08, second round; 30.5%
+before the audit, 44.0% after it). Met on clean labels, not met on photographs. The harness
+prints the two apart because one number hid which half moved.
 
 | # | Item | Status | Where / evidence |
 |---|---|---|---|
@@ -183,7 +183,8 @@ number hid which half moved.
 | 8 | Printed declaration tables | done | 2026-09-08, six labelled runs: real 28.4% -> 29.8%, **7 fewer false accusations, no new misses** |
 | 9 | Per-miss error report and a run diff | done | [error_report.py](eval/error_report.py), [compare.py](eval/compare.py); `eval/results/<run>_errors.{md,json}` |
 | 10 | The audit round | done | nine labelled changes, real **30.5% -> 44.0%**, 26 fields better / 1 worse, spurious 13 -> 6, violation precision 0.74 -> 0.77 with recall 0.99 unchanged. Runs, per-field table and what is left: `docs/EVAL.md`, `docs/AUDIT.md` |
-| 11 | 70% on real photographs | **not met** | 44.0%; the 79 misses are 32 OCR (23 never detected, 9 misread), 20 unlabelled generic names, 27 the extractor could still touch |
+| 11 | The second round | done | the unlabelled generic name by its head noun (reworked three times, each measured), sideways boxes transposed, four OCR-side experiments; real **44.0% -> 50.4%**, violation precision 0.77 -> 0.83, exact-set 53.6% -> 64.3%. Table below and in `docs/EVAL.md` |
+| 12 | 70% on real photographs | **not met** | 50.4%; the 70 misses are 33 OCR (23 never detected, 10 misread), 15 not grouped, 12 unlabelled generic names the head noun cannot reach, 10 wrong neighbour or over-merged |
 
 ### Reading a printed declarations table
 
@@ -267,6 +268,36 @@ misses with the gold, the best OCR line and the stage that lost it:
 The next levers: a 90° detection pass merged with the upright one, and `det_limit_side_len=1600`
 re-measured now that split lines hurt less (both need a full re-OCR); transposed geometry for a
 box taller than it is wide; and the VLM for the unlabelled generic name only.
+
+### The second round (2026-09-08, after the audit)
+
+Same 56 cases. The extractor runs use the audit's OCR cache; the OCR runs re-read every image.
+One variable per run, each judged on its `compare.py` diff before the next was started.
+
+| Run | Change | Real | Verdict |
+|---|---|---|---|
+| `p2-ocr-det-v4-mobile` | PP-OCRv4 mobile detector **replaces** the English v3 one | 38.3%, synthetic 88.1% | rejected: drops the care line on nine clean labels |
+| `p2-generic-name-by-head-noun` | an unlabelled line ending in a commodity head noun is the generic name | 48.9% | reworked: precision 0.50 ("TOTAL SUGARS", "WAFERS", "Snack Foods") |
+| `p2-generic-name-two-words-on-a-pack` | two words or more, on a pack only, nutrition words refused | 49.6% | kept, precision 0.69 |
+| `p2-generic-name-is-not-a-list` | a comma makes it a list | 49.6% | kept, exact-set 62.5% |
+| `p2-best-before-wraps-two-lines` | a best-before sentence takes two digit-less lines | 49.6% | flat on every key, reverted |
+| `p2-sideways-geometry` | a box taller than wide is read with x and y swapped | **50.4%** | kept: the soy sauce use-by date |
+| `p2-ocr-rec-server` | PP-OCRv4 server recogniser (Chinese dictionary) | 42.6%, synthetic 78.6% | rejected: "lnclusive", "MlDC", 4.7 GB |
+| `p2-generic-name-capitalises-every-word` | a name capitalises every word and has no dot in it | 50.4% | kept: false claims 11 -> 8, exact-set 64.3% |
+| `p2-ocr-full-res-pass-merged` | a second detection pass at 1600 px, boxes added only where the 960 px pass found nothing | 50.4% | flat: +1 country of origin, -1 best-before (an added duplicate box broke the wrap), +1 spurious MRP; doubles OCR time — rejected |
+| `p2-ocr-v4-det-pass-merged` | the v4 detector as a second pass, merged the same way | 51.1% | +1 (the same Sprite "MADE IN INDIA") bought with two false claims, one of which hides a D3 gold expects; doubles OCR time — rejected |
+
+Baseline to final: field accuracy 69.7% -> 73.0%, real **44.0% -> 50.4%** (62 -> 71 of 141),
+synthetic unchanged; violations precision 0.774 -> 0.827, recall 0.993 -> 0.986, exact-set
+53.6% -> 64.3%; 9 fields better, 1 worse, spurious claims 6 -> 7. The one worse is a printed
+"CARBONATED WATER" that the Sprite gold omits (`docs/AUDIT.md`, gold to review). generic_name:
+precision 0.95 -> 0.77, recall 0.47 -> 0.68; every other field unchanged but best_before (+1).
+
+What the head noun cannot reach, and why the bucket is 12 and not 0: PP-OCR glued or split the
+name ("PACKAGEDDRINKING WATERJOZONISED", "TONED MILK" alone for "PASTEURISED HOMOGENISED TONED
+MILK", "INDIAN SNACKS & SAVOURIES" on one line and "PROPRIETARY FOOD" on another), never read it
+(Jim Jam, Tata Salt), or read the bilingual Patanjali pack with the Devanagari model, whose
+output lacks the line. Those are OCR misses wearing a generic-name label.
 
 ### Where the gap was before the audit
 
@@ -731,6 +762,21 @@ Not started. See `docs/PLAN.md` for the item list and the "done when" line.
 ---
 
 ## Log
+
+- **2026-09-08** — **Second round on the real-photo number: 44.0% → 50.4%, and four OCR-side
+  experiments answered.** The audit had written the unlabelled generic name off as a VLM's job.
+  It is not: the line ends in a head noun, and the heads are enumerated by law (the FSSAI food
+  category system, Schedule S of the Drugs and Cosmetics Rules). A rule of two to seven
+  capitalised words ending in a head, on a pack, with no anchor, figure, comma or sentence word,
+  took generic_name recall 0.47 → 0.68; its first version cost precision (0.50) and was reworked
+  three times, each run kept. Sideways boxes are now read with x and y swapped (+1). On the OCR
+  side, both PaddleOCR model swaps were measured and rejected with numbers — the v4 mobile
+  detector as a replacement (real 38.3%, synthetic 88.1%) and the v4 server recogniser (synthetic
+  78.6%, "lnclusive", 4.7 GB) — and the two merged second passes the audit asked for were run
+  (table in P2). Violation precision 0.77 → 0.83, exact-set 53.6% → 64.3%, recall 0.99. The
+  70 misses left are 33 OCR, 15 not grouped, 12 generic names the head noun cannot reach, 10
+  neighbour or wrap. One more gold file flagged (Sprite prints "CARBONATED WATER", gold omits it).
+  `make test` 579 + 2 skipped · `make lint` clean.
 
 - **2026-09-08** — **Audit of P0–P8 against the implementation, and the P2 real-photo number
   taken apart.** Full matrix in `docs/AUDIT.md`. What held: the rule engine (all 56 gold verdicts

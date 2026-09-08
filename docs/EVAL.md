@@ -299,6 +299,35 @@ before (Bisleri, KitKat) are now read with OCR errors in them — both D6 verdic
 to right, which is the number that matters for that field; and unit_sale_price precision, one
 unit price taken from the related-products carousel at the foot of an Amazon tile.
 
+### The second round, 2026-09-08
+
+Same 56 cases. Extractor runs on the audit's cache; OCR runs re-read the set (about 25 minutes
+for one detection pass, twice that for two). One variable per run.
+
+| Run | Change | Real | Violations P / R / exact |
+|---|---|---|---|
+| `p2-ocr-det-v4-mobile` | the PP-OCRv4 mobile detector **replaces** the English v3 one | 38.3% (synthetic 88.1%) | 0.732 / 0.979 / 39.3% — **rejected** |
+| `p2-generic-name-by-head-noun` | an unlabelled line ending in a commodity head noun is the generic name | 48.9% | 0.837 / 0.917 / 58.9% — generic precision 0.50, **reworked** |
+| `p2-generic-name-two-words-on-a-pack` | two to seven words, on a pack only, nutrition words refused | 49.6% | 0.828 / 0.966 / 60.7% |
+| `p2-generic-name-is-not-a-list` | a comma makes it a list | 49.6% | 0.83 / 0.97 / 62.5% |
+| `p2-best-before-wraps-two-lines` | a best-before sentence takes two digit-less lines | 49.6% | identical — **reverted** |
+| `p2-sideways-geometry` | a box taller than wide is read with x and y swapped | **50.4%** | 0.83 / 0.97 / 62.5% |
+| `p2-ocr-rec-server` | the PP-OCRv4 server recogniser | 42.6% (synthetic 78.6%) | 0.77 / 0.93 / 35.7% — **rejected** |
+| `p2-generic-name-capitalises-every-word` | every word capitalised, no dot in the body | 50.4% | 0.827 / 0.986 / **64.3%** |
+| `p2-ocr-full-res-pass-merged` | a second detection pass at 1600 px, merged: a box is added only if under 30% of its area lies under first-pass boxes | 50.4% | 0.84 / 0.97 / 64.3% — 1 better (Sprite "MADE IN INDIA"), 1 worse (Kinley's best-before lost its wrapped line to an added duplicate), 1 more spurious; 2× OCR time — **rejected** |
+| `p2-ocr-v4-det-pass-merged` | the PP-OCRv4 mobile detector as a second pass, merged the same way | 51.1% | 0.83 / 0.98 / 64.3% — 1 better (the same Sprite "MADE IN INDIA"), 2 worse ("NET QUANTITY 45L" on a can whose gold expects D3, "MKT.BY PEDCIr"); 2× OCR time — **rejected** |
+
+`p2-ocr-rec-server` started while the extractor file was mid-change (the first head-noun
+version, with a regex bug), so its real-photo figure is confounded; its synthetic figure is the
+recogniser's alone — it reads "I" as "l" and "0" as "o" on rendered text, "lnclusive", "MlDC" —
+and that is disqualifying by itself. Its process also took 4.7 GB against the 3 GB worker budget.
+
+Baseline to final: field accuracy 69.7% → 73.0%, real **44.0% → 50.4%** (62 → 71 of 141),
+synthetic 98.4% unchanged, **9 fields better and 1 worse**, spurious predictions 6 → 7.
+generic_name precision 0.95 → 0.77, recall 0.47 → 0.68; best_before recall 0.76 → 0.79; every
+other field identical. The one worse is `off_coca_cola_sprite_8901764032707`, which prints
+"CARBONATED WATER" on its own line above the ingredients and whose gold omits it.
+
 The one field that got worse: the Ching's soy sauce use-by date. Its second photograph is
 sideways, the label boxes are 60–90 px wide and 130–270 px tall, and in that geometry the
 mfg-date label reaches the use-by's date first; once a figure could be the value of one label
@@ -343,9 +372,16 @@ b = json.load(open("eval/results/2026-09-08_p5-reports.json"))
 [k for k in a if k not in ("label", "date") and a[k] != b[k]]   # []
 ```
 
-### The four rejected hypotheses
+### The rejected hypotheses
 
-Worth more than the accepted ones, because each closes off a plausible idea:
+Worth more than the accepted ones, because each closes off a plausible idea. Two more joined the
+list on 2026-09-08, both PaddleOCR model swaps, numbers in the second-round table above: the
+**PP-OCRv4 mobile detector as a replacement** boxes the clean labels differently and drops the
+care line on nine of them, though it does find lines the v3 detector never returns (which is why
+it was re-run as a merged second pass); and the **PP-OCRv4 server recogniser** reads "I" as "l"
+and "0" as "o" on rendered print and takes 4.7 GB. The server *detector* was spot-checked on
+five photographs and boxes single words on the bottles ("DRINI | NKING | WATER"), the same
+line-splitting as hypothesis 1 below, so it was not run. The first four:
 
 1. **Detect at full resolution** (`det_limit_side_len=1600`). PP-OCR shrinks a 1600 px photo to
    960 before detection, so raising it looks obviously right. It scored 54.5% against 57.7%:
@@ -377,35 +413,30 @@ out contrast as the reason PP-OCR misses whole lines on a curved bottle.
 
 ## Where the remaining gap is
 
-Real photographs sit at 44.0% against a 70% target. The 79 misses, from
-`eval/results/2026-09-08_eval-accents-are-folded-like-the-rupee-sign_errors.md`, every one
-looked at:
+Real photographs sit at 50.4% against a 70% target. The 70 misses, from
+`eval/results/2026-09-08_p2-generic-name-capitalises-every-word_errors.md`, every one looked at:
 
 | Cause | Misses | Reachable by the extractor? |
 |---|---|---|
-| **OCR did not detect the print** — under half the gold words are anywhere in the output | 23 (29%) | **No.** Small white print on the curve of a Bisleri, Kinley or Maaza bottle; the tilted Ching's jar, where the address lines under "MKT BY" were never detected; the Bru sachet, whose print is a dozen pixels high; KitKat's "₹ 10/-" read as "R10F"; sideways text. Legible to a person in every case. Only the OCR step can reach these. |
-| the common name is printed with **no label to anchor on** | 20 (25%) | **No.** `SPICED BUTTERMILK`, `CARBONATED WATER`, `Lip Balm`, `Coated Wafer`, `AYURVEDIC PROPRIETARY MEDICINE`. 17 of the 21 generic_name misses. This is the case for the Stretch item. |
-| the words were read but the extractor did not group them | 17 (22%) | Partly. Half are consumer care blocks where the phone or e-mail line was not detected, so the block never carries the contact D6 needs; the rest are sideways photographs, where the label / value geometry is transposed, and a Flipkart pack shot read as garbage. |
-| character errors on the line used | 9 (11%) | **No.** `Net Wt.1 g` for `10 g`, `SlPCOT`, `PHASE-` for `PHASE-1`, `DELH-100`. Same class as `Bjscuits` on the rendered labels; the lever is the recognition model, not the extractor. |
-| the anchor took the wrong neighbour | 8 (10%) | Some. Two are the Amazon MRP convention (the listing's own "M.R.P" row against the displayed price gold chose); two are packs printing both a manufacturer and a marketer; the rest are sideways or tilted panels. |
+| **OCR did not detect the print** — under half the gold words are anywhere in the output | 23 (33%) | **No.** Small white print on the curve of a Bisleri, Kinley or Maaza bottle; the tilted Ching's jar, where the address lines under "MKT BY" were never detected; the Bru sachet, whose print is a dozen pixels high; KitKat's "₹ 10/-" read as "R10F"; sideways text. Legible to a person in every case. Only the OCR step can reach these, and the four OCR experiments of the second round did not (table above). |
+| the words were read but the extractor did not group them | 15 (21%) | Partly. Half are consumer care blocks where the phone or e-mail line was not detected, so the block never carries the contact D6 needs; the rest are label and value columns that do not line up (Quaker's "79/-" sits a row above its "MRP"), a Flipkart pack shot read as garbage, and a date pair printed as one box under two labels (Bru). |
+| the common name is printed with **no label to anchor on** | 12 (17%) | Was 20. The head noun reaches a printed line; what is left is a name PP-OCR glued or split (`PACKAGEDDRINKING WATERJOZONISED`, `TONED MILK` for `PASTEURISED HOMOGENISED TONED MILK`), never read (Jim Jam, Tata Salt), or read by the Devanagari model (Patanjali). OCR misses under a generic-name label. |
+| character errors on the line used | 10 (14%) | **No.** `Net Wt.1 g` for `10 g`, `SlPCOT`, `PHASE-` for `PHASE-1`, `DELH-100`. Same class as `Bjscuits` on the rendered labels; the lever is the recognition model, and the one heavier recogniser PaddleOCR 2.x ships was measured and rejected. |
+| the anchor took the wrong neighbour | 8 (11%) | Some. Two are the Amazon MRP convention (the listing's own "M.R.P" row against the displayed price gold chose); two are packs printing both a manufacturer and a marketer; the rest are sideways or tilted panels. |
 | a wrapped value cut short or over-merged | 2 (3%) | Some. |
 
-Spurious predictions are down to 6, and four of those are the same two Amazon tiles: a price and
-a unit price from the related-products carousel, and a "Mfg. Date" / "Exp. Date" pair the listing
-really does print in its details table and gold omits.
+Spurious predictions are 7: the same two Amazon tiles as before (a price and a unit price from
+the related-products carousel, a "Mfg. Date" the listing prints and gold omits), the Sprite's
+printed "CARBONATED WATER", and a care block and two maker's addresses read off cut-off cans.
 
-Two things follow. First, the extractor's remaining reach is small: of the 79 misses, 32 are
-OCR failures of one kind or another and 20 are structural, leaving about 27 the extractor could
-in principle touch, most of them on sideways or tilted photographs. The next extractor-side
-experiment is transposed geometry for a box that is taller than it is wide; the next OCR-side
-experiment is a second detection pass at 90° merged with the upright one rather than replacing
-it (the earlier rejection replaced), and a re-measurement of `det_limit_side_len=1600` now that
-the extractor tolerates split lines better. Both cost a full re-OCR of the set.
-
-Second, the structural bucket is the case for the Stretch item in `docs/PLAN.md` — a local VLM
-extractor behind `EXTRACTOR=local_vlm`, measured against this same baseline and logged in
-`model_calls`. `rules/pc_rules_2011.yaml` D2 requires the *common or generic name*, Indian packs
-print it as a bare line, no amount of regex reaches that, and a hand-written list of product
-categories would be fitted to this dataset rather than to the law. It is justified for that one
-field. It is not justified for the OCR bucket: a VLM reading the same 1600 px photograph faces
-the same twelve-pixel print, and that bucket wants a better detector, not a different reader.
+Two things follow. First, the extractor's remaining reach is now small in fact, not only in
+the count: of the 70 misses, 33 are OCR failures, 12 more are OCR failures under a generic-name
+label, and of the 25 left most are layouts that no rule short of a table reader resolves. The
+transposed-geometry experiment has been run (+1). Second, the OCR bucket did not move under any
+of the four experiments this project can make inside PaddleOCR 2.x: two model swaps (rejected on
+the rendered labels), and two merged second passes (results in the table). What that bucket
+wants is a recogniser that reads twelve-pixel Latin print better than `en_PP-OCRv4_rec`, which
+is a model, not a setting — PP-OCRv5 under PaddleOCR 3.x is the candidate, and it is a
+dependency change the owner decides. The Stretch item's VLM is still justified for the generic
+name, for a bucket of 12 rather than 20, and still not for the OCR bucket: a VLM reading the same
+1600 px photograph faces the same twelve-pixel print.

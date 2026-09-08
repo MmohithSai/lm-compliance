@@ -1,10 +1,10 @@
 {
-  "source": "2026-09-08_p2-sideways-geometry.json",
+  "source": "2026-09-08_p2-generic-name-capitalises-every-word.json",
   "real_cases": 38,
   "gold_declarations": 141,
   "correct": 71,
   "misses": 70,
-  "spurious": 9,
+  "spurious": 7,
   "categories": {
     "ocr_missed": "1. OCR did not detect the text (under half the gold words are anywhere in the output)",
     "layout": "2. OCR read the words but they span several boxes and the extractor did not group them",
@@ -77,11 +77,11 @@
     }
   },
   "spurious_by_field": {
-    "generic_name": 3,
     "manufacturer": 2,
     "mrp": 1,
     "unit_sale_price": 1,
     "mfg_date": 1,
+    "generic_name": 1,
     "consumer_care": 1
   },
   "rows": [
@@ -1815,7 +1815,7 @@
       "case": "off_ching_secret_dark_soy_sauce_8901595862818",
       "field": "generic_name",
       "gold": "DARK SOY SAUCE (SOYABEAN SAUCE)",
-      "final": "Really tasty Fried Rice!",
+      "final": null,
       "ocr_coverage_all_images": 1.0,
       "ocr_coverage_by_image": {
         "0_front": 1.0,
@@ -1828,7 +1828,7 @@
       "ocr_best_line_coverage": 0.6,
       "ocr_best_line_confidence": 0.968,
       "gold_is_labelled": false,
-      "status": "wrong",
+      "status": "missed",
       "category": "unlabeled",
       "why": "gold carries none of the field's label words; nothing to anchor on"
     },
@@ -2048,15 +2048,6 @@
       "gold_is_labelled": true,
       "status": "correct",
       "category": null
-    },
-    {
-      "case": "off_coca_cola_sprite_sprite_8901764032912",
-      "field": "generic_name",
-      "gold": null,
-      "final": "UER.SUGAR",
-      "status": "spurious",
-      "category": "spurious",
-      "why": "predicted a field gold does not have"
     },
     {
       "case": "off_coca_cola_sprite_sprite_8901764032912",
@@ -2626,15 +2617,6 @@
       "gold_is_labelled": true,
       "status": "correct",
       "category": null
-    },
-    {
-      "case": "off_mazza_the_coca_cola_company_maaza_8901764092206",
-      "field": "generic_name",
-      "gold": null,
-      "final": "NGREDIENTS:WATER",
-      "status": "spurious",
-      "category": "spurious",
-      "why": "predicted a field gold does not have"
     },
     {
       "case": "off_mazza_the_coca_cola_company_maaza_8901764092206",

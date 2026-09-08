@@ -289,6 +289,10 @@ VLM, each as its own labelled run.
   D1 subjects; the field-level match is a coin toss until gold says which.
 - `ecom_amazon_parle_g_800g` prints "Mfg. Date: 21/12/17" and "Exp. Date: 5 months" in its
   details table; gold omits both, so they count as spurious.
+- `off_coca_cola_sprite_8901764032707` (added in the second round) prints "CARBONATED WATER" on
+  its own line above "INGREDIENTS:" in `1_ingredients.jpg`, the same layout as
+  `off_coke_diet_coke_can_250ml_8901764061257`, whose gold records it. This gold omits it and
+  expects D2. If corrected, one field and one violation move.
 
 ---
 
@@ -314,3 +318,33 @@ thread are P9's own work. What P9 should not promise is 70% on real photographs.
 
 Final validation, 2026-09-08: worker 577 passed (PDF tests running), frontend 29 passed;
 ruff, ruff format, mypy, tsc, eslint, `pnpm build` clean; `make check-rls` 53 of 53.
+
+---
+
+## Addendum — the second round, later on 2026-09-08
+
+The P2 number moved again after this audit was written: real **44.0% → 50.4%** (62 → 71 of
+141), violation precision 0.77 → 0.83, exact-set 53.6% → 64.3%. Runs and per-field numbers in
+`docs/EVAL.md` ("The second round"); decisions in `docs/PLAN.md`. What changed against the
+findings above:
+
+- **"Is a VLM justified?" — the generic-name answer was too pessimistic.** 8 of the 20 unlabelled
+  generic names are reachable without a model: the printed line ends in a commodity head noun,
+  and the heads are enumerated by law. The bucket is 12 now, and what is left in it is PP-OCR
+  gluing or splitting the name, not the absence of a label. The VLM case for that field is
+  smaller but still real.
+- **The OCR-side experiments named above were run.** Both PaddleOCR model swaps were measured
+  and rejected on the rendered labels (v4 mobile detector as a replacement: synthetic 98.4% →
+  88.1%; v4 server recogniser: 78.6%, and 4.7 GB); the two merged second passes are in the
+  EVAL table. The OCR bucket (23 never detected, 10 misread) is where the remaining gap lives,
+  and inside PaddleOCR 2.x there is no setting left to try — the next step is a model (PP-OCRv5
+  under PaddleOCR 3.x), which is a dependency decision.
+- **One more gold file to review:** `off_coca_cola_sprite_8901764032707` prints "CARBONATED
+  WATER" on its own line above the ingredients, as the Diet Coke can does, and gold omits it and
+  expects D2. Add it to the list under "Gold files to review".
+- **Sideways photographs:** issue 5 in the list above is done for the label-to-value step (x and
+  y swapped for a box taller than wide, +1); the page's reading direction is still not known, so
+  address blocks on a sideways pack still do not wrap.
+
+The remaining-issues list stands with item 1 at 50.4%, and P9 should still not promise 70% on
+real photographs.

@@ -1,6 +1,6 @@
-# Real-photo error report — `2026-09-08_p2-sideways-geometry.json`
+# Real-photo error report — `2026-09-08_p2-generic-name-capitalises-every-word.json`
 
-38 real cases, 141 gold declarations, 71 correct, 70 missed or wrong, 9 spurious.
+38 real cases, 141 gold declarations, 71 correct, 70 missed or wrong, 7 spurious.
 
 ## Misses by category
 
@@ -31,11 +31,11 @@
 
 | Field | Count |
 |---|---|
-| generic_name | 3 |
 | manufacturer | 2 |
 | mrp | 1 |
 | unit_sale_price | 1 |
 | mfg_date | 1 |
+| generic_name | 1 |
 | consumer_care | 1 |
 
 ## Every miss and spurious prediction
@@ -84,7 +84,7 @@
 | off_ching_s_secret_schezwan_chutney_89 | consumer_care | FOR ANY COMPLAINT CONTACT CUSTOMER CARE EXECUTIVE AT MKT BY ADDRESS ABOVE. 18001084488 AND care@tataconsumer.com | *Based on 2000 kcal diet recommended for Adult (8%, 0.98) | — | ocr_missed | only 31% of the gold words are anywhere in the OCR output |
 | off_ching_s_secret_schezwan_chutney_89 | manufacturer | MKT BY: CAPITAL FOODS PVT. LTD., VILLA CAPITAL, SADHANA COMPOUND, NR. OSHIWARA BRIDGE, S. V. ROAD, JOGESHWARI (W), MUMBAI - 400 102. | MKT BYCAPITAL FOODS PVT.LTD. (25%, 0.93) | — | ocr_missed | only 38% of the gold words are anywhere in the OCR output |
 | off_ching_secret_dark_soy_sauce_890159 | consumer_care | FOR ANY COMPLAINT CONTACT CONSUMER MANAGER AT BRAND OWNED & MARKETED BY ADDRESS ABOVE. 022-67140100 AND CUSTOMERCARE@CAPITALFOODS.CO.IN | FOR ANY COMPLAINT (21%, 0.92) | — | ocr_missed | only 29% of the gold words are anywhere in the OCR output |
-| off_ching_secret_dark_soy_sauce_890159 | generic_name | DARK SOY SAUCE (SOYABEAN SAUCE) | (SOYABEAN SAUCE) (60%, 0.97) | Really tasty Fried Rice! | unlabeled | gold carries none of the field's label words; nothing to anchor on |
+| off_ching_secret_dark_soy_sauce_890159 | generic_name | DARK SOY SAUCE (SOYABEAN SAUCE) | (SOYABEAN SAUCE) (60%, 0.97) | — | unlabeled | gold carries none of the field's label words; nothing to anchor on |
 | off_ching_secret_dark_soy_sauce_890159 | manufacturer | BRAND OWNED & MARKETED BY: CAPITAL FOODS PVT.LTD., VILLA CAPITAL, SADHANA COMPOUND, NR. OSHIWARA BRIDGE, S.V. ROAD, JOGESHWARI (W), MUMBAI - 400 102. | Ching's (0%, 0.97) | — | ocr_missed | only 12% of the gold words are anywhere in the OCR output |
 | off_ching_secret_dark_soy_sauce_890159 | mfg_date | DATE OF MFG.: 10/12/2024 (15:16) | DATE OF MFG: (50%, 0.87) | DATE OFMFG: USERY 10/12/202415:16) | recognition | prediction is 90% similar to gold: characters OCR misread |
 | off_ching_secret_dark_soy_sauce_890159 | mrp | MRP ₹: (incl. of all taxes) 25 (Rs. 0.28/g) | incl. of all taxes (60%, 0.89) | MRP: 25Rs.0.28/9) | association | anchor fired but the value came from another box (56% similar) |
@@ -94,7 +94,6 @@
 | off_coca_cola_sprite_8901764032707 | net_quantity | NET QUANTITY: 600 ml | 600 ml (33%, 0.93) | — | ocr_missed | only 33% of the gold words are anywhere in the OCR output |
 | off_coca_cola_sprite_sprite_8901764032 | consumer_care | CONTACT CONSUMER RESPONSE COORDINATOR AT: 1800-208-2653 indiahelpline@coca-cola.com ADDRESS: SAME AS MFG/MKT BY ADDRESS | ADDRESS SAME AS MANOFACTURED BADDRESS (30%, 0.94) | — | layout | gold words are in the OCR output (60%) but the best single line holds 30% |
 | off_coca_cola_sprite_sprite_8901764032 | consumer_care | CONTACT CONSUMER RESPONSE COORDINATOR AT: 1800-208-2653 indiahelpline@coca-cola.com ADDRESS : SAME AS MANUFACTURED BY ADDRESS | CONTACT CONSUMERIES (20%, 0.87) | — | layout | gold words are in the OCR output (60%) but the best single line holds 20% |
-| off_coca_cola_sprite_sprite_8901764032 | generic_name | — | — | UER.SUGAR | spurious | predicted a field gold does not have |
 | off_coca_cola_sprite_sprite_8901764032 | manufacturer | MANUFACTURED BY BENGAL BEVERAGES PVT. LTD., (UNIT-II), DURGAPUR EXPRESSWAY, P.O. DANKUNI COAL COMPLEX, DIST: HOOGHLY - 712 310, WEST BENGAL | MANUFACTURED BY BENGAL BEVERAGES PVT.LTD (24%, 0.95) | MANUFACTURED BY BENGAL BEVERAGES PVT.LTD (UNIT-N1).DURGAPUR EXPRESSWAT.P.O.OANKUNICOAL COMPLEX,DIST:HOOGHLY-712 310.WESTBENGAL ssalLic No.1001203100008 | recognition | prediction is 87% similar to gold: characters OCR misread |
 | off_coke_diet_coke_can_250ml_890176406 | best_before | BEST BEFORE THREE MONTHS FROM MANUFACTURE WHEN STORED IN A COOL AND DRY PLACE | WHEN STORED IN A COOL AND DRY PLACE (50%, 0.92) | — | layout | gold words are in the OCR output (100%) but the best single line holds 50% |
 | off_coke_diet_coke_can_250ml_890176406 | consumer_care | — | — | CONTACT CONSUMER RESPONSE CO 1800-208-2653indiahe | spurious | predicted a field gold does not have |
@@ -110,7 +109,6 @@
 | off_kitkat_nestle_nutrition_kitkat_min | mfg_date | JUL/25 - FEB/26 - 5159045481 | 10F (0%, 0.87) | — | ocr_missed | only 0% of the gold words are anywhere in the OCR output |
 | off_kitkat_nestle_nutrition_kitkat_min | mrp | ₹ 10/- | 10F (0%, 0.87) | — | ocr_missed | only 0% of the gold words are anywhere in the OCR output |
 | off_kurkure_pepsico_kurkure_masala_mun | consumer_care | THE CONSUMER SERVICES MANAGER, PEPSICO INDIA HOLDINGS PVT. LTD., P.O. BOX-27, DLF QUTAB ENCLAVE, PHASE-1, GURUGRAM - 122002, HARYANA, INDIA. OR CALL US AT 1800 22 4020 OR EMAIL US AT CONSUMER.FEEDBACK@PEPSICO.COM | PepsiCo India Holdings Pvt.Ltd (17%, 0.96) | THE CONSUMER SERVICES MANAGER PEPSICO INDIA HOLDINGS PVT.LTD., P.O.BOX-27.DLF QUTAB ENCLAVE,PHASE- GURUGRAM-122002,HARYANA,INDIA ORCALLUSAT 1800224020 OR EMAILUSAT CONSUMER.FEEDBACK@PEPSICO.COM | recognition | prediction is 100% similar to gold: characters OCR misread |
-| off_mazza_the_coca_cola_company_maaza_ | generic_name | — | — | NGREDIENTS:WATER | spurious | predicted a field gold does not have |
 | off_mazza_the_coca_cola_company_maaza_ | manufacturer | MFG BY: HINDUSTAN COCA-COLA BEVERAGES PVT LTD, 303&304, BAANI ADDRESS 1, GOLF CRSE, SEC 53, GURUGRAM-122011, HARYANA | MFG BY:HINDUSTAN COCA-COLAEN (21%, 0.91) | MFG BY:HINDUSTAN COCA-COLAEN GURUGRAM-122011,HARYANA | ocr_missed | only 36% of the gold words are anywhere in the OCR output |
 | off_pepsi_cola_pepsi_8902080104581 | consumer_care | CONTACT CUSTOMER SERVICE MANAGER AT: P.O. BOX 27, DLF QUTAB ENCLAVE-1, GURUGRAM-122002, HARYANA CONSUMER.FEEDBACK@PEPSICO.COM 1800 22 4020 | CONTACT CUSTOMER SERVICE MANAGER (31%, 0.96) | CONTACT CUSTOMER SERVICE MANAGER AT:P.O.BOX 27DLF QUTAB ENCLAVE-1, GURUGRAM-122002,HARYANA CONSUMER.FEEDBACK@PEPSICO.COM C1800224020 | recognition | prediction is 100% similar to gold: characters OCR misread |
 | off_pepsi_cola_pepsi_8902080104581 | manufacturer | MFD. BY: VARUN BEVERAGES LIMITED | MFD.BY:VARUN BEVERAGESLIMITED (75%, 0.92) | MKT.BY. PEPSICO INDIA HOLDINGS PVL.LID | association | anchor fired but the value came from another box (25% similar) |

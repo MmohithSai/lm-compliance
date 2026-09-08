@@ -119,10 +119,10 @@ photographs. Nothing else passes anything but the default.
 - The answer does not depend on the order the photographs arrive in. Read in upload order, and
   the fields that could still differ (the address blocks) take the fullest candidate. Measured
   before the fix: reversing the images changed 7 of 37 multi-image cases and flipped a D5 verdict.
-- What the system cannot do is counted, not hidden: real-photo field extraction is 44.0% (62 of
-  141 declarations, 2026-09-08), and `eval/results/<run>_errors.md` says for each of the 79
-  misses whether the OCR never saw the print (23), the pack printed no label to anchor on (20),
-  the words were read but not grouped (17), or a character was misread (9).
+- What the system cannot do is counted, not hidden: real-photo field extraction is 50.4% (71 of
+  141 declarations, 2026-09-08), and `eval/results/<run>_errors.md` says for each of the 70
+  misses whether the OCR never saw the print (23), the words were read but not grouped (15), the
+  pack printed no label to anchor on (12), or a character was misread (10).
 
 ## Deployment (₹0)
 

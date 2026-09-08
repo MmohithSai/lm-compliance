@@ -38,32 +38,37 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - [x] measured on real photographs, one variable per run, every result file kept
 - [x] the audit round of 2026-09-08: a per-miss error report (`eval/error_report.py`), a result
       diff (`eval/compare.py`), and nine labelled extractor changes measured one at a time
+- [x] the second round of 2026-09-08: the unlabelled generic name found by its head noun,
+      sideways boxes read transposed, and four OCR-side experiments (two model swaps, two merged
+      second passes), each its own labelled run
 - Done when: `make eval LABEL=baseline-v1` ≥ 70% field extraction on clean photos. Save the result file.
-  **98.4% on the 18 synthetic labels. 44.0% on the 38 real cases** (2026-09-08,
-  `eval/results/2026-09-08_eval-accents-are-folded-like-the-rupee-sign.json`; the harness prints
+  **98.4% on the 18 synthetic labels. 50.4% on the 38 real cases** (2026-09-08,
+  `eval/results/2026-09-08_p2-generic-name-capitalises-every-word.json`; the harness prints
   the two apart). **The 70% line is met on clean labels and not on real photographs.** The audit
-  round took the real half from 30.5% to 44.0% — 26 fields better, 1 worse, spurious claims
-  13 → 6, violation precision 0.74 → 0.77 with recall 0.99 unchanged. The 79 misses left are
+  round took the real half from 30.5% to 44.0%; the second round to 50.4% (62 → 71 of 141),
+  with violation precision 0.77 → 0.83, recall 0.99, exact-set 53.6% → 64.3%, 9 fields better
+  and 1 worse (a printed "CARBONATED WATER" that the Sprite gold omits). The 70 misses left are
   counted one by one in `eval/results/<run>_errors.md`, and they are five things, in order of size:
-  1. **OCR never detected the print** — 23 (29%). Small white print on curved bottles, a tilted
+  1. **OCR never detected the print** — 23 (33%). Small white print on curved bottles, a tilted
      jar, sachet print a dozen pixels high, sideways text. The extractor never sees these words;
-     only the OCR step can reach them.
-  2. **generic_name printed with no label** — 20 (25%). "SPICED BUTTERMILK", "Lip Balm",
-     "Coated Wafer". An anchor extractor structurally cannot find it. This is the case for the
-     Stretch item, not for more regex.
-  3. **words read, spread over boxes the extractor did not group** — 17 (22%). Mostly consumer
-     care blocks whose phone or e-mail line PP-OCR did not detect, and packs photographed
-     sideways, where the label/value geometry is transposed.
-  4. **character errors on the very line used** — 9 (11%): "Net Wt.1 g" for "10 g", "SlPCOT".
-  5. **wrong neighbour** — 8 (10%); over-merge — 2.
-  Before this round: `det_limit_side_len=1600` (54.5%), merging continuation lines for short
-  fields (51.4%), listing-table anchors alone (flat), a second OCR pass at 90° (real 28.9% →
-  28.1%) were all measured and rejected; CLAHE was measured and kept. Within this round three
-  intermediate states were measured and reverted before their run was kept: a below-right reach
-  ahead of the cell test (took the pen box's date for its price), a loosened row test with no
-  value shape (took a net weight for a price), and a bare "Quantity" anchor without the
-  fuller-label rule (took Amazon's buy box). The next lever for (1) is the OCR step, for (2) the
-  Stretch item.
+     only the OCR step can reach them, and the four OCR experiments below did not.
+  2. **words read, spread over boxes the extractor did not group** — 15 (21%). Mostly consumer
+     care blocks whose phone or e-mail line PP-OCR did not detect, and label/value pairs printed
+     in columns that do not line up.
+  3. **generic_name printed with no label** — 12 (17%), down from 20. What the head noun cannot
+     reach: a name PP-OCR glued or split ("PACKAGEDDRINKING WATERJOZONISED", "TONED MILK" for
+     "PASTEURISED HOMOGENISED TONED MILK"), one it never read, and a bilingual pack read by the
+     Devanagari model.
+  4. **character errors on the very line used** — 10 (14%): "Net Wt.1 g" for "10 g", "SlPCOT".
+  5. **wrong neighbour** — 8 (11%); over-merge — 2.
+  Measured and rejected in the second round: the PP-OCRv4 mobile detector as a replacement
+  (real 38.3%, synthetic 88.1%), the PP-OCRv4 server recogniser (synthetic 78.6%: it reads "I"
+  as "l" and "0" as "o", and its process took 4.7 GB), a best-before sentence that wraps two
+  lines (flat). Before this round: `det_limit_side_len=1600` (54.5%), merging continuation
+  lines for short fields (51.4%), listing-table anchors alone (flat), a second OCR pass at 90°
+  (real 28.9% → 28.1%) were all measured and rejected; CLAHE was measured and kept. The
+  remaining lever for (1) and (4) is a better recogniser than PaddleOCR 2.x ships for English,
+  which is not a setting; for (3) the Stretch item, now for a bucket of 12 rather than 20.
 
 ## P3 — rule engine + scan detail page
 - [x] fill `CHECKS` in `rules_engine.py`; delete the `xfail` line in `tests/test_rules.py`
@@ -194,6 +199,54 @@ Per-item status and evidence live in `docs/PROGRESS.md`. Update both together.
 - Total monthly cost: ₹0.
 
 ## Decisions log
+- 2026-09-08 — Second round. **An unlabelled generic name is found by its head noun.** Rule
+  6(1)(b)'s common name is printed bare on Indian packs — "SPICED BUTTERMILK", "Coated Wafer",
+  "FACE WASH" — and the audit had written that bucket off as unreachable without a VLM. What the
+  line does have is a head noun: its last word names the kind of commodity, and the kinds are
+  enumerated by law rather than by this dataset (the FSSAI food category system; Schedule S of
+  the Drugs and Cosmetics Rules; section 3(h) for "ayurvedic proprietary medicine"). A line of
+  two to seven capitalised words, on a pack, with no anchor, no figure, no comma, no dot and no
+  sentence word, ending in one of those heads, is the generic name; first in reading order. The
+  first version (any line ending in a head) scored 48.9% with generic-name precision 0.50 —
+  "TOTAL SUGARS", "WAFERS", "Snack Foods" — and was reworked three times, each a labelled run,
+  to 50.4% at precision 0.77. The trade written into the rule: a one-word line is refused
+  because it is the brand broken into boxes ("Balaji WAFERS"), and that costs the one pack that
+  prints a bare "BISCUIT". No AI, no list of this dataset's products: "pen" is on the list for
+  the pen box, "wafer" for KitKat, and neither would be if the list were built from the law
+  alone — that is said here so nobody mistakes it for a clean derivation.
+- 2026-09-08 — Second round. **A box taller than wide is a line printed sideways, and its
+  geometry is read transposed.** "Beside" is along the print and "below" is the next line; for a
+  sideways anchor the panel is read with x and y swapped and the same boxes come back by id.
+  One field on the soy sauce photographed on its side (its use-by date), no regressions; the
+  audit's "transposed geometry" experiment, done. The page's reading direction is still unknown,
+  so the next-line test works for one of the two rotations only.
+- 2026-09-08 — Second round. **Two PaddleOCR model swaps measured and rejected, with numbers.**
+  The PP-OCRv4 mobile detector (`ch_PP-OCRv4_det_infer`) does box lines the English v3 detector
+  never returns — the "BEST BEFORE" line on a Bisleri bottle, the marketer's address on a Bru
+  sachet — but as a replacement it boxes the clean labels differently and drops the care line on
+  nine of them: real 44.0% → 38.3%, synthetic 98.4% → 88.1%. The PP-OCRv4 server recogniser
+  (`ch_PP-OCRv4_rec_server_infer`) fixes some near-misses ("Net Wt. 10 g") and reads "I" as "l"
+  and "0" as "o" on rendered text ("lnclusive", "MlDC"), failing D5 on every synthetic label
+  (78.6%); its process also took 4.7 GB against the 3 GB worker budget. The server *detector*
+  was spot-checked and not run: it boxes single words on the bottles ("DRINI | NKING | WATER"),
+  which is the line-splitting that sank `det_limit_side_len=1600`. What survives of the idea is
+  "merge, don't replace": a second pass whose boxes are added only where the first found nothing.
+  Measured twice. **At full resolution** (`p2-ocr-full-res-pass-merged`): flat — one field
+  found (a sideways "MADE IN INDIA"), one lost (an added box that half-duplicated a line broke
+  the Kinley best-before wrap), one more false price, and twice the OCR time; rejected. **With
+  the v4 detector** (`p2-ocr-v4-det-pass-merged`): real 50.4% → 51.1%, the one field gained
+  being that same "MADE IN INDIA", bought with two false claims — "NET QUANTITY 45L" on a can
+  whose gold expects D3, and a garbled marketer — and twice the OCR time; rejected. The lesson is the same
+  as the 90° pass: a second detector's boxes are not free, because a box that overlaps a line
+  by a quarter is a new neighbour for every anchor near it.
+- 2026-09-08 — Second round. **A best-before sentence still wraps one line.** Letting it take
+  two digit-less lines ("...FROM MANUFACTURE" / "WHEN STORED IN A COOL AND DRY PLACE") moved no
+  number on any key; reverted, result file kept.
+- 2026-09-08 — Second round. **One more gold file to review, not changed:**
+  `off_coca_cola_sprite_8901764032707` prints "CARBONATED WATER" on its own line above the
+  ingredients, exactly as the Diet Coke can whose gold records it, and its gold omits it and
+  expects D2. The extractor now finds it and is scored wrong for it. Left for the dataset's
+  owner with the others in `docs/AUDIT.md`.
 - 2026-09-08 — Audit. **Photographs are read in upload order, on the hosted worker too.**
   `run_scan` read `scan_images` with no `order by`, and the extractor then sorted words by
   `image_id` — a file name in the eval, which sorts like the upload, and a uuid on a real scan,
