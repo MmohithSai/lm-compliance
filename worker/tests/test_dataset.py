@@ -70,6 +70,10 @@ def test_violation_codes_exist_and_score(case: str) -> None:
     assert not info_only, f"{case}: info-severity codes can never be matched: {info_only}"
 
 
+# Read off the pixels, not off the text: gold declarations cannot produce them.
+MEASURED_CODES = {"F1", "F2", "P2"}
+
+
 @pytest.mark.parametrize("case", CASES)
 def test_engine_reproduces_gold_from_gold_declarations(case: str) -> None:
     """The rule engine, fed the declarations a human read off the photo, gets gold's verdict.
@@ -77,9 +81,14 @@ def test_engine_reproduces_gold_from_gold_declarations(case: str) -> None:
     The eval measures extraction *and* rules together, so a rule bug hides behind an OCR miss.
     This separates them: 37 hand written cases, no OCR. A failure here is either the engine or
     the gold file, and both are worth knowing about.
+
+    F1, F2 and P2 are left out of the comparison. Gold holds the declarations as printed, and
+    those three read a measurement off the pixels — `height_mm`, the width/height ratio and the
+    contrast — which no amount of text can stand in for. Fed text alone the engine correctly
+    reports them "not verifiable", so demanding them here would only pin that it does.
     """
     data = gold(case)
     decls = [Declaration(field=f, value=v) for f, v in data["declarations"].items()]
     context = ScanContext.model_validate({"today": TODAY, **data.get("context", {})})
     predicted = {v.rule_id for v in run_rules(decls, context) if v.severity != Severity.info}
-    assert predicted == set(data["violations"])
+    assert predicted == set(data["violations"]) - MEASURED_CODES

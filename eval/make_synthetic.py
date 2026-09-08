@@ -5,8 +5,12 @@ anchor word. It covers D1-D8, D7 (imported), E1 and the X1/X2/X3 exemptions so t
 has something to fail against before real photos exist. Real photos (40-60, phone camera) are
 still the actual test set; these are not the benchmark.
 
-Font (F1/F2), grouping (P1) and contrast (P2) are not covered here: they need a real scale and a
-real multi-panel photo. On these images they come back `unverifiable`.
+Grouping (P1) is not covered here: it needs a real multi-panel photo, and on these images it
+comes back `unverifiable`. Font (F1/F2) and contrast (P2) are covered by the two `_marker_` cases
+at the bottom, which print a 50 mm ArUco marker at a known 8 px per mm — so the true scale, and
+therefore the true printed height in millimetres, is known by construction rather than measured.
+They are the only cases in the set with any scale at all. A rendered marker is not a photograph
+of one: `eval/dataset/README.md`'s shot list still asks for real packs with a card in frame.
 
 Run: cd worker && uv run python ../eval/make_synthetic.py
 """
@@ -17,7 +21,10 @@ import json
 from pathlib import Path
 from typing import Any
 
+import cv2
 from PIL import Image, ImageDraw, ImageFont
+
+from pipeline.measure import ARUCO_MARKER_MM
 
 DATASET = Path(__file__).resolve().parent / "dataset"
 FONTS = [
@@ -163,6 +170,17 @@ CASES: dict[str, tuple[str, dict[str, str | None], dict[str, Any], list[str]]] =
 }
 
 
+# A rendered label shot "with a reference card": one 50 mm marker, at a scale we choose. The
+# text is drawn at font size 34, whose capitals are about 24 px -> 3 mm of print.
+MARKER_PX_PER_MM = 8.0
+MARKER_CASES: dict[str, tuple[str, dict[str, str | None], dict[str, Any], list[str]]] = {
+    # 30 cm2 panel: Table I asks for 1 mm and the pack prints 3 mm.
+    "synthetic_marker_font_ok": ("BRITE BISCUITS", {}, {"pdp_area_cm2": 30}, []),
+    # 3000 cm2 panel (a sack): Table I asks for 6 mm and the same print is now too small.
+    "synthetic_marker_font_small": ("BRITE FLOUR", {}, {"pdp_area_cm2": 3000}, ["F1"]),
+}
+
+
 def font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     for path in FONTS:
         if Path(path).exists():
@@ -183,6 +201,25 @@ def render(header: str, lines: list[str], out: Path) -> None:
     img.save(out, quality=92)
 
 
+def render_with_marker(header: str, lines: list[str], out: Path) -> None:
+    """The same label with a 50 mm DICT_4X4_50 marker in the frame, 8 px to the millimetre."""
+    marker_px = int(ARUCO_MARKER_MM * MARKER_PX_PER_MM)
+    img = Image.new("RGB", (1600, 1200), "white")
+    draw = ImageDraw.Draw(img)
+    draw.text((60, 50), header, font=font(56), fill="black")
+    y = 160
+    for line in lines:
+        draw.text((60, y), line, font=font(34), fill="black")
+        y += 72
+    marker = cv2.aruco.generateImageMarker(
+        cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50), 0, marker_px
+    )
+    img.paste(
+        Image.fromarray(marker).convert("RGB"), (1600 - marker_px - 40, 1200 - marker_px - 40)
+    )
+    img.save(out, quality=92)
+
+
 def declarations(overrides: dict[str, str | None]) -> dict[str, str]:
     """BASE with overrides applied; DROP removes the line. Order follows BASE, extras last."""
     merged = {**BASE, **overrides}
@@ -190,11 +227,12 @@ def declarations(overrides: dict[str, str | None]) -> dict[str, str]:
 
 
 def main() -> None:
-    for name, (header, overrides, context, violations) in CASES.items():
+    for name, (header, overrides, context, violations) in {**CASES, **MARKER_CASES}.items():
         decls = declarations(overrides)
         case_dir = DATASET / name
         case_dir.mkdir(parents=True, exist_ok=True)
-        render(header, list(decls.values()), case_dir / "front.jpg")
+        draw_it = render_with_marker if name in MARKER_CASES else render
+        draw_it(header, list(decls.values()), case_dir / "front.jpg")
         gold = {
             "context": {"source": "package", **context},
             "declarations": decls,
@@ -204,7 +242,7 @@ def main() -> None:
             json.dumps(gold, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
         )
         print(f"{name}: {len(decls)} declarations, expect {violations or 'no violations'}")
-    print(f"{len(CASES)} synthetic cases in {DATASET}")
+    print(f"{len(CASES) + len(MARKER_CASES)} synthetic cases in {DATASET}")
 
 
 if __name__ == "__main__":
